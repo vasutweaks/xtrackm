@@ -14,7 +14,7 @@ path_new = f"/regional-xtrack-coastal/version_x_track_l2p_2022"
 sats = ["GFO", "TP+J1+J2+J3", "S3A", "TPN+J1N+J2N", "ERS1+ERS2+ENV+SRL", "HY2"]
 
 sats_new = ["GFO", "TP+J1+J2+J3+S6A", "S3A", "S3B", "TPN+J1N+J2N+J3N", "ERS1+ERS2+ENV+SRL", "HY2A", "HY2B"]
-sats_new = ["TP+J1+J2+J3+S6A", "S3A", "S3B", "TPN+J1N+J2N+J3N", "ERS1+ERS2+ENV+SRL", "HY2A", "HY2B"]
+# sats_new = ["TP+J1+J2+J3+S6A", "S3A", "S3B", "TPN+J1N+J2N+J3N", "ERS1+ERS2+ENV+SRL", "HY2A", "HY2B"]
 
 ftp = ftplib.FTP(ftpsite)
 ftp.login(avuser, avpass)
