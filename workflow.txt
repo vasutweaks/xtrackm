@@ -1,3 +1,8 @@
 1. Downloading with data/download_xtrack.py
 new version v2.2 data has a total of 8 satellite missions.
 They have changed the path sligtly
+These files are not lzma compressed, so no need to decompress
+2. Lon wise ordered linking the data that also checks for zero size files
+data/link_raw_nonzero_files_orderbylon.py
+3. Basic meta data of all sats missions
+meta/data_coverage_basic.py
