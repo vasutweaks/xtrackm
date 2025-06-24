@@ -6,3 +6,9 @@ These files are not lzma compressed, so no need to decompress
 data/link_raw_nonzero_files_orderbylon.py
 3. Basic meta data of all sats missions
 meta/data_coverage_basic.py
+4. data_coverage_df.py script does all meta data gathering in to a csv file, the following scripts functionally just parts of 
+meta/data_coverage_df.py script
+l.lat_lon.dists2.py
+l.lat_lon.max_min.py
+5. satellite_mission_time_spans_new.py plots the schematic of temporal
+durations of each satellite mission

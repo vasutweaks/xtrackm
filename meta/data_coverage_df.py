@@ -10,9 +10,8 @@ df = pd.DataFrame(
 
 for sat in sats_new:
     tracks_n = get_total_tracks(sat)
-    intervals = []
-    delds = []
-    for f in sorted(glob.glob(f"../data/ctoh.sla.ref.{sat}.nindian.*.nc")):
+    print(f"number of tracks of {sat}: {tracks_n}")
+    for f in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")):
         ds = xr.open_dataset(f)
         lons_track = ds.lon.values
         lats_track = ds.lat.values
@@ -32,10 +31,12 @@ for sat in sats_new:
         lon_e = lons_track[-1]
         lat_s = lats_track[0]
         lat_e = lats_track[-1]
+        intervals = []
         for i in range(1, len(time_datetime)):
             interval = time_datetime[i] - time_datetime[i - 1]
             intervals.append(interval.days)
-        if len(lons_track) > 10:
+        delds = []
+        if len(lons_track) > 100:
             for i in range(len(lons_track) - 1):
                 lat1 = lats_track[i]
                 lon1 = lons_track[i]
