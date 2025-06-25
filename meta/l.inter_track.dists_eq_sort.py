@@ -31,11 +31,13 @@ for sat in sats_new:
         slope = (lat_coast - lat_equat) / (lon_coast - lon_equat)
         angle_r = math.atan(slope)
         angle_d = angle_r * (180 / math.pi)
-        if slope > 0:
+        if slope < 0:
             lons_equat.append(lon_equat)
             lats_equat.append(lat_equat)
-    lons_sorted = sorted(lons_equat)
-    lats_sorted = sorted(lats_equat)
+    # lons_sorted = sorted(lons_equat)
+    # lats_sorted = sorted(lats_equat)
+    lons_sorted = lons_equat
+    lats_sorted = lats_equat
     ln = len(lons_equat)
     dists = []
     for i in range(ln - 1):
@@ -50,3 +52,6 @@ for sat in sats_new:
     d = dist_mode * np.cos(np.pi/2 - abs(angle_r))
     print(f"{sat}: {dist_mode}")
     print(f"{sat}: {d}")
+    break
+
+print(lons_equat)
