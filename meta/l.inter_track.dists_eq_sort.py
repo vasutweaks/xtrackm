@@ -1,3 +1,5 @@
+# picking up lons, lats at equator of tracks with negative slope
+# finding successive distances between them
 import glob
 import math
 import statistics
@@ -19,7 +21,7 @@ for sat in sats_new:
         ds = xr.open_dataset(f, engine="h5netcdf", decode_times=False)
         if len(ds.points_numbers) == 0:
             continue
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         lon_equat = lons_track[0]
@@ -29,7 +31,7 @@ for sat in sats_new:
         slope = (lat_coast - lat_equat) / (lon_coast - lon_equat)
         angle_r = math.atan(slope)
         angle_d = angle_r * (180 / math.pi)
-        if slope < 0:
+        if slope > 0:
             lons_equat.append(lon_equat)
             lats_equat.append(lat_equat)
     lons_sorted = sorted(lons_equat)

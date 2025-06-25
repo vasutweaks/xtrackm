@@ -28,7 +28,7 @@ for sat in sats_new:
         ds = xr.open_dataset(f, engine="h5netcdf", decode_times=False)
         if len(ds.points_numbers) < 12:
             continue
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         lon_equat = lons_track[0]

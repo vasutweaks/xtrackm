@@ -1,3 +1,8 @@
+l.closest_descending_track_in_time.py not clear on what this script does
+
+there is some problem with l.inter_track.dists_eq_sort.py 
+the inter track distance between negative slope and positive slope tracks should be same. But they are differing alot.
+
 ds.cycles_numbers and ds.cycle are differing only in initial values,
 both are just integer values
 
