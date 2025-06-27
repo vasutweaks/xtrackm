@@ -7,18 +7,22 @@ import matplotlib.pyplot as plt
 import xarray as xr
 from cartopy.io.img_tiles import GoogleTiles
 from tools_xtrackm import *
+import matplotlib as mpl
+
 
 cmap = "Spectral"
 cmap = "PuBuGn"
 cmap = "YlGnBu"
 cmap = "YlGn"
 cmap_r = plt.cm.get_cmap(cmap)
-cmap1 = cmo.cm.topo
 cmap2 = cmo.cm.thermal
-cmap1 = cmo.cm.topo
-cmap1 = cmo.cm.diff
 cmap3 = cmaps.BlAqGrYeOrReVi200
 cmap4 = cmo.cm.phase
+cmap1 = cmo.cm.topo
+cmap1 = cmo.cm.topo
+cmap1 = cmo.cm.diff
+cmap1 = mpl.colormaps["Greys"]
+cmap1 = mpl.colormaps["binary"]
 
 # cmap1="viridis"
 zone = "nindian"
@@ -37,11 +41,10 @@ xticks = [45, 60, 75, 90, 105]
 yticks = [0, 5, 15, 30]
 tiles = GoogleTiles(style="satellite")
 
+dse = xr.open_dataset("/home/srinivasu/allData/topo/etopo5.cdf")  # open etopo dataset
 for sat in sats_new:
     tracks_n = get_total_tracks(sat)
     tsta, tend = get_time_limits(sat)
-    dse = xr.open_dataset(
-        "/home/srinivasu/allData/topo/etopo5.cdf")  # open etopo dataset
     fig, ax1 = plt.subplots(
         1,
         1,
@@ -89,9 +92,9 @@ for sat in sats_new:
             ax1.scatter(
                 lons_track,
                 lats_track,
-                color="w",
-                linewidths=0.0,
-                s=6,
+                color="b",
+                marker=".",
+                s=4,
             )
             if is_within_region(lonm, latm, *NIO):
                 plt.text(
@@ -100,16 +103,16 @@ for sat in sats_new:
                     s=track_number,
                     fontsize=10,
                     rotation=angle,
-                    color="k",
+                    color="r",
                 )
         else:
             angle = np.rad2deg(np.arctan(m))
             ax1.scatter(
                 lons_track,
                 lats_track,
-                color="k",
-                linewidths=0.0,
-                s=6,
+                color="r",
+                s=4,
+                marker=".",
             )
             if is_within_region(lonm, latm, *NIO):
                 plt.text(
@@ -118,7 +121,7 @@ for sat in sats_new:
                     s=track_number,
                     fontsize=10,
                     rotation=angle,
-                    color="w",
+                    color="b",
                 )
     plt.savefig(
         f"pngs_tracks/tracks_{sat}.{zone}.with_track_numbers.ascending.png",
@@ -126,3 +129,5 @@ for sat in sats_new:
     )
     plt.show()
     plt.close("all")
+
+dse.close()
