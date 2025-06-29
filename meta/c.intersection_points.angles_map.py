@@ -61,12 +61,11 @@ ax1.plot(
 
 for f_self in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")):
     ds_self = xr.open_dataset(f_self, decode_times=False)
-    track_number = ds_self.Pass
+    track_number_self = ds_self.Pass
     print(ds_self)
     sla = ds_self.sla
-    sla1 = sla.isel(cycles_numbers=0)
-    ln = ds_self["sla"].sizes["points_numbers"]
-    ln2 = ln // 2
+    lns = ds_self["sla"].sizes["points_numbers"]
+    lns2 = lns // 2
     lons_track_self = ds_self.lon.values
     lats_track_self = ds_self.lat.values
     lon_coast_self = lons_track_self[-1]  # this on coast
@@ -93,7 +92,7 @@ for f_self in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.ni
         plt.text(
             lonm,
             latm,
-            s=track_number,
+            s=track_number_self,
             fontsize=10,
             rotation=angle_self,
             color="w",
@@ -110,6 +109,8 @@ for f_self in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.ni
         if len(ds_other.points_numbers) == 0:
             continue
         track_number_other = ds_other.Pass
+        lno = ds_other["sla"].sizes["points_numbers"]
+        lno2 = lno // 2
         lons_track_other = ds_other.lon.values
         lats_track_other = ds_other.lat.values
         lon_equat_other = lons_track_other[0]
@@ -128,20 +129,24 @@ for f_self in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.ni
         other_times = []
         if track_path_self.intersects(track_path_other):
             point = track_path_self.intersection(track_path_other)
-            print(sat, track_number, track_number_other, point)
-            # x_from_coast = distance.distance((lat_coast_self,
-            #                                   lon_coast_self),
-            #                                  (point.y, point.x)).km
+            print(sat, track_number_self, track_number_other, point)
+            x_from_coast_self = distance.distance((lat_coast_self,
+                                              lon_coast_self),
+                                             (point.y, point.x)).km
+            x_from_coast_other = distance.distance((lat_coast_other,
+                                              lon_coast_other),
+                                             (point.y, point.x)).km
             # x_idx = index_at_x(x, x_from_coast)
-            lat_idx = index_at_lat(ds_other, point.y)
-            ln = ds_other["sla"].sizes["points_numbers"]
-            ln2 = ln // 2
+            lat_idx_self = index_at_lat(ds_self, point.y)
+            lat_idx_other = index_at_lat(ds_other, point.y)
             # dvals_other = ds_other.time.isel(points_numbers=ln2).values
-            dvals_self = ds_self.time.isel(points_numbers=lat_idx).values
+            # dvals_self = ds_self.time.isel(points_numbers=lat_idx).values
+            dvals_self = ds_self.time.isel(points_numbers=lns2).values
             # these dates change by weeks or months
             dates_self = [dt0 + timedelta(days=int(d)) for d in dvals_self]
             time0_self = dates_self[0]
-            dvals_other = ds_other.time.isel(points_numbers=lat_idx).values
+            # dvals_other = ds_other.time.isel(points_numbers=lat_idx).values
+            dvals_other = ds_other.time.isel(points_numbers=lno2).values
             dates_other = [dt0 + timedelta(days=int(d)) for d in dvals_other]
             time0_other = dates_other[0]
             dist_time = (time0_other - time0_self).days
@@ -154,15 +159,21 @@ for f_self in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.ni
                 markersize=15,
             )
             other_times.append((track_number_other, abs(dist_time)))
-        # plt.pause(0.1)
             track_other.append(track_number_other)
-            track_self.append(track_number)
+            track_self.append(track_number_self)
             lons_inter.append(point.x)
             lats_inter.append(point.y)
+        # plt.pause(0.1)
     break
-    if len(other_times) == 0:
-        continue
-    other_times.sort(key=lambda x: x[1], reverse=True)
+    # if len(other_times) == 0:
+        # continue
+    # other_times.sort(key=lambda x: x[1], reverse=True)
+plt.savefig(
+    f"tracks_intersections_{sat}.png",
+    dpi=300,
+    bbox_inches="tight",
+)
+plt.show()
 
 df = pd.DataFrame(
     {

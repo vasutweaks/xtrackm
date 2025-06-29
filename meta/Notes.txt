@@ -1,3 +1,6 @@
+for a given satellite mission, for all tracks the starting and 
+ending dates are same.
+
 l.closest_descending_track_in_time.py don't know what this script does
 
 sorting of lons, lats should not be done in l.inter_track.dists_eq_sort.py
