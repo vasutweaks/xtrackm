@@ -67,7 +67,8 @@ for sat in sats_new:
         # if not is_odd(track_number):
         #     print(f"{angle_point_d} {angle_point_d2} {orbit_str} {sat}")
         # if not is_odd(track_number):
-        #     print(f"{sat} {angle_whole_d2} {orbit_str}")
+        if True:
+            print(f"{sat} {angle_whole_d} {angle_whole_d2} {orbit_str}")
         if is_odd(track_number):
             # print(f"{sat} {angle_whole_d2} {orbit_str}")
             ascending_angles.append(angle_whole_d2)
@@ -77,3 +78,4 @@ for sat in sats_new:
     print(f"{sat} mean ascending: {np.mean(ascending_angles)}")
     print(f"{sat} mean descending: {np.mean(descending_angles)}")
     print(f"{sat} sum of mean: {np.mean(ascending_angles) + np.mean(descending_angles)}")
+    break
