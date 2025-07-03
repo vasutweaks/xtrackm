@@ -343,11 +343,13 @@ radar_times = {
 
 sats_tfreq = {
     "GFO": 17,
-    "TP+J1+J2+J3": 10,
+    "TP+J1+J2+J3+S6A": 10,
     "S3A": 27,
-    "TPN+J1N+J2N": 10,
+    "S3B": 27,
+    "TPN+J1N+J2N+J3N": 10,
     "ERS1+ERS2+ENV+SRL": 35,
-    "HY2": 14,
+    "HY2A": 14,
+    "HY2B": 14,
 }
 
 omni_d_str = {
