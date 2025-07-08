@@ -1733,7 +1733,7 @@ def omni_nearby_track_box(omni_id, sat, box_size=2.0):
     list_tuples = []
     for f in sorted(
         glob.glob(
-            f"/home/srinivasu/xtrackm/data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"
+            f"/home/srinivasu/xtrackm/data/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
@@ -1798,7 +1798,7 @@ def cb_nearby_track_box(cb_id, sat, box_size=2.0):
     list_tuples = []
     for f in sorted(
         glob.glob(
-            f"/home/srinivasu/xtrackm/data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"
+            f"/home/srinivasu/xtrackm/data/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
@@ -1841,7 +1841,7 @@ def psmsl_nearby_track_box(psmsl_id, df_nio, sat, box_size=2.0):
     list_tuples = []
     for f in sorted(
         glob.glob(
-            f"/home/srinivasu/xtrackm/data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"
+            f"/home/srinivasu/xtrackm/data/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
@@ -1919,7 +1919,7 @@ def cb_nearby_track_new(cb_id, sat):
     x0, y0 = cb_d[cb_id]
     for f in sorted(
         glob.glob(
-            f"/home/srinivasu/xtrackm/data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"
+            f"/home/srinivasu/xtrackm/data/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
@@ -1992,7 +1992,7 @@ def cb_nearby_track_normal(cb_id, sat):
     x0, y0 = cb_d[cb_id]
     for f in sorted(
         glob.glob(
-            f"/home/srinivasu/xtrackm/data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"
+            f"/home/srinivasu/xtrackm/data/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
