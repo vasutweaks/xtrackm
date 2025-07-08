@@ -1235,13 +1235,13 @@ def virtual_dist_time_asn(ds):
     return var2
 
 
-def track_dist_time_asn_gshhs(ds, var_str="sla", units_in="m"):
+def track_dist_time_asn_gshhg(ds, var_str="sla", units_in="m"):
     dt0 = datetime.strptime("1950-01-01", "%Y-%m-%d")
     # these dists start from equator
     if units_in == "m":
-        dists = ds.dist_to_coast_gshhs.values
+        dists = ds.dist_to_coast_gshhg.values
     elif units_in == "km":
-        dists = 0.001 * ds.dist_to_coast_gshhs.values
+        dists = 0.001 * ds.dist_to_coast_gshhg.values
     dists_rev = dists[::-1]
     # these dists start from coast
     ln = ds[var_str].sizes["points_numbers"]
