@@ -8,8 +8,6 @@ from scipy.signal import savgol_filter
 from tools_xtrackm import sats_new, get_first_file, get_total_tracks
 import matplotlib.pyplot as plt
 
-# make a function to write even numbers
-
 frac1 = 0.05
 # check if argument is supplied
 if len(sys.argv) > 1:
@@ -19,13 +17,14 @@ else:
 
 print(f"loess frac = {frac1}")
 
+part1 = np.arange(0, 20, 1)
+
 j = 0
 for sat in sats_new[:]:
     i = 0
     # we are making a huge pile of gshhg distances across all tracks
     gshhg_np = np.empty(0)
     counts_np = np.empty(0)
-    no_tracks = get_total_tracks(sat)
     for f in sorted(glob.glob(f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc")):
         ds = xr.open_dataset(f, decode_times=False)
         gshhg = 0.001 * ds.dist_to_coast_gshhg.values
@@ -35,27 +34,12 @@ for sat in sats_new[:]:
         counts_np = np.append(counts_np, count_perc)
         i = i + 1
     print(len(gshhg_np), i)
-    # plot the histogram of gshhg_np
-    # plot the diff of gshhg_np
-    gshhg_np_diff = np.diff(gshhg_np)
-    # gshhg_np_diff peaks to hundreds of km near where two tracks are appended
-    masked = np.where(gshhg_np_diff < 20, gshhg_np_diff, np.nan)
-    # becuase some tracks are ascending and some are descending, the diff is negative
-    # half of the times.
-    masked_abs = np.abs(masked)
-    # fig, ax = plt.subplots()
-    # ax.hist(gshhg_np_diff, bins=100)
-    # plt.show()
-    # To get whole pile of distances to be sampled at equal intervals
-    # We sort and smooth all distance values
-    # these intervals are then used as output x-axis of loess filter
-    gshhg_np_sorted = np.sort(gshhg_np)
-    smoothed_array = savgol_filter(
-        gshhg_np_sorted, window_length=51, polyorder=3
-    )
-    # since the gshhg_np is the result of no_tracks of appends
-    # we get the average number of points (along x) for typical tracks.
-    xnew = smoothed_array[::no_tracks]
+    max_dist = max(gshhg_np)
+    # Next values with step 6, starting from 20
+    # Example: generate 10 more values
+    part2 = np.arange(20, max_dist, 6)
+    # Combine both parts
+    xnew = np.concatenate([part1, part2])
     xout, yout, wout = loess_1d(
         gshhg_np,
         counts_np,
@@ -66,7 +50,7 @@ for sat in sats_new[:]:
         rotate=False,
         sigy=None,
     )
-    da_out = xr.DataArray(yout, coords={"gshhg_resampled": xout})
+    da_out = xr.DataArray(yout, coords={"standard_6km": xout})
     ds_out = xr.Dataset({"valid_count": da_out})
-    ds_out.to_netcdf(f"xtrack_sla_valid_count_{sat}_loess_fit.nc")
+    ds_out.to_netcdf(f"xtrack_sla_valid_count_{sat}_loess_fit_6km.nc")
     j = j + 1
