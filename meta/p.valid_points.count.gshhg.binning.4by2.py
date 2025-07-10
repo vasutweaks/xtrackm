@@ -8,7 +8,7 @@ from tools_xtrackm import *
 
 intervals = np.arange(0, 200)
 
-fig, axes = plt.subplots(3, 2, figsize=(12, 14), sharex=True)
+fig, axes = plt.subplots(4, 2, figsize=(12, 14), sharex=True)
 
 j = 0
 for sat in sats_new[:]:
@@ -77,5 +77,5 @@ for sat in sats_new[:]:
         color="r",
     )
     j = j + 1
-plt.savefig(f"p.count.alltracks_allsat.gshhg.3by2.png", bbox_inches="tight")
+plt.savefig(f"p.count.alltracks_allsat.gshhg.4by2.png", bbox_inches="tight")
 plt.show()
