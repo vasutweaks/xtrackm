@@ -1425,9 +1425,9 @@ def change_time(ds1, time_str):
 
 # TIDE GAUGE FUNCTIONS
 # @timeit_decorator
-def read_tide_meta():
+def read_tide_meta(data_loc="/home/srinivasu/slnew/psmsl/rlr_monthly"):
     df = pd.read_csv(
-        "/home/srinivasu/slnew/psmsl/rlr_monthly/filelist.txt",
+        f"{data_loc}/filelist.txt",
         sep=";",
         names=[
             "id",
@@ -1440,7 +1440,7 @@ def read_tide_meta():
         ],
         header=None,
     )
-    df.set_index("id", inplace=True)
+    df = df.set_index("id")
     return df
 
 
@@ -1457,13 +1457,14 @@ def region_selected(df, lon_min, lon_max, lat_min, lat_max):
 
 
 def get_lonlat_psmsl(PSMSL_ID, df_nio):
-    lon_psmsl = df_nio.loc[PSMSL_ID]["longitude"]
-    lat_psmsl = df_nio.loc[PSMSL_ID]["latitude"]
-    name_psmsl = df_nio.loc[PSMSL_ID]["name"]
+    row = df_nio.loc[PSMSL_ID]
+    lon_psmsl = row["longitude"]
+    lat_psmsl = row["latitude"]
+    name_psmsl = row["name"]
     return lon_psmsl, lat_psmsl, name_psmsl
 
 
-def read_id(id1):
+def read_id(id1, data_loc="/home/srinivasu/slnew/psmsl/rlr_monthly/data/"):
     def convert_partial_year(number):
         # https://stackoverflow.com/questions/19305991/convert-fractional-years-to-a-real-date-in-python
         # TODO this function need a revisit
@@ -1474,14 +1475,15 @@ def read_id(id1):
         return date
 
     df = pd.read_csv(
-        f"/home/srinivasu/slnew/psmsl/rlr_monthly/data/{id1}.rlrdata",
+        f"{data_loc}/{id1}.rlrdata",
         delimiter=";",
         names=["time", "height", "a1", "a2"],
         na_values=-99999,
         parse_dates=[0],
         date_parser=convert_partial_year,
     )
-    df.set_index("time", inplace=True)
+    # df.set_index("time", inplace=True)
+    df = df.set_index("time")
     df = df.to_xarray()
     return df
 
@@ -1513,6 +1515,38 @@ def read_id1(id1):
     )
     df["time"] = df["time"].apply(convert_to_datetime)
     df.set_index("time", inplace=True)
+    df = df.to_xarray()
+    return df
+
+
+def read_id_ai(id1, data_loc="/home/srinivasu/slnew/psmsl/rlr_monthly/data/"):
+    def convert_partial_year(number):
+        try:
+            number = float(number)
+            year = int(number)
+            frac = number - year
+            # Derive month (1-12) from fraction
+            month = int(frac * 12) + 1
+            # Clamp month to 1-12 in case of floating-point edge cases
+            month = max(1, min(12, month))
+            # Get days in that month (handles leap years)
+            _, days_in_month = calendar.monthrange(year, month)
+            # Calculate mid-month day (e.g., 15 for Feb, 16 for Jan/Mar)
+            mid_day = (days_in_month // 2) + 1
+            # Create datetime (will raise ValueError if invalid, e.g., Feb 30)
+            return datetime(year, month, mid_day)
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid fractional year '{number}': {e}")
+
+    df = pd.read_csv(
+        f"{data_loc}/{id1}.rlrdata",
+        delimiter=";",
+        names=["time", "height", "a1", "a2"],
+        na_values=-99999,
+        parse_dates=[0],
+        date_parser=convert_partial_year,
+    )
+    df = df.set_index("time")  # Avoid inplace=True
     df = df.to_xarray()
     return df
 
