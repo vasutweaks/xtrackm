@@ -1612,7 +1612,7 @@ def omni_nearby_track(omni_id, sat):
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
         # ds = xr.open_dataset(f, decode_times=False)
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -1650,7 +1650,7 @@ def rama_nearby_track(rama_id, sat):
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -1683,7 +1683,7 @@ def rama_nearby_track_box(rama_id, sat, box_size=2.0):
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -1727,7 +1727,7 @@ def coastal_nearby_track_box(coastal_id, sat, box_size=2.0):
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -1772,7 +1772,7 @@ def omni_nearby_track_box(omni_id, sat, box_size=2.0):
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
         # ds = xr.open_dataset(f, decode_times=False)
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -1836,7 +1836,7 @@ def cb_nearby_track_box(cb_id, sat, box_size=2.0):
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -1925,7 +1925,7 @@ def psmsl_nearby_track(psmsl_id, df_nio, sat):
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
         # ds = xr.open_dataset(f, decode_times=False)
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -1957,7 +1957,7 @@ def cb_nearby_track_new(cb_id, sat):
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         lon_coast = lons_track[-1]  # this on coast
@@ -2030,7 +2030,7 @@ def cb_nearby_track_normal(cb_id, sat):
         )
     ):
         ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
