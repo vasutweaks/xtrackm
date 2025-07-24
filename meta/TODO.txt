@@ -1,3 +1,4 @@
+[ ] best and sophisticated way to deal outliers of sla data
 [ ] the loess fit of number of good points near coast looks so flat?
 
 [-] to understand dates intersection business of c.intersection_points.angles_map.py
