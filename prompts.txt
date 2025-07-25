@@ -1,0 +1,117 @@
+u1, v1 are orthogonal vectors and u2, v2 are another set of othogonal vectors
+sharing same origin. u1 and v1 are oriented along x-axis and y-axis
+respectively. u2 makes an angle of theta with u1 clockwise. If u2, v2
+frame is rotated counter clockwise by theta, then what are the new values of
+vectors u2, v2. Give mathematical formulations and python function
+
+
+Equation of a line passing through point P(x0, y0) and making an angle theta
+with x-axis(counter clockwise). Call this line T1.
+Equation of a line passing through P and perpedicular to T1. Call this Line P1.
+Equation of a line passing through P and makes an acute angle alpha with T1 at
+P. Call this Line N1.
+Equation of line passing through P and parallel to y-axis
+Equation of line passing through P and parallel to x-axis
+write a python sympy program to solve the angle between x-axis and P1 and
+ to solve the acute angle between N1 and P1.
+
+Write a python code that 
+1. Draw a parallel thin line to the x-axis of 10 units width and 5 units height
+above x-axis.
+2. Draw a line that traverse x-axis the parallel line, with an angle of 
+110 degrees (measured counter clock wise from x-axis).
+3. Mark the point at which traversing line intersects the parallel line as P.
+and mark the angle greek letter theta near the x-axis.
+4. At the point of intersection draw a vertical arrow and horizontal arrow
+pointing bothsides. Mark the vertical arrow as u bar (vector notation) and 
+horizontal arrow as v bar (vector notation).
+5. At point p, draw a perpendicular line to traversing line as a thin dotted
+arrow pointing bothsides.
+
+Write a python code that 
+Draw y=2**x curve, draw a tangent to the curve at x=2.5 and y=2**x.
+Mark the point of touching of tangent to the curve as P
+At point P, draw a perpendicular line to tangent line as a thin dotted
+arrow pointing bothsides.
+Draw a line passing through the above point making an angle of 
+110 degrees (measured counter clock wise from x-axis). Mark this line as T1.
+Mark the angle greek letter theta that T1 makes with the x-axis.
+At the P, draw a vertical arrow and horizontal arrow
+pointing bothsides. Mark the vertical arrow as u bar (vector notation) and 
+horizontal arrow as v bar (vector notation).
+
+I am trying to compute cross-track geostrophic currents from along track
+altimetry data which contains sea level anomaly(sla) and lon, lat data of the
+ground track. For convenience, I have remapped the sla data as a function of
+distance (s) from the coast. Now sla becomes a function s dimension. To compute
+cross track geostrophic currents, I need to get the gradient of sla along
+s which is d(sla)/ds and then multiply it with g/f where g is gravity as
+function of lat and f is coriolis parameter as a function of lat. The satellite
+ground track makes and angle of a with x-axis. At a given point on the tracks
+del s = sqrt(del x ** 2 + del y ** 2). Now how do i compute zonal and
+meridional components of currents from cross-track geostrophic currents. Give
+mathematical formulation.
+
+Write a python code that 
+Draw two lines one making an angle of 70 and the other making 110 with
+x-axis(measured counter clock wise from x-axis). Both lines start at the
+x-axis but from different points.
+Mark the intersection of the lines as P.
+At the point of intersection draw a vertical arrow and horizontal arrow
+pointing bothsides. Mark the vertical arrow as v bar (vector notation) and 
+horizontal arrow as u bar (vector notation).
+At point P, draw perpendicular lines to each of the two lines as a thin dotted
+arrows extending both sides of the line. They have the same color as the
+their perpedicular line.
+
+There are two satellite altimetry tracks (T1, T2) that intersect at a point
+P with an acute angle of theta. The cross track geostrophic current is computed
+by differentiating the sea level anomaly (sla) along the track. The computed
+geostrophic currents are normal to the track path. The geostrophic currents 
+computed at the point P are g1 and g2 for the tracks T1 and T2 respectively. g1
+and g2 are normal to the tracks T1 and T2 at point P. Now how do we deduce the
+zonal and meridional components of currents at point P from g1 and g2? Deduce
+the relation mathematically.
+
+If we have only one track T1 and geostrophic current at point P is g1,
+can we not decude u and v as g1*sin(theta1) and g2*cos(theta1)?
+
+There are two othogonal vectors g1, g2 originating at (0, 0). There is a third
+vector r (originating from same point) inbetween g1 and g2 which makes an
+angle of theta with g2. Now how do we express vector r with respect to g1 and
+g2?
+
+There are two orthogonal vectors u (along x-axis) and v(along y-axis).
+If a vector r makes an angle of theta with x-axis, how do we express r
+interms of u and v. Note that u and v are not unit vectors.
+
+There are two vectors g1, g2 originating at (0, 0). g1 makes an angle of a
+with x-axis counterclock wise and g2 makes an angle of b with x-axis clockwise
+. So g1 and g2 are position on the either sides of x-axis. How is the resulting
+vector along x-axis expressed in term of g1 and g2.
+
+Write a python code with following requirements
+I have a bunch of ascending and descending tracks each of which are defined
+by two arrays of longitudes and latitudes contained in netcdf files.
+The code starts as follows.
+for f in sorted(
+    glob.glob(f"../data/ctoh.sla.ref.{sat}.nindian.*.nc")
+):
+    # print(f)
+    ds = xr.open_dataset(f, engine="h5netcdf", decode_times=False)
+    if len(ds.points_numbers) == 0:
+        continue
+    track_number = ds.pass_number
+    lons_track = ds.lon.values
+    lats_track = ds.lat.values
+    lon_equat = lons_track[0]
+    lat_equat = lats_track[0]
+    lon_coast = lons_track[-1]
+    lat_coast = lats_track[-1]
+1. For each track define a shapely linestring, find the slope.
+(assuming the track is linear and taking first and last points to find the
+ slope and angle it makes with with equator as atan(slope))
+2. For each track, check intersection points with other tracks and the
+acute angle between the tracks.
+3. We have to keep saving the tracknumber of self, tracknumber of other track
+, intersection point, acute angle between them
