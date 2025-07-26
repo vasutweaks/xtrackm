@@ -22,8 +22,6 @@ from scipy.ndimage import gaussian_filter1d
 from scipy.signal import butter, filtfilt
 from shapely.geometry import Point, Polygon
 from namesm import *
-
-
 import math
 
 
@@ -802,7 +800,11 @@ def compute_geostrophy_gc(ds, sla_smooth):
     lons_track_rev = ds.lon.values[::-1]
     lats_track_rev = ds.lat.values[::-1]
     if len(lons_track_rev) == 0:
-        return
+        return None
+    # Add minimum length check
+    if len(lons_track_rev) < 3:
+        print("Warning: Insufficient data points for gradient calculation")
+        return None
     f1 = cor_p(lats_track_rev)
     f2 = f1.values
     f3 = np.where(lats_track_rev > 2, f2, np.nan)
@@ -813,7 +815,59 @@ def compute_geostrophy_gc(ds, sla_smooth):
     ratio1 = ratio[:, np.newaxis]
     dhbydx = sla_smooth.differentiate("x")
     gc = ratio1 * dhbydx
+    # Add metadata
+    gc.attrs["units"] = "m/s"
+    gc.attrs["long_name"] = "Cross-track geostrophic current"
+    gc.attrs["description"] = "Geostrophic current perpendicular to satellite track"
     return gc
+
+
+def geostrophic_components(gc1, gc2, a1_deg, a2_deg):
+    """
+    Compute zonal and meridional geostrophic current components from 
+    cross-track velocities measured by two intersecting satellite tracks.
+    Parameters:
+    -----------
+    gc1 : float or array-like
+        Cross-track geostrophic velocity from track 1 (m/s)
+    gc2 : float or array-like  
+        Cross-track geostrophic velocity from track 2 (m/s)
+    a1_deg : float
+        Azimuth of track 1 in degrees (measured counter-clockwise from east)
+    a2_deg : float
+        Azimuth of track 2 in degrees (measured counter-clockwise from east)
+    Returns:
+    --------
+    u : float or array-like
+        Zonal (eastward) velocity component (m/s)
+    v : float or array-like
+        Meridional (northward) velocity component (m/s)
+    Raises:
+    -------
+    ValueError: If tracks are parallel (intersection angle ≈ 0°)
+    """
+    # Convert azimuths from degrees to radians
+    a1 = a1 #math.radians(a1_deg)
+    a2 = a2 #math.radians(a2_deg)
+    # Calculate intersection angle
+    theta = a2 - a1
+    sin_theta = math.sin(theta)
+    # Check for parallel tracks
+    if abs(sin_theta) < 1e-6:
+        raise ValueError(f"Tracks are nearly parallel"
+                         "(angle = {math.degrees(theta):.2f}°). "
+                        "Cannot resolve both velocity components.")
+    # Calculate trigonometric values
+    cos_a1 = math.cos(a1)
+    cos_a2 = math.cos(a2)
+    sin_a1 = math.sin(a1)
+    sin_a2 = math.sin(a2)
+    # Solve for velocity components using the derived formulas:
+    # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
+    # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
+    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
+    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
+    return u, v
 
 
 def compute_geostrophy_from_slope(ds, slope_smooth, current="zonal"):
