@@ -6,13 +6,9 @@ from tools_xtrackm import *
 import sys
 
 cmap1 = cmo.cm.diff
-sat = "TP+J1+J2+J3+S6A"
 sat = "S3A"
 sat = "ERS1+ERS2+ENV+SRL"
-rama_id = "15n90e"
-rama_id = "0n90e"
-rama_id = "4n90e"
-lon_rama, lat_rama = rama_d[rama_id]
+sat = "TP+J1+J2+J3+S6A"
 d = 1.5
 height, width = 9, 9
 
@@ -39,11 +35,15 @@ def find_n_closest_points(df, lon0, lat0, n=4):
     return df.nsmallest(n, "distance_km")
 
 
-df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
-df_4 = find_n_closest_points(df, lon_rama, lat_rama, n=4)
-print(df_4)
+omni_id = "BD09"
+for omni_id in omni_d.keys():
+    lon_omni, lat_omni = omni_d[omni_id]
+    df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
+    df_4 = find_n_closest_points(df, lon_omni, lat_omni, n=4)
+    print(omni_id)
+    print(df_4)
 
-# sys.exit()
+sys.exit()
 track_self = df_4["track_self"].apply(lambda x: str(x)).values
 track_other = df_4["track_other"].apply(lambda x: str(x)).values
 lons_inter = df_4["lons_inter"].values
@@ -97,7 +97,7 @@ for i in range(len(df_4)):
                                  drop=True)
     sla_other_at = sla_other_at.interp(time=sla_self_at.time)
     # other_times.append((track_number_other, abs(dist_time)))
-    fig, ax1 = plt.subplots(1,
+    fig1, ax1 = plt.subplots(1,
                             1,
                             figsize=(width, height),
                             layout="constrained")
@@ -128,8 +128,8 @@ for i in range(len(df_4)):
     decorate_axis(ax2, "", *TRACKS_REG)
     ax2.grid()
     ax2.plot(
-        lon_rama,
-        lat_rama,
+        lon_omni,
+        lat_omni,
         c="r",
         marker="o",
         markersize=6,
@@ -137,8 +137,8 @@ for i in range(len(df_4)):
         markeredgecolor='black',
         markeredgewidth=2
     )
-    # plot plat form code of rama at lon_rama, lat_rama
-    plt.text(lon_rama, lat_rama, f"{rama_id}", fontsize=10, color="k") 
+    # plot plat form code of omni at lon_omni, lat_omni
+    plt.text(lon_omni, lat_omni, f"{omni_id}", fontsize=10, color="k") 
     ax2.scatter(
         lons_track_self,
         lats_track_self,

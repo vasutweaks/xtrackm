@@ -24,9 +24,9 @@ angle_obtuse = []
 x_from_coast_self = []
 x_from_coast_other = []
 
-sat = "TP+J1+J2+J3+S6A"
 sat = "S3A"
 sat = "ERS1+ERS2+ENV+SRL"
+sat = "TP+J1+J2+J3+S6A"
 
 for f_self in sorted(
         glob.glob(
@@ -68,12 +68,14 @@ for f_self in sorted(
             zip(lons_track_other, lats_track_other))
         if track_path_self.intersects(track_path_other):
             point = track_path_self.intersection(track_path_other)
-            print(sat, track_number_self, track_number_other, point)
             acute, obtuse = intersection_angles_rad(slope_self, slope_other)
             x_from_coast_self1 = distance.distance(
-                (lat_coast_self, lon_coast_self), (point.y, point.x)).km
+                (lat_coast_self, lon_coast_self), (point.y, point.x)).m
             x_from_coast_other1 = distance.distance(
-                (lat_coast_other, lon_coast_other), (point.y, point.x)).km
+                (lat_coast_other, lon_coast_other), (point.y, point.x)).m
+            print(sat, track_number_self, track_number_other, point.x, point.y, x_from_coast_self1, x_from_coast_other1)
+            if is_land(point.x, point.y):
+                continue
             track_other.append(track_number_other)
             track_self.append(track_number_self)
             lons_inter.append(point.x)
