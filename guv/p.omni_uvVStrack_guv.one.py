@@ -8,7 +8,6 @@ import sys
 import math
 import numpy as np
 
-
 def geostrophic_components_from_slopes(gc1, gc2, slope1, slope2):
     """
     Compute zonal and meridional geostrophic current components from 
@@ -82,9 +81,16 @@ def find_n_closest_points(df, lon0, lat0, n=4):
     return df.nsmallest(n, "distance_km")
 
 
+cmap1 = cmo.cm.diff
+
 sat = "TP+J1+J2+J3+S6A"
 d = 1.5
 height, width = 9, 9
+oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
+ds_oscar = xr.open_dataset(f"{oscar_dir}/oscar_0.25_u_full_xr_concat.nc")
+print(ds_oscar)
+u_oscar = ds_oscar.u
+# v_oscar = ds_oscar.v
 
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 omni_id = "BD09"
@@ -99,6 +105,10 @@ omni_v = ds_omni.vd.interp(depth=dpth)
 # make 10 average of omni_v
 omni_v = omni_v.rolling(time=10, center=True).mean()
 omni_v = 0.01 * omni_v
+omni_u = ds_omni.ud.interp(depth=dpth)
+# make 10 average of omni_v
+omni_u = omni_u.rolling(time=10, center=True).mean()
+omni_u = 0.01 * omni_u
 N = omni_v.count().item()
 print(N)
 
@@ -157,6 +167,9 @@ for i in range(len(df_4)):
     slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other - lon_equat_other)
     angle_other = np.rad2deg(np.arctan(slope_other))
     track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
+    # u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
+    u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
+    # v_oscar_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
     gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
     gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
     # if track_path_self.intersects(track_path_other):
@@ -175,8 +188,12 @@ for i in range(len(df_4)):
                             layout="constrained")
     # gc_self_at.plot(ax=ax1, label=f"pass {track_number_self}")
     # gc_other_at.plot(ax=ax1, label=f"pass {track_number_other}")
-    gv.plot(ax=ax1, label=f"pass {track_number_other}")
-    omni_v.plot(ax=ax1, color="r", linewidth=2, label="omni")
+    # gv.plot(ax=ax1, label=f"pass {track_number_other}", color="r", linewidth=2)
+    # omni_v.plot(ax=ax1, color="b", linewidth=2, label="omni")
+    # v_oscar_at.plot(ax=ax1, color="k", linewidth=2, label="oscar")
+    gu.plot(ax=ax1, label=f"pass {track_number_other}", color="r", linewidth=2)
+    omni_u.plot(ax=ax1, color="b", linewidth=2, label="omni")
+    u_oscar_at.plot(ax=ax1, color="k", linewidth=2, label="oscar")
     # text coordinate of intersection point
     plt.text(
         0.15,
@@ -187,67 +204,67 @@ for i in range(len(df_4)):
         fontweight="bold",
     )
     plt.legend()
-    # fig2, ax2 = plt.subplots(
-    #     1,
-    #     1,
-    #     subplot_kw={"projection": ccrs.PlateCarree()},
-    #     figsize=(width, height),
-    #     layout="constrained",
-    # )
-    # dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
-    #     *TRACKS_REG[2:])).plot(ax=ax2,
-    #                            add_colorbar=False,
-    #                            add_labels=False,
-    #                            cmap=cmap1)
-    # decorate_axis(ax2, "", *TRACKS_REG)
-    # ax2.grid()
-    # ax2.plot(
-    #     lon_omni,
-    #     lat_omni,
-    #     c="r",
-    #     marker="o",
-    #     markersize=6,
-    #     markerfacecolor='red',
-    #     markeredgecolor='black',
-    #     markeredgewidth=2
-    # )
-    # # plot plat form code of omni at lon_omni, lat_omni
-    # plt.text(lon_omni, lat_omni, f"{omni_id}", fontsize=10, color="k") 
-    # ax2.scatter(
-    #     lons_track_self,
-    #     lats_track_self,
-    #     marker=".",
-    #     color="c",
-    #     s=4,
-    # )
-    # ax2.scatter(
-    #     lons_track_other,
-    #     lats_track_other,
-    #     marker=".",
-    #     color="c",
-    #     s=4,
-    # )
-    # lonm, latm = get_point_at_distance(lon_equat_self, lat_equat_self,
-    #                                    lon_coast_self, lat_coast_self, d)
-    # if is_within_region(lonm, latm, *TRACKS_REG):
-    #     plt.text(
-    #         lonm,
-    #         latm,
-    #         s=track_number_self,
-    #         fontsize=14,
-    #         rotation=angle_self,
-    #         color="w",
-    #     )
-    # lonm, latm = get_point_at_distance(lon_equat_other, lat_equat_other, lon_coast_other, lat_coast_other, d)
-    # if is_within_region(lonm, latm, *TRACKS_REG):
-    #     plt.text(
-    #         lonm,
-    #         latm,
-    #         s=track_number_other,
-    #         fontsize=14,
-    #         rotation=angle_other,
-    #         color="w",
-    #     )
+    fig2, ax2 = plt.subplots(
+        1,
+        1,
+        subplot_kw={"projection": ccrs.PlateCarree()},
+        figsize=(width, height),
+        layout="constrained",
+    )
+    dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
+        *TRACKS_REG[2:])).plot(ax=ax2,
+                               add_colorbar=False,
+                               add_labels=False,
+                               cmap=cmap1)
+    decorate_axis(ax2, "", *TRACKS_REG)
+    ax2.grid()
+    ax2.plot(
+        lon_omni,
+        lat_omni,
+        c="r",
+        marker="o",
+        markersize=6,
+        markerfacecolor='red',
+        markeredgecolor='black',
+        markeredgewidth=2
+    )
+    # plot plat form code of omni at lon_omni, lat_omni
+    plt.text(lon_omni, lat_omni, f"{omni_id}", fontsize=10, color="k") 
+    ax2.scatter(
+        lons_track_self,
+        lats_track_self,
+        marker=".",
+        color="c",
+        s=4,
+    )
+    ax2.scatter(
+        lons_track_other,
+        lats_track_other,
+        marker=".",
+        color="c",
+        s=4,
+    )
+    lonm, latm = get_point_at_distance(lon_equat_self, lat_equat_self,
+                                       lon_coast_self, lat_coast_self, d)
+    if is_within_region(lonm, latm, *TRACKS_REG):
+        plt.text(
+            lonm,
+            latm,
+            s=track_number_self,
+            fontsize=14,
+            rotation=angle_self,
+            color="w",
+        )
+    lonm, latm = get_point_at_distance(lon_equat_other, lat_equat_other, lon_coast_other, lat_coast_other, d)
+    if is_within_region(lonm, latm, *TRACKS_REG):
+        plt.text(
+            lonm,
+            latm,
+            s=track_number_other,
+            fontsize=14,
+            rotation=angle_other,
+            color="w",
+        )
     plt.show()
     plt.close("all")
     break

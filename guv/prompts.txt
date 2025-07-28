@@ -1,0 +1,2 @@
+I am trying to compare zonal component of current computed from two cross track geostrophic currents at the intersection point of the tracks with loess smoothed sla with oscar ocean currents. The meridional
+component of oscar compare well with computed geostrophic zonal component but zonal component does not compare well at all. What could be fundamental reason? Some studies claim that two tracks' cross track geostrophic currents are needed to compute components, but studies are doing with one track alone.
