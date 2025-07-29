@@ -100,7 +100,7 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
     # Solve for velocity components using the derived formulas:
     # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
     # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
-    u = -1 * (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
+    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
     v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
     return u, v
 
@@ -110,16 +110,16 @@ sat = "TP+J1+J2+J3+S6A"
 track_number_self, track_number_other = "53", "14"
 d = 1.5
 height, width = 9, 9
-oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
+# oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 
-ds_oscar_u = xr.open_dataset(f"{oscar_dir}/oscar_0.25_u_full_xr_concat.nc")
-print(ds_oscar_u)
-u_oscar = ds_oscar_u.u
+# ds_oscar_u = xr.open_dataset(f"{oscar_dir}/oscar_0.25_u_full_xr_concat.nc")
+# print(ds_oscar_u)
+# u_oscar = ds_oscar_u.u
 
-ds_oscar_v = xr.open_dataset(f"{oscar_dir}/oscar_0.25_v_full_xr_concat.nc")
-print(ds_oscar_v)
-v_oscar = ds_oscar_v.v
+# ds_oscar_v = xr.open_dataset(f"{oscar_dir}/oscar_0.25_v_full_xr_concat.nc")
+# print(ds_oscar_v)
+# v_oscar = ds_oscar_v.v
 
 f_self = (
     f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
@@ -184,8 +184,18 @@ sla_other_smooth = ds_other_smooth.sla_smooth
 track_path_self = sg.LineString(zip(lons_track_self, lats_track_self))
 track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
 
-u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
-v_oscar_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
+# u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
+# v_oscar_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
+# ds_out = xr.Dataset({
+#         "u_oscar_at": u_oscar_at,
+#         "v_oscar_at": v_oscar_at,
+#         })
+#
+# ds_out.to_netcdf(f"oscar_uv_at_{sat}_{track_number_self}_{track_number_other}.nc")
+
+ds_oscar = xr.open_dataset(f"oscar_uv_at_{sat}_{track_number_self}_{track_number_other}.nc")
+u_oscar_at = ds_oscar.u_oscar_at
+v_oscar_at = ds_oscar.v_oscar_at
 
 gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
 gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
