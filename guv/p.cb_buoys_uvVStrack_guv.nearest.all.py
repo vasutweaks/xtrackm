@@ -81,15 +81,8 @@ dpth = 15.0
 height, width = 9, 9
 oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
-omni_data_dir = "/home/srinivasu/allData/MB_cleaned/"
+cb_data_dir = "/home/srinivasu/slnew/xtrackd/coastal/"
 nth = 0
-
-# ds_oscar_u = xr.open_dataset(f"{oscar_dir}/oscar_0.25_u_full_xr_concat.nc")
-# ds_oscar_v = xr.open_dataset(f"{oscar_dir}/oscar_0.25_v_full_xr_concat.nc")
-# print(ds_oscar_u)
-# print(ds_oscar_v)
-# u_oscar = ds_oscar_u.u
-# v_oscar = ds_oscar_v.v
 
 df_all_list = []
 for sat in sats_new:
@@ -97,23 +90,24 @@ for sat in sats_new:
     df_all_list.append(df)
 df_all = pd.concat(df_all_list, ignore_index=True)
 
-for omni_id in omni_d.keys():
-    lon_omni, lat_omni = omni_d[omni_id]
-    ds_omni = xr.open_dataset(f"{omni_data_dir}/{omni_id}_uvs_z_xr_daily.nc",
-                              decode_times=False)
-    print(ds_omni)
-    ds_omni = change_time(ds_omni, "time")
-    omni_u = ds_omni.ud.interp(depth=dpth)
-    omni_u = omni_u.rolling(time=10, center=True).mean()
-    omni_u = 0.01 * omni_u
-    omni_v = ds_omni.vd.interp(depth=dpth)
-    omni_v = omni_v.rolling(time=10, center=True).mean()
-    omni_v = 0.01 * omni_v
-    N = omni_v.count().item()
-    print(N)
-    df_4 = find_n_closest_points(df_all, lon_omni, lat_omni, n=4)
-    # print(omni_id, lon_omni, lat_omni, "\n", df_4.head(1))
-    sat = df_4["sat"].values[nth]
+for cb_id in cb_d.keys():
+    lon_cb, lat_cb = cb_d[cb_id]
+    ds_cb = xr.open_dataset(f"{cb_data_dir}/{cb_id.upper()}_uvs.nc")
+    print(ds_cb)
+
+    cb_u = ds_cb.U
+    cb_v = ds_cb.V
+    cb_s = ds_cb.speed
+    cb_dir = ds_cb.direction
+
+    # plt.xlim(datetime(2016, 6, 1), datetime(2018, 6, 30))
+    cb_u = cb_u.resample(time="1D").mean(dim="time")
+    cb_v = cb_v.resample(time="1D").mean(dim="time")
+    cb_s = cb_s.resample(time="1D").mean(dim="time")
+    # print(N)
+    df_4 = find_n_closest_points(df_all, lon_cb, lat_cb, n=1)
+    # print(cb_id, lon_cb, lat_cb, "\n", df_4.head(1))
+    sat = df_4["sat"].values[0]
     track_number_self = df_4["track_self"].apply(lambda x: str(x)).values[nth]
     track_number_other = df_4["track_other"].apply(lambda x: str(x)).values[nth]
     lons_inter1 = df_4["lons_inter"].values[nth]
@@ -124,12 +118,9 @@ for omni_id in omni_d.keys():
     x_from_coast_other1 = df_4["x_from_coast_other"].values[nth]
     angle_acute = df_4["angle_acute"].values[nth]
     angle_obtuse = df_4["angle_obtuse"].values[nth]
-    distance_km = df_4["distance_km"].values[nth]
-    if abs(lat1) < 2:
-        continue
     print(
         sat,
-        omni_id,
+        cb_id,
         track_number_self,
         track_number_other,
         lons_inter1,
@@ -190,29 +181,23 @@ for omni_id in omni_d.keys():
     gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
     # other_times.append((track_number_other, abs(dist_time)))
     fig1, ax1 = plt.subplots(1, 1, figsize=(12, 8), layout="constrained")
-    # gu_cut = -1 * gu.interp(time=omni_u.time)
-    # gv_cut = gv.interp(time=omni_v.time)
-    gu_cut = -1 * gu
-    gv_cut = gv
+    gu_cut = -1 * gu.interp(time=cb_u.time)
+    gv_cut = gv.interp(time=cb_v.time)
     # gu_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
-    # omni_u.plot(ax=ax1, color="b", linewidth=2, label="omni")
+    # cb_u.plot(ax=ax1, color="b", linewidth=2, label="cb")
     # u_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar u")
-    # corr = xs.pearson_r(gu_cut, omni_u, dim="time", skipna=True)
+    # corr = xs.pearson_r(gu_cut, cb_u, dim="time", skipna=True)
     gv_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
-    tfreq = sats_tfreq[sat]
-    omni_v = omni_v.resample(time=f"{tfreq}D").mean()
-    omni_v = omni_v.interp(time=gv_cut.time)
-    omni_v.plot(ax=ax1, color="b", linewidth=2, label="omni")
+    cb_v.plot(ax=ax1, color="b", linewidth=2, label="cb")
     # v_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar v")
-    corr = xs.pearson_r(gv_cut, omni_v, dim="time", skipna=True)
+    corr = xs.pearson_r(gv_cut, cb_v, dim="time", skipna=True)
     corr1 = corr.item()
     # print(f"Correlation between gu and u_oscar_at: {corr1}")
     print(f"Correlation between gv and v_oscar_at: {corr1}")
-    info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km}",
     plt.text(
         0.15,
         0.95,
-        info,
+        f"intersection point ({lon1:.2f}, {lat1:.2f})",
         transform=ax1.transAxes,
         fontsize=14,
         fontweight="bold",
@@ -233,8 +218,8 @@ for omni_id in omni_d.keys():
     decorate_axis(ax2, "", *TRACKS_REG)
     ax2.grid()
     ax2.plot(
-        lon_omni,
-        lat_omni,
+        lon_cb,
+        lat_cb,
         c="r",
         marker="o",
         markersize=6,
@@ -242,8 +227,8 @@ for omni_id in omni_d.keys():
         markeredgecolor="black",
         markeredgewidth=2,
     )
-    # plot plat form code of omni at lon_omni, lat_omni
-    plt.text(lon_omni, lat_omni, f"{omni_id}", fontsize=10, color="k")
+    # plot plat form code of cb at lon_cb, lat_cb
+    plt.text(lon_cb, lat_cb, f"{cb_id}", fontsize=10, color="k")
     ax2.scatter(
         lons_track_self,
         lats_track_self,
