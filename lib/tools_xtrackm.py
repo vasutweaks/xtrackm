@@ -1640,6 +1640,42 @@ def create_topo_map(dse,
     return fig, ax1
 
 
+def plot_etopo_subplot(fig, position, tracks_reg, cmap, title="", step=2,
+                       data_path="~/allData/topo/etopo5.cdf"):
+    """
+    Create a Cartopy subplot with ETOPO bathymetry data.
+    Parameters:
+        fig        : matplotlib Figure object
+        position   : subplot position index (e.g., 311, 312, 313)
+        tracks_reg : (xsta, xend, ysta, yend) region tuple
+        cmap       : matplotlib colormap
+        title      : subplot title
+        step       : tick step interval
+        data_path  : path to the ETOPO NetCDF file
+    """
+    # Load ETOPO dataset
+    dse = xr.open_dataset(data_path)
+    da = dse.ROSE
+    # Extract region
+    xsta, xend, ysta, yend = tracks_reg
+    da_reg = da.sel(ETOPO05_X=slice(xsta, xend), ETOPO05_Y=slice(ysta, yend))
+    # Create subplot with Cartopy
+    ax = fig.add_subplot(position, projection=ccrs.PlateCarree())
+    # Plot data
+    da_reg.plot(ax=ax, cmap=cmap, add_colorbar=False, add_labels=False)
+    # Decorate map
+    ax.add_feature(cfeature.COASTLINE, linewidth=2.0)
+    xticks = list(range(int(xsta), int(xend), step))
+    yticks = list(range(int(ysta), int(yend), step))
+    ax.axhline(y=0.0, linestyle="--", color="k")
+    ax.set_xticks(xticks, crs=ccrs.PlateCarree())
+    ax.set_yticks(yticks, crs=ccrs.PlateCarree())
+    ax.set_title(title)
+    ax.xaxis.set_major_formatter(LongitudeFormatter())
+    ax.yaxis.set_major_formatter(LatitudeFormatter())
+    ax.set_extent([xsta, xend, ysta, yend], crs=ccrs.PlateCarree())
+    return ax
+
 def decorate_axis(ax, title1="", xsta=60, xend=100, ysta=-5, yend=25, step=2):
     ax.add_feature(cfeature.COASTLINE, linewidth=2.0)
     xticks = list(range(int(xsta), int(xend), step))
