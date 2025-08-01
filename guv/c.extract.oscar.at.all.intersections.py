@@ -24,24 +24,30 @@ for sat in sats_new:
     df_all_list.append(df)
 df_all = pd.concat(df_all_list, ignore_index=True)
 
-track_self = df["track_self"].apply(lambda x: str(x)).values
-track_other = df["track_other"].apply(lambda x: str(x)).values
-lons_inter = df["lons_inter"].values
-lats_inter = df["lats_inter"].values
-x_from_coast_self = df["x_from_coast_self"].values
-x_from_coast_other = df["x_from_coast_other"].values
-angle_acute = df["angle_acute"].values
-angle_obtuse = df["angle_obtuse"].values
-sat = df["sat"].values
+track_self = df_all["track_self"].apply(lambda x: str(x)).values
+track_other = df_all["track_other"].apply(lambda x: str(x)).values
+lons_inter = df_all["lons_inter"].values
+lats_inter = df_all["lats_inter"].values
+x_from_coast_self = df_all["x_from_coast_self"].values
+x_from_coast_other = df_all["x_from_coast_other"].values
+angle_acute = df_all["angle_acute"].values
+angle_obtuse = df_all["angle_obtuse"].values
+sat = df_all["sat"].values
 
 ln = len(track_self)
 
+k = 0
 for i in range(ln):
     track_number_self = track_self[i]
     track_number_other = track_other[i]
     lon1 = lons_inter[i]
     lat1 = lats_inter[i]
     sat1 = sat[i]
+    if sat1 != "HY2B":
+    # if sat1 != "S3B":
+        continue
+    k = k + 1
+    print(f"{k} {track_number_self} {track_number_other}")
     # extrack oscar at lon1, lat1
     u_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
     v_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
