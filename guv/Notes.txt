@@ -1,0 +1,6 @@
+lots of difference between track gv and aviso gv at points very close to
+coast
+track meridional velocities are usually poorly correlated with other products
+
+I expected correlations of above 0.9 with aviso guv, because they are purely geostrophic, but it was not the case. correlations are similar to
+that of with oscar

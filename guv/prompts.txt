@@ -1,2 +1,9 @@
 I am trying to compare zonal component of current computed from two cross track geostrophic currents at the intersection point of the tracks with loess smoothed sla with oscar ocean currents. The meridional
 component of oscar compare well with computed geostrophic zonal component but zonal component does not compare well at all. What could be fundamental reason? Some studies claim that two tracks' cross track geostrophic currents are needed to compute components, but studies are doing with one track alone.
+
+I expected correlations of above 0.9 with aviso guv, because they are purely geostrophic, but it was not the case. correlations are similar to
+that of with oscar.
+track meridional velocities are usually poorly correlated with other products. What could be the reason?
+lots of difference between track gv and aviso gv at points very close to
+coast.
+
