@@ -1,0 +1,6 @@
+Whole region (TRACKS_REG) is filled with drifter paths and satellite intersection points.
+Each point on a drifter path is located by ((lon, lat), time) and carries the values ve which is a function of (lon, lat) or equivalently a function of (time).
+Each intersection point is associated with timeseries of computed currents gv.
+At each intersection point, we should locate nearby driter points (and its index to locate time_inter) so that satellite velocity at intersection point and drifter point can be compared. The gv at intersection point is sampled at time_inter. This value is compared with ve at the point where is drifter path is closest to the intersection point. How to go about it?
+Knowns:
+lons_inter and lats_inter are always contained in the region.
