@@ -52,6 +52,7 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
     # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
     u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
     v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
+    u = -1 * u
     return u, v
 
 

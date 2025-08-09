@@ -1,6 +1,39 @@
-Whole region (TRACKS_REG) is filled with drifter paths and satellite intersection points.
-Each point on a drifter path is located by ((lon, lat), time) and carries the values ve which is a function of (lon, lat) or equivalently a function of (time).
-Each intersection point is associated with timeseries of computed currents gv.
-At each intersection point, we should locate nearby driter points (and its index to locate time_inter) so that satellite velocity at intersection point and drifter point can be compared. The gv at intersection point is sampled at time_inter. This value is compared with ve at the point where is drifter path is closest to the intersection point. How to go about it?
-Knowns:
-lons_inter and lats_inter are always contained in the region.
+The region (TRACKS_REG) is filled with drifter paths and satellite
+intersection points.
+Each point on a drifter path is located by (lon, lat) pair or (time) dimension equivalently. Each path file carries the variable 
+ve which is a function of (lon, lat) or
+equivalently a function of (time). Each intersection point is associated with timeseries of computed currents gv and gu.
+There are guv files in the format guv_at_intersection_{sat}_{track_self}_{track_other}.nc which contain the timeseries of gu and gv at the intersection of track_self and track_other in a seperate folder.
+At each intersection point, we should
+locate nearby driter points (and its index to locate time_inter) so that
+satellite velocity at intersection point and drifter point can be compared. The gv timeseries at intersection point is sampled at time_inter. This value is compared with ve at the point where is drifter path is closest to the intersection point. How
+to go about it? provide full code.
+Additional information:
+lons_inter and lats_inter are always contained in the
+region.
+traj dimension is always there in drifter ds.
+following is the header of tracks_intersections_S3A_1.csv
+,sat,track_self,track_other,lons_inter,lats_inter,x_from_coast_self,x_from_coast_other,angle_acute,angle_obtuse
+0,S3A,8,79,94.14047103085358,8.36326782978126,885051.8986275726,1543629.620555419,0.44727413372659675,2.6943185198631965
+1,S3A,8,193,94.60794862071828,10.435742966838522,650148.6339016478,1194725.7346903323,0.44656871163430817,2.695023941955485
+2,S3A,8,307,95.07549211474587,12.489287957263238,417331.9028785974,854253.7568147178,0.4459235207375096,2.6956691328522835
+3,S3A,8,421,95.54320490371074,14.52079644718165,186943.59620474064,126272.34377060639,0.4434318644667041,2.698160789123089
+4,S3A,8,507,92.7380651706875,2.0680879981685036,1598332.5897657045,2203201.928851282,0.4469590080350044,2.694633645554789
+All satellite intersections points csv files use the same header.
+location of output folder of gv files
+/home/srinivasu/xtrackm/guv/guv_at_intersections
+ncdump -h guv_at_intersection_GFO_98_169.nc
+netcdf guv_at_intersection_GFO_98_169 {
+dimensions:
+	time = 186 ;
+variables:
+	int64 time(time) ;
+		time:units = "days since 2000-01-11" ;
+		time:calendar = "proleptic_gregorian" ;
+	double gu(time) ;
+		gu:_FillValue = NaN ;
+	double gv(time) ;
+		gv:_FillValue = NaN ;
+}
+Required output is a CSV file of gv at time of intersection and ve of drifter along with intersection points, corresponding tracks etc
+For others take the best defaults.
