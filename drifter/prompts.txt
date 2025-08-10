@@ -1,3 +1,5 @@
+I have an ocean drifter buoy data which moves both in space and time. The spatial movement is described by two arrays lons_drift and lats_drift. Write a python function to check if atleast some part of the drifter passed through a given region.
+
 The region (TRACKS_REG) is filled with drifter paths and satellite
 intersection points.
 Each point on a drifter path is located by (lon, lat) pair or (time) dimension equivalently. Each path file carries the variable 

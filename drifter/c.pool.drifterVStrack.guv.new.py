@@ -17,7 +17,7 @@ INTERSECTION_CSV_GLOB = "tracks_intersections_*.csv"
 
 # Folder containing guv time series files:
 # Files are named guv_at_intersection_{sat}_{track_self}_{track_other}.nc
-GUV_FOLDER = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+GUV_FOLDER = "/home/srinivasu/xtrackm/guv/guv_at_intersections/"
 
 # Drifter files (traj dimension always present)
 # Example glob given in earlier context:
