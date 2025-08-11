@@ -4,6 +4,58 @@ import numpy as np
 import xarray as xr
 from tools_xtrackm import *
 
+
+def closest_index(lons_drift, lats_drift, lon1, lat1):
+    dist = np.sqrt((lons_drift - lon1) ** 2 + (lats_drift - lat1) ** 2)
+    return np.argmin(dist)
+
+
+def geostrophic_components_from_a(gc1, gc2, a1, a2):
+    """
+    Compute zonal and meridional geostrophic current components from
+    cross-track velocities and track slopes of two intersecting satellite tracks.
+    Parameters:
+    -----------
+    gc1 : float or array-like
+        Cross-track geostrophic velocity from track 1 (m/s)
+    gc2 : float or array-like
+        Cross-track geostrophic velocity from track 2 (m/s)
+    slope1 : float
+        Slope of track 1 (dy/dx = rise/run)
+    slope2 : float
+        Slope of track 2 (dy/dx = rise/run)
+    Returns:
+    --------
+    u : float or array-like
+        Zonal (eastward) velocity component (m/s)
+    v : float or array-like
+        Meridional (northward) velocity component (m/s)
+    Raises:
+    -------
+    ValueError: If tracks are parallel (same slope)
+    """
+    # Calculate intersection angle
+    theta = a2 - a1
+    sin_theta = math.sin(theta)
+    # Additional check using sine of intersection angle
+    if abs(sin_theta) < 1e-6:
+        raise ValueError(
+            f"Tracks are nearly parallel (intersection angle = {math.degrees(theta):.2f}°). "
+            "Cannot resolve both velocity components.")
+    # Calculate trigonometric values
+    cos_a1 = math.cos(a1)
+    cos_a2 = math.cos(a2)
+    sin_a1 = math.sin(a1)
+    sin_a2 = math.sin(a2)
+    # Solve for velocity components using the derived formulas:
+    # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
+    # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
+    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
+    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
+    u = -1 * u
+    return u, v
+
+
 sat, track_number_self, track_number_other, lons_inter, lats_inter = (
     "S3A",
     "8",
@@ -11,7 +63,10 @@ sat, track_number_self, track_number_other, lons_inter, lats_inter = (
     94.14047103085358,
     8.36326782978126,
 )
+x_from_coast_self1, x_from_coast_other1, angle_acute, angle_obtuse = 885051.8986275726, 1543629.620555419, 0.44727413372659675, 2.6943185198631965
+
 d = 1.5
+TRACKS_REG = (73.0, 99.0, 0.0, 25.4)
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 rose = dse.ROSE
 cmap1 = "Greys_r"
@@ -42,6 +97,8 @@ overlap_tsta_o, overlap_tend_o = overlap_dates(track_tsta_o, track_tend_o,
                                                drift_tsta_o, drift_tend_o)
 print(f"overlap period {overlap_tsta_o} {overlap_tend_o}")
 times_drift = ds_d.time.isel(traj=0).values
+ve_da = drifter_time_asn(ds_d, var_str="ve")
+vn_da = drifter_time_asn(ds_d, var_str="vn")
 lons_da = drifter_time_asn(ds_d, var_str="longitude")
 lats_da = drifter_time_asn(ds_d, var_str="latitude")
 lons_da1 = lons_da.resample(time="1D").mean()
@@ -53,6 +110,10 @@ lats_da3 = lats_da2.ffill(dim="time").bfill(dim="time")
 
 lons_drift = lons_da3.values
 lats_drift = lats_da3.values
+
+nidx = closest_index(lons_drift, lats_drift, lon1, lat1)
+close_drift_lon = lons_drift[nidx]
+close_drift_lat = lats_drift[nidx]
 
 f_self = (
     f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
@@ -88,6 +149,25 @@ slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
                                                      lon_equat_other)
 angle_other = np.rad2deg(np.arctan(slope_other))
 track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
+
+gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
+gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
+gc_self_at = gc_self.sel(x=x_from_coast_self1,
+                         method="nearest",
+                         drop=True)
+gc_other_at = gc_other.sel(x=x_from_coast_other1,
+                           method="nearest",
+                           drop=True)
+gc_other_at = gc_other_at.interp(time=gc_self_at.time)
+
+a2 = math.atan2(
+    lat_coast_other - lat_equat_other,
+    lon_coast_other - lon_equat_other,
+)
+a1 = math.atan2(lat_coast_self - lat_equat_self,
+                lon_coast_self - lon_equat_self)
+print(f"azimuths {a1:.2f} {a2:.2f}")
+gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
 
 fig = plt.figure(figsize=(12, 10), layout="constrained")
 ax2 = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
@@ -126,6 +206,13 @@ ax2.scatter(
     marker=".",
     color="b",
     s=4,
+)
+ax2.plot(
+    close_drift_lon,
+    close_drift_lat,
+    marker="x",
+    markersize=8,
+    color="k",
 )
 # add polygon box as geometry
 ax2.add_geometries([box],
