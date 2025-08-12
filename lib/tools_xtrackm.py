@@ -875,6 +875,52 @@ def geostrophic_components(gc1, gc2, a1_deg, a2_deg):
     return u, v
 
 
+def geostrophic_components_from_a(gc1, gc2, a1, a2):
+    """
+    Compute zonal and meridional geostrophic current components from
+    cross-track velocities and track slopes of two intersecting satellite tracks.
+    Parameters:
+    -----------
+    gc1 : float or array-like
+        Cross-track geostrophic velocity from track 1 (m/s)
+    gc2 : float or array-like
+        Cross-track geostrophic velocity from track 2 (m/s)
+    slope1 : float
+        Slope of track 1 (dy/dx = rise/run)
+    slope2 : float
+        Slope of track 2 (dy/dx = rise/run)
+    Returns:
+    --------
+    u : float or array-like
+        Zonal (eastward) velocity component (m/s)
+    v : float or array-like
+        Meridional (northward) velocity component (m/s)
+    Raises:
+    -------
+    ValueError: If tracks are parallel (same slope)
+    """
+    # Calculate intersection angle
+    theta = a2 - a1
+    sin_theta = math.sin(theta)
+    # Additional check using sine of intersection angle
+    if abs(sin_theta) < 1e-6:
+        raise ValueError(
+            f"Tracks are nearly parallel (intersection angle = {math.degrees(theta):.2f}°). "
+            "Cannot resolve both velocity components.")
+    # Calculate trigonometric values
+    cos_a1 = math.cos(a1)
+    cos_a2 = math.cos(a2)
+    sin_a1 = math.sin(a1)
+    sin_a2 = math.sin(a2)
+    # Solve for velocity components using the derived formulas:
+    # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
+    # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
+    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
+    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
+    u = -1 * u
+    return u, v
+
+
 def compute_geostrophy_from_slope(ds, slope_smooth, current="zonal"):
     lons_track_rev = ds.lon.values[::-1]
     lats_track_rev = ds.lat.values[::-1]
