@@ -1,3 +1,6 @@
+I have a satellite intersection point (lons_inter, lats_inter). I have hundreds of drifter buoys that fill up the NIO region. I want to find the closest drifter buoy to the intersection point and closest point on drifter path to the intersection point.
+What is the best way to do this?
+
 I have an ocean drifter buoy data which moves both in space and time. The spatial movement is described by two arrays lons_drift and lats_drift. Write a python function to check if atleast some part of the drifter passed through a given region.
 
 The region (TRACKS_REG) is filled with drifter paths and satellite

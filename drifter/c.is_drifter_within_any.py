@@ -82,10 +82,8 @@ for chunk in chunks:
         times_drift = ds_d.time.isel(traj=0).values
         lons_da = drifter_time_asn(ds_d, var_str="longitude")
         lats_da = drifter_time_asn(ds_d, var_str="latitude")
-        lons_da1 = lons_da.resample(time="1D").mean()
-        lats_da1 = lats_da.resample(time="1D").mean()
-        lons_da2 = lons_da1.rolling(time=3).mean()
-        lats_da2 = lats_da1.rolling(time=3).mean()
+        lons_da2 = lons_da.rolling(time=3).mean()
+        lats_da2 = lats_da.rolling(time=3).mean()
         lons_da3 = lons_da2.ffill(dim="time").bfill(dim="time")
         lats_da3 = lats_da2.ffill(dim="time").bfill(dim="time")
 

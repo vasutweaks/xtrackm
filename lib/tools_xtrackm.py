@@ -95,7 +95,12 @@ def read_drifter_data_simple(fname):
 def drifter_time_asn(ds_d, var_str="ve"):
     time1 = ds_d.time.isel(traj=0).values
     var1 = ds_d[var_str].isel(traj=0).values
-    var_asn = xr.DataArray(var1, coords=[time1], dims=["time"])
+    var_asn = xr.DataArray(var1,
+                           coords=[time1],
+                           dims=["time"],
+                           attrs=ds_d[var_str].attrs)
+    var_asn = var_asn.resample(time="1D").mean()
+    var_asn.name = var_str
     return var_asn
 
 

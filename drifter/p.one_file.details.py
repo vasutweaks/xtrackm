@@ -1,4 +1,5 @@
 import os
+import sys
 
 import numpy as np
 import xarray as xr
@@ -18,9 +19,11 @@ print(ds_d)
 # print attributes
 for k, v in ds_d.attrs.items():
     print(f"{k}: {v}")
-byte_id = ds_d.ID.values[0]
-str_id = byte_id.decode("utf-8")
-drifter_id = str_id
+# byte_id = ds_d.ID.values[0]
+# str_id = byte_id.decode("utf-8")
+# drifter_id = str_id
+byte_id = ds_d["ID"].isel(traj=0).values  # numpy bytes scalar like b'133666'
+drifter_id = byte_id.item().decode("utf-8").strip()
 drift_tsta_o1, drift_tend_o1 = (
     ds_d.start_date.values[0],
     ds_d.end_date.values[0],
@@ -33,10 +36,8 @@ ve_da = drifter_time_asn(ds_d, var_str="ve")
 vn_da = drifter_time_asn(ds_d, var_str="vn")
 lons_da = drifter_time_asn(ds_d, var_str="longitude")
 lats_da = drifter_time_asn(ds_d, var_str="latitude")
-lons_da1 = lons_da.resample(time="1D").mean()
-lats_da1 = lats_da.resample(time="1D").mean()
-lons_da2 = lons_da1.rolling(time=3).mean()
-lats_da2 = lats_da1.rolling(time=3).mean()
+lons_da2 = lons_da.rolling(time=3).mean()
+lats_da2 = lats_da.rolling(time=3).mean()
 lons_da3 = lons_da2.ffill(dim="time").bfill(dim="time")
 lats_da3 = lats_da2.ffill(dim="time").bfill(dim="time")
 
@@ -59,10 +60,4 @@ ax2.scatter(
     color="b",
     s=4,
 )
-# add polygon box as geometry
-# ax2.add_geometries([box],
-#                    ccrs.PlateCarree(),
-#                    edgecolor="g",
-#                    facecolor="none",
-#                    linewidth=2)
 plt.show()
