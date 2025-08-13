@@ -2,9 +2,6 @@ import os
 
 import numpy as np
 import xarray as xr
-
-# import Polygon
-from shapely.geometry.polygon import Polygon
 from tools_xtrackm import *
 
 
@@ -62,28 +59,16 @@ chunk_time_dict = {
     ),
 }
 
-# df_all_list = []
-# for sat in sats_new:
-#     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
-#     df_all_list.append(df)
-# df_all = pd.concat(df_all_list, ignore_index=True)
-
 d = 1.5
 data_loc = f"/home/srinivasu/allData/drifter1/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 rose = dse.ROSE
 cmap1 = "Greys_r"
 dist_threshold = 0.5  # in degrees
-# chunk = "15001_current"
-# chunks = ["1_5000", "5001_10000", "10001_15000", "15001_current"]
-# chunks = ["15001_current"]
-# chunks = ["1_5000"]
 chunks = ["5001_10000"]
 df_all = pd.read_csv(f"tracks_intersections_TP+J1+J2+J3+S6A_test.csv")
-# df_close = df_all.copy()
-# creat df with same colums as df_all
-# df_close = pd.DataFrame(columns=df_all.columns)
 df_close = df_all.copy()
+
 close_drifters_column = []
 
 found = False
@@ -121,37 +106,6 @@ for i, r in df_all.iterrows():
     lon_inter_box_max = lon1 + dist_threshold
     lat_inter_box_min = lat1 - dist_threshold
     lat_inter_box_max = lat1 + dist_threshold
-    box = Polygon([
-        (lon_inter_box_min, lat_inter_box_min),
-        (lon_inter_box_max, lat_inter_box_min),
-        (lon_inter_box_max, lat_inter_box_max),
-        (lon_inter_box_min, lat_inter_box_max),
-    ])
-    f_self = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_self.zfill(3)}.nc"
-    f_other = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_other.zfill(3)}.nc"
-    ds_self = xr.open_dataset(f_self, engine="h5netcdf", decode_times=False)
-    sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
-    ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
-    sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
-    lons_track_self = ds_self.lon.values
-    lats_track_self = ds_self.lat.values
-    lon_coast_self = lons_track_self[-1]  # this on coast
-    lat_coast_self = lats_track_self[-1]  # this on coast
-    lon_equat_self = lons_track_self[0]  # this on equator
-    lat_equat_self = lats_track_self[0]  # this on equator
-    slope_self = (lats_track_self[-1] - lats_track_self[0]) / (
-        lons_track_self[-1] - lons_track_self[0])
-    angle_self = np.rad2deg(np.arctan(slope_self))
-    lons_track_other = ds_other.lon.values
-    lats_track_other = ds_other.lat.values
-    lon_equat_other = lons_track_other[0]
-    lat_equat_other = lats_track_other[0]
-    lon_coast_other = lons_track_other[-1]
-    lat_coast_other = lats_track_other[-1]
-    slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
-                                                         lon_equat_other)
-    angle_other = np.rad2deg(np.arctan(slope_other))
-    print(f"{angle_self} {angle_other} -------------------")
     for chunk in chunks:
         chunk_tsta_o1, chunk_tend_o1 = chunk_time_dict[chunk]
         chunk_tsta_o, chunk_tend_o = n64todatetime1(
@@ -203,85 +157,8 @@ for i, r in df_all.iterrows():
                 nidx = closest_index(lons_drift, lats_drift, lon1, lat1)
                 close_drift_lon = lons_drift[nidx]
                 close_drift_lat = lats_drift[nidx]
-                fig = plt.figure(figsize=(12, 10), layout="constrained")
-                ax2 = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-                rose.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
-                    *TRACKS_REG[2:])).plot(ax=ax2,
-                                           add_colorbar=False,
-                                           add_labels=False,
-                                           cmap=cmap1)
-                decorate_axis(ax2, "", *TRACKS_REG, step=5)
-                ax2.grid()
-                ax2.plot(
-                    lon1,
-                    lat1,
-                    c="r",
-                    marker="o",
-                    markersize=4,
-                    markerfacecolor="red",
-                )
-                ax2.scatter(
-                    lons_track_self,
-                    lats_track_self,
-                    marker=".",
-                    color="c",
-                    s=4,
-                )
-                ax2.scatter(
-                    lons_track_other,
-                    lats_track_other,
-                    marker=".",
-                    color="c",
-                    s=4,
-                )
-                ax2.add_geometries([box],
-                                   ccrs.PlateCarree(),
-                                   edgecolor="g",
-                                   facecolor="none",
-                                   linewidth=2)
-                lonm, latm = get_point_at_distance(lon_equat_self, lat_equat_self,
-                                                   lon_coast_self, lat_coast_self, d)
-                if is_within_region(lonm, latm, *TRACKS_REG):
-                    plt.text(
-                    lonm,
-                    latm,
-                    s=track_number_self,
-                    fontsize=14,
-                    rotation=angle_self,
-                    color="w",
-                    )
-                lonm, latm = get_point_at_distance(lon_equat_other, lat_equat_other,
-                                                   lon_coast_other, lat_coast_other, d)
-                if is_within_region(lonm, latm, *TRACKS_REG):
-                    plt.text(
-                        lonm,
-                        latm,
-                        s=track_number_other,
-                        fontsize=14,
-                        rotation=angle_other,
-                        color="w",
-                    )
-                ax2.scatter(
-                    lons_drift,
-                    lats_drift,
-                    marker=".",
-                    color="y",
-                    s=4,
-                )
-                ax2.plot(
-                    close_drift_lon,
-                    close_drift_lat,
-                    marker="x",
-                    markersize=8,
-                    color="k",
-                )
-                plt.savefig(f"close_drifters/close_drifters_at_intersection_point_{drifter_id}.png")
-                # plt.show()
-                plt.close("all")
                 found = True
     close_drifters_column.append(close_ones)
 df_close["close_drifters_column"] = close_drifters_column
-df_close.to_csv(
-    f"close_drifters_at_intersection_point.csv"
-)
+df_close.to_csv(f"close_drifters_at_intersection_point.csv")
 dse.close()
