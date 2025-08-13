@@ -548,6 +548,11 @@ def n64todatetime(d):
         np.datetime_as_string(d, unit="s"), "%Y-%m-%dT%H:%M:%S"
     )
 
+def n64todatetime1(d):
+    if np.isnat(d):
+        return None
+    return d.astype('datetime64[ms]').astype(datetime)
+
 
 def append_metrics(ts1, ts2, df, sat, psmsl_id, track_no, lon1, lat1, jj, mindist):
     # print(df)

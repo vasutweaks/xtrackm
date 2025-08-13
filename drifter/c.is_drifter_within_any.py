@@ -2,7 +2,6 @@ import os
 
 import xarray as xr
 from rich.console import Console
-from shapely.geometry import LineString, Point
 from tools_xtrackm import *
 
 console = Console()
@@ -12,11 +11,13 @@ computed_loc = f"/home/srinivasu/slnew/xtrackm/computed/"
 data_loc = f"/home/srinivasu/allData/drifter1/"
 
 
-def is_within_region_all(lons_drifter, lats_drifter,
-                     lon_min, lon_max, lat_min, lat_max):
-    lons_within_range = np.logical_and(lons_drifter >= lon_min, lons_drifter <= lon_max)
+def is_within_region_all(lons_drifter, lats_drifter, lon_min, lon_max, lat_min,
+                         lat_max):
+    lons_within_range = np.logical_and(lons_drifter >= lon_min, lons_drifter
+                                       <= lon_max)
     # Check if all latitudes are within the range
-    lats_within_range = np.logical_and(lats_drifter >= lat_min, lats_drifter <= lat_max)
+    lats_within_range = np.logical_and(lats_drifter >= lat_min, lats_drifter
+                                       <= lat_max)
     # Combine both conditions
     all_within_region = np.logical_and(lons_within_range, lats_within_range)
     # Check if all points are within the region
@@ -28,7 +29,13 @@ def is_within_region_all(lons_drifter, lats_drifter,
         return False
 
 
-def is_within_region_any(lons, lats, lon_min, lon_max, lat_min, lat_max, include_boundary=True):
+def is_within_region_any(lons,
+                         lats,
+                         lon_min,
+                         lon_max,
+                         lat_min,
+                         lat_max,
+                         include_boundary=True):
     """
     Return True if any (lon, lat) point falls inside the rectangular region.
     include_boundary=True counts points on the edges/corners as inside.
@@ -52,7 +59,13 @@ def is_within_region_any(lons, lats, lon_min, lon_max, lat_min, lat_max, include
     return bool(hit)
 
 
-sat, track_number_self, track_number_other, lons_inter, lats_inter = "S3A", "8", "79", 94.14047103085358, 8.36326782978126
+sat, track_number_self, track_number_other, lons_inter, lats_inter = (
+    "S3A",
+    "8",
+    "79",
+    94.14047103085358,
+    8.36326782978126,
+)
 # a square polygon with lons_inter, lats_inter as the center
 box = create_box_patch(lons_inter, lats_inter, dist_threshold)
 lon_max, lat_max = lons_inter + dist_threshold, lats_inter + dist_threshold
@@ -75,10 +88,12 @@ for chunk in chunks:
             ds_d.start_date.values[0],
             ds_d.end_date.values[0],
         )
-        drift_tsta_o, drift_tend_o = n64todatetime(drift_tsta_o1), n64todatetime(
-            drift_tend_o1)
-        overlap_tsta_o, overlap_tend_o = overlap_dates(track_tsta_o, track_tend_o,
-                                                   drift_tsta_o, drift_tend_o)
+        drift_tsta_o, drift_tend_o = n64todatetime(
+            drift_tsta_o1), n64todatetime(drift_tend_o1)
+        overlap_tsta_o, overlap_tend_o = overlap_dates(track_tsta_o,
+                                                       track_tend_o,
+                                                       drift_tsta_o,
+                                                       drift_tend_o)
         times_drift = ds_d.time.isel(traj=0).values
         lons_da = drifter_time_asn(ds_d, var_str="longitude")
         lats_da = drifter_time_asn(ds_d, var_str="latitude")
@@ -99,7 +114,8 @@ for chunk in chunks:
             continue
         else:
             print(f"{overlap_tsta_o}, {overlap_tend_o}")
-        if is_within_region_any(lons_drift, lats_drift, lon_min, lon_max, lat_min, lat_max):
+        if is_within_region_any(lons_drift, lats_drift, lon_min, lon_max,
+                                lat_min, lat_max):
             print(f"{fd}")
             print(f"Drifter {drifter_id} is within the region.")
             found = True

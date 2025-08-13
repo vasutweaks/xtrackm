@@ -1,0 +1,10 @@
+datatypes of times
+drift_tsta_o1, drift_tend_o1 = (
+    ds_d.start_date.values[0],
+    ds_d.end_date.values[0],
+)
+<class 'numpy.datetime64'>
+
+
+The total number of drifters in track_reg is only 852.
+Total buoy over whole glove is 2401.
