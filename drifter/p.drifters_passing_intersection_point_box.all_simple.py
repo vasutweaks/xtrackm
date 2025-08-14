@@ -11,6 +11,13 @@ import sys
 import ast
 
 
+def convert_to_list(x):
+    try:
+        return ast.literal_eval(x) if isinstance(x, str) else x
+    except (ValueError, SyntaxError):
+        return x  # Return as-is if conversion fails
+
+
 def closest_index(lons_drift, lats_drift, lon1, lat1):
     dist = [distance.distance((y, x), (lat1, lon1)).m for x, y in zip(lons_drift, lats_drift)]
     return np.argmin(dist)
@@ -65,25 +72,14 @@ chunk_time_dict = {
     ),
 }
 
-# df_all_list = []
-# for sat in sats_new:
-#     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
-#     df_all_list.append(df)
-# df_all = pd.concat(df_all_list, ignore_index=True)
-
-df_all = pd.read_csv(f"close_drifters_at_intersection_point.csv")
+sat_here = "TP+J1+J2+J3+S6A"
+df_all = pd.read_csv(f"close_drifters_at_intersection_point_{sat_here}.csv")
 d = 1.5
 data_loc = f"/home/srinivasu/allData/drifter1/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 rose = dse.ROSE
 cmap1 = "Greys_r"
 dist_threshold = 1  # in degrees
-def convert_to_list(x):
-    try:
-        return ast.literal_eval(x) if isinstance(x, str) else x
-    except (ValueError, SyntaxError):
-        return x  # Return as-is if conversion fails
-
 # Apply the conversion to the column with lists
 df_all['close_drifters_column'] = df_all['close_drifters_column'].apply(convert_to_list)
 
@@ -171,6 +167,8 @@ for i, r in df_all.iterrows():
             drift_tsta_o1), n64todatetime1(drift_tend_o1)
         overlap_tsta_o, overlap_tend_o = overlap_dates(
             track_tsta_o, track_tend_o, drift_tsta_o, drift_tend_o)
+        print(f"satellite period {track_tsta_o} {track_tend_o}")
+        print(f"drifter period {drift_tsta_o} {drift_tend_o}")
         print(f"overlap period {overlap_tsta_o} {overlap_tend_o}")
         if overlap_tsta_o is None or overlap_tend_o is None:
             continue
@@ -186,6 +184,9 @@ for i, r in df_all.iterrows():
         nidx = closest_index(lons_drift, lats_drift, lon1, lat1)
         close_drift_lon = lons_drift[nidx]
         close_drift_lat = lats_drift[nidx]
+        close_dist = distance.distance((lat1, lon1), (close_drift_lat, close_drift_lon)).km
+        info = f"{sat1} {track_number_self.zfill(3)} {track_number_other.zfill(3)} {drifter_id} {close_drift_lon:.2f} {close_drift_lat:.2f}"
+        info1 = f"{close_dist:.2f}"
         fig = plt.figure(figsize=(12, 10), layout="constrained")
         ax2 = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         rose.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
@@ -195,6 +196,23 @@ for i, r in df_all.iterrows():
                                    cmap=cmap1)
         decorate_axis(ax2, "", *TRACKS_REG, step=5)
         ax2.grid()
+        # add info to ax2 to the figure
+        ax2.text(
+            0.3,
+            0.9,
+            info,
+            transform=ax2.transAxes,
+            fontsize=18,
+            color="b",
+        )
+        ax2.text(
+            0.6,
+            0.7,
+            info1,
+            transform=ax2.transAxes,
+            fontsize=18,
+            color="b",
+        )
         ax2.plot(
             lon1,
             lat1,
