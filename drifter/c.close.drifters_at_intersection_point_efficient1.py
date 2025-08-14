@@ -3,6 +3,7 @@ import os
 import numpy as np
 import xarray as xr
 from tools_xtrackm import *
+import sys
 
 
 def is_within_region_any(lons,
@@ -57,8 +58,10 @@ chunk_time_dict = {
 d = 1.5
 data_loc = f"/home/srinivasu/allData/drifter1/"
 dist_threshold = 0.5  # in degrees
-chunks = ["5001_10000", "10001_15000"]
-df_all = pd.read_csv(f"tracks_intersections_TP+J1+J2+J3+S6A_1.csv")
+# chunks = ["5001_10000", "10001_15000"]
+# take satellite from as first argument
+sat_here = sys.argv[1]
+df_all = pd.read_csv(f"tracks_intersections_{sat_here}_1.csv")
 df_close = df_all.copy()
 
 close_drifters_column = []
@@ -134,4 +137,4 @@ for i, r in df_all.iterrows():
                 found = True
     close_drifters_column.append(close_ones)
 df_close["close_drifters_column"] = close_drifters_column
-df_close.to_csv(f"close_drifters_at_intersection_point.csv")
+df_close.to_csv(f"close_drifters_at_intersection_point_{sat_here}.csv")
