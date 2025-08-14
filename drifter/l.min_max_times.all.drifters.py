@@ -5,6 +5,7 @@ import numpy as np
 
 data_loc = f"/home/srinivasu/allData/drifter1/"
 chunks = ["1_5000", "5001_10000", "10001_15000", "15001_current"]
+
 chunk_time_dict = {}
 for chunk in chunks:
     start_times = []
