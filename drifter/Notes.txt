@@ -1,3 +1,6 @@
+there is huge outliner for track_guvVSnearby_drifters_at_intersection_points_GFO.csv
+
+
 datatypes of times
 drift_tsta_o1, drift_tend_o1 = (
     ds_d.start_date.values[0],

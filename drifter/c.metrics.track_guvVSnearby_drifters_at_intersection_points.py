@@ -1,14 +1,13 @@
+import ast
 import os
+import sys
 
 import numpy as np
 import xarray as xr
+from geopy import distance
 
 # import Polygon
-from shapely.geometry.polygon import Polygon
 from tools_xtrackm import *
-from geopy import distance
-import sys
-import ast
 
 
 def convert_to_list(x):
@@ -19,7 +18,10 @@ def convert_to_list(x):
 
 
 def closest_index(lons_drift, lats_drift, lon1, lat1):
-    dist = [distance.distance((y, x), (lat1, lon1)).m for x, y in zip(lons_drift, lats_drift)]
+    dist = [
+        distance.distance((y, x), (lat1, lon1)).m
+        for x, y in zip(lons_drift, lats_drift)
+    ]
     return np.argmin(dist)
 
 
@@ -71,9 +73,11 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
 
 data_loc = f"/home/srinivasu/allData/drifter1/"
 sat_here = "TP+J1+J2+J3+S6A"
+sat_here = sys.argv[1]
 df_all = pd.read_csv(f"close_drifters_at_intersection_point_{sat_here}.csv")
-df_all['close_drifters_column'] = df_all['close_drifters_column'].apply(convert_to_list)
-dist_limit = 15 # km
+df_all["close_drifters_column"] = df_all["close_drifters_column"].apply(
+    convert_to_list)
+dist_limit = 15  # km
 gu_ats = []
 ve_ats = []
 df_out = pd.DataFrame()
@@ -136,14 +140,11 @@ for i, r in df_all.iterrows():
     lat_equat_other = lats_track_other[0]
     lon_coast_other = lons_track_other[-1]
     lat_coast_other = lats_track_other[-1]
-    slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
-                                                         lon_equat_other)
+    slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other - lon_equat_other)
     angle_other = np.rad2deg(np.arctan(slope_other))
     gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
     gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-    gc_self_at = gc_self.sel(x=x_from_coast_self1,
-                             method="nearest",
-                             drop=True)
+    gc_self_at = gc_self.sel(x=x_from_coast_self1, method="nearest", drop=True)
     gc_other_at = gc_other.sel(x=x_from_coast_other1,
                                method="nearest",
                                drop=True)
@@ -174,8 +175,10 @@ for i, r in df_all.iterrows():
         )
         drift_tsta_o, drift_tend_o = n64todatetime1(
             drift_tsta_o1), n64todatetime1(drift_tend_o1)
-        overlap_tsta_o, overlap_tend_o = overlap_dates(
-            track_tsta_o, track_tend_o, drift_tsta_o, drift_tend_o)
+        overlap_tsta_o, overlap_tend_o = overlap_dates(track_tsta_o,
+                                                       track_tend_o,
+                                                       drift_tsta_o,
+                                                       drift_tend_o)
         print(f"satellite period {track_tsta_o} {track_tend_o}")
         print(f"drifter period {drift_tsta_o} {drift_tend_o}")
         print(f"overlap period {overlap_tsta_o} {overlap_tend_o}")
@@ -195,16 +198,16 @@ for i, r in df_all.iterrows():
         driter_times = ve_da.time.values
         nidx = closest_index(lons_drift, lats_drift, lon1, lat1)
         match_time = driter_times[nidx]
-        gu_at = gv.interp(time=match_time).item()
-        ve_at = vn_da.isel(time=nidx).item()
+        gu_at = gu.interp(time=match_time).item()
+        ve_at = ve_da.isel(time=nidx).item()
         close_drift_lon = lons_drift[nidx]
         close_drift_lat = lats_drift[nidx]
-        close_dist = distance.distance((lat1, lon1), (close_drift_lat, close_drift_lon)).km
+        close_dist = distance.distance((lat1, lon1),
+                                       (close_drift_lat, close_drift_lon)).km
         if close_dist < dist_limit:
             gu_ats.append(gu_at)
             ve_ats.append(ve_at)
 
-            # break
 df_out["gu"] = gu_ats
 df_out["ve"] = ve_ats
 df_out.to_csv(f"track_guvVSnearby_drifters_at_intersection_points_{sat1}.csv")
