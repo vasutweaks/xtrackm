@@ -1,5 +1,13 @@
 there is huge outliner for track_guvVSnearby_drifters_at_intersection_points_GFO.csv
 
+Our track_dist_time_asn function outputs numpy.datetime64 not list of datetime objects after opening file with decode_times=False
+drifter files are opened without decode_times=False and defalut time datatype is numpy.datetime64, even after drifter_time_asn, it remains
+numpy.datetime64
+following seems redunt here.
+drift_tsta_o, drift_tend_o = n64todatetime1(drift_tsta_o1), n64todatetime1(drift_tend_o1)
+
+The datatypes of times in the drifter or track depend on option like
+decode_times=False or decode_times=True while reading the netcdf files.
 
 datatypes of times
 drift_tsta_o1, drift_tend_o1 = (

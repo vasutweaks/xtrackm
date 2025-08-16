@@ -72,7 +72,6 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
 
 
 data_loc = f"/home/srinivasu/allData/drifter1/"
-sat_here = "TP+J1+J2+J3+S6A"
 sat_here = sys.argv[1]
 df_all = pd.read_csv(f"close_drifters_at_intersection_point_{sat_here}.csv")
 df_all["close_drifters_column"] = df_all["close_drifters_column"].apply(
@@ -87,6 +86,8 @@ for i, r in df_all.iterrows():
     #     break
     sat1 = r["sat"]
     track_tsta_o, track_tend_o = get_time_limits_o(sat1)
+    print(type(track_tsta_o))
+    # break
     track_number_self = str(r["track_self"])
     track_number_other = str(r["track_other"])
     lons_inter1 = r["lons_inter"]
@@ -117,6 +118,7 @@ for i, r in df_all.iterrows():
     f_other = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_other.zfill(3)}.nc"
     f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat1}_{track_number_self}_loess_0.2.nc"
     f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat1}_{track_number_other}_loess_0.2.nc"
+    # opened with decode_times=False
     ds_self = xr.open_dataset(f_self, engine="h5netcdf", decode_times=False)
     ds_self_smooth = xr.open_dataset(f_self_smooth)
     ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
@@ -158,11 +160,14 @@ for i, r in df_all.iterrows():
     print(f"azimuths {a1:.2f} {a2:.2f}")
     gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
     print(f"{angle_self} {angle_other} -------------------")
+    print(type(gu.time.values[0]), type(gv.time.values[0]))
+    # sys.exit(0)
     for id_drifter in close_ones:
         print(id_drifter)
         fd = f"{data_loc}/netcdf_all/track_reg/drifter_6h_{id_drifter}.nc"
         print(fd)
         basename1 = os.path.basename(fd)
+        # opened without decode_times=False
         ds_d = xr.open_dataset(fd, drop_variables=["WMO"])
 
         byte_id = ds_d.ID.values[0]
@@ -175,6 +180,8 @@ for i, r in df_all.iterrows():
         )
         drift_tsta_o, drift_tend_o = n64todatetime1(
             drift_tsta_o1), n64todatetime1(drift_tend_o1)
+        # drift_tsta_o, drift_tend_o = drift_tsta_o1, drift_tend_o1
+        print(type(track_tsta_o), type(track_tend_o))
         overlap_tsta_o, overlap_tend_o = overlap_dates(track_tsta_o,
                                                        track_tend_o,
                                                        drift_tsta_o,
@@ -196,6 +203,8 @@ for i, r in df_all.iterrows():
         lons_drift = lons_da3.values
         lats_drift = lats_da3.values
         driter_times = ve_da.time.values
+        print(type(driter_times[0]))
+        sys.exit()
         nidx = closest_index(lons_drift, lats_drift, lon1, lat1)
         match_time = driter_times[nidx]
         gu_at = gu.interp(time=match_time).item()

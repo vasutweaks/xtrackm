@@ -1,3 +1,6 @@
+probe the time dimensions/variables of attached drifter and satellite
+track files and their units. Recommend how their time axis has to be properly formatted so that their variables can be compared correctly.
+
 I have a satellite intersection point (lons_inter, lats_inter). I have hundreds of drifter buoys that fill up the NIO region. I want to find the closest drifter buoy to the intersection point and closest point on drifter path to the intersection point.
 What is the best way to do this?
 
