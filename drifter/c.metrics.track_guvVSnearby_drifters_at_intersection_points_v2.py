@@ -9,6 +9,20 @@ from geopy import distance
 # import Polygon
 from tools_xtrackm import *
 
+# Three changes
+# Index based selection
+# local azimuths
+# smoothing of ve and gc
+
+
+def index_at_lat(ds, lat1):
+    lons_track = ds.lon.values
+    lats_track = ds.lat.values
+    lons_track_rev = lons_track[::-1]
+    lats_track_rev = lats_track[::-1]
+    i1 = np.abs(lats_track_rev - lat1).argmin()
+    return i1
+
 
 def convert_to_list(x):
     try:
@@ -80,14 +94,13 @@ dist_limit = 15  # km
 gu_ats = []
 ve_ats = []
 df_out = pd.DataFrame()
+idx_delta = 5
+close_dists = []
 
 for i, r in df_all.iterrows():
-    # if i > 10:
-    #     break
     sat1 = r["sat"]
     track_tsta_o, track_tend_o = get_time_limits_o(sat1)
     print(type(track_tsta_o))
-    # break
     track_number_self = str(r["track_self"])
     track_number_other = str(r["track_other"])
     lons_inter1 = r["lons_inter"]
@@ -133,8 +146,7 @@ for i, r in df_all.iterrows():
     lat_coast_self = lats_track_self[-1]  # this on coast
     lon_equat_self = lons_track_self[0]  # this on equator
     lat_equat_self = lats_track_self[0]  # this on equator
-    slope_self = (lats_track_self[-1] - lats_track_self[0]) / (
-        lons_track_self[-1] - lons_track_self[0])
+    slope_self = (lat_coast_self - lat_equat_self) / (lon_coast_self - lon_equat_self)
     angle_self = np.rad2deg(np.arctan(slope_self))
     lons_track_other = ds_other.lon.values
     lats_track_other = ds_other.lat.values
@@ -144,24 +156,24 @@ for i, r in df_all.iterrows():
     lat_coast_other = lats_track_other[-1]
     slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other - lon_equat_other)
     angle_other = np.rad2deg(np.arctan(slope_other))
+    idx_self = index_at_lat(ds_self, lat1)
+    idx_other = index_at_lat(ds_other, lat1)
     gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
     gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-    gc_self_at = gc_self.sel(x=x_from_coast_self1, method="nearest", drop=True)
-    gc_other_at = gc_other.sel(x=x_from_coast_other1,
-                               method="nearest",
-                               drop=True)
-    gc_other_at = gc_other_at.interp(time=gc_self_at.time)
-    a1 = math.atan2(lat_coast_self - lat_equat_self,
-                    lon_coast_self - lon_equat_self)
+    gc_self_at = gc_self.isel(x=slice(idx_self-1, idx_self+1)).mean(dim="x")
+    gc_other_at = gc_other.isel(x=slice(idx_other-1, idx_other+1)).mean(dim="x")
+    # sys.exit(0)
+    a1 = math.atan2(
+        lats_track_self[idx_self-2] - lats_track_self[idx_self+2],
+        lons_track_self[idx_self-2] - lons_track_self[idx_self+2],
+    )
     a2 = math.atan2(
-        lat_coast_other - lat_equat_other,
-        lon_coast_other - lon_equat_other,
+        lats_track_other[idx_other-2] - lats_track_other[idx_other+2],
+        lons_track_other[idx_other-2] - lons_track_other[idx_other+2],
     )
     print(f"azimuths {a1:.2f} {a2:.2f}")
-    gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
     print(f"{angle_self} {angle_other} -------------------")
-    print(type(gu.time.values[0]), type(gv.time.values[0]))
-    # sys.exit(0)
+    # print(type(gu.time.values[0]), type(gv.time.values[0]))
     for id_drifter in close_ones:
         print(id_drifter)
         fd = f"{data_loc}/netcdf_all/track_reg/drifter_6h_{id_drifter}.nc"
@@ -199,6 +211,8 @@ for i, r in df_all.iterrows():
         lats_da2 = lats_da.rolling(time=3).mean()
         lons_da3 = lons_da2.ffill(dim="time").bfill(dim="time")
         lats_da3 = lats_da2.ffill(dim="time").bfill(dim="time")
+        ve_da = ve_da.rolling(time=3).mean()
+        vn_da = vn_da.rolling(time=3).mean()
 
         lons_drift = lons_da3.values
         lats_drift = lats_da3.values
@@ -206,8 +220,17 @@ for i, r in df_all.iterrows():
         print(type(driter_times[0]))
         nidx = closest_index(lons_drift, lats_drift, lon1, lat1)
         match_time = driter_times[nidx]
-        gu_at = gu.interp(time=match_time).item()
-        ve_at = ve_da.isel(time=nidx).item()
+        # ve_at = ve_da.isel(time=slice(nidx-1, nidx+1)).mean(dim="time").item()
+        ve_at = ve_da.isel(time=nidx)
+        try:
+            gc_self_at = gc_self_at.interp(time=match_time)
+        except:
+            continue
+        gc_other_at = gc_other_at.interp(time=match_time)
+        gu_at, gv_at = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
+        print(type(gu_at))
+        gu_at = gu_at.item()
+        ve_at = ve_at.item()
         close_drift_lon = lons_drift[nidx]
         close_drift_lat = lats_drift[nidx]
         close_dist = distance.distance((lat1, lon1),
@@ -215,7 +238,9 @@ for i, r in df_all.iterrows():
         if close_dist < dist_limit:
             gu_ats.append(gu_at)
             ve_ats.append(ve_at)
+            close_dists.append(close_dist)
 
 df_out["gu"] = gu_ats
 df_out["ve"] = ve_ats
-df_out.to_csv(f"track_guvVSnearby_drifters_at_intersection_points_{sat1}.csv")
+df_out["close_dist"] = close_dists
+df_out.to_csv(f"track_guvVSnearby_drifters_at_intersection_points_{sat1}_1.csv")

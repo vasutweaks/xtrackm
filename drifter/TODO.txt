@@ -1,0 +1,4 @@
+drifter, track guv mismatch issues
+
+1. At the intersection points, the two passing tracks can be measuring 
+the same point at different times (as much seperated as the orbital period of the satellite mission)

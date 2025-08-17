@@ -46,7 +46,7 @@ def clean_outliers(gu, ve, max_speed=3.0, mad_thresh=3.5):
     return gu[mask], ve[mask], mask
 
 sat_here = sys.argv[1]
-df1 = pd.read_csv(f"track_guvVSnearby_drifters_at_intersection_points_{sat_here}.csv")
+df1 = pd.read_csv(f"track_guvVSnearby_drifters_at_intersection_points_{sat_here}_1.csv")
 
 gu_clean, ve_clean, mask = clean_outliers(df1["gu"], df1["ve"])
 
