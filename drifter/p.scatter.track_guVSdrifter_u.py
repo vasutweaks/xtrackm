@@ -25,6 +25,8 @@ def clean_outliers(gu, ve, max_speed=3.0, mad_thresh=3.5):
     mask : ndarray (bool)
         Boolean mask of valid points.
     """
+    # gu = pd.to_numeric(gu, errors='coerce')
+    # ve = pd.to_numeric(ve, errors='coerce')
     gu = np.asarray(gu)
     ve = np.asarray(ve)
     # Step 1: remove NaNs and infinities
@@ -39,10 +41,8 @@ def clean_outliers(gu, ve, max_speed=3.0, mad_thresh=3.5):
             return np.zeros_like(points, dtype=bool)
         z = 0.6745 * (points - median) / mad
         return np.abs(z) > thresh
-
     mask &= ~mad_based_outlier(gu, mad_thresh)
     mask &= ~mad_based_outlier(ve, mad_thresh)
-
     return gu[mask], ve[mask], mask
 
 sat_here = sys.argv[1]
