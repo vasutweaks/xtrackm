@@ -178,6 +178,8 @@ for i, r in df_all.iterrows():
     # plt.legend()
     # plt.show()
     # sys.exit(0)
+    if idx_self-2 < 0 or idx_self+2 > len(lons_track_self_rev) or idx_other-2 < 0 or idx_other+2 > len(lons_track_other_rev):
+        continue
     a1 = math.atan2(
         lats_track_self_rev[idx_self-2] - lats_track_self_rev[idx_self+2],
         lons_track_self_rev[idx_self-2] - lons_track_self_rev[idx_self+2],
