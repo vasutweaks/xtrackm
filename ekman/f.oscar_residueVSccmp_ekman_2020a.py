@@ -32,8 +32,8 @@ cbar_kwargs = {
 }
 
 ccmp_ek_u.mean(dim='time').plot(ax=ax1, transform=ccrs.PlateCarree(), cbar_kwargs=cbar_kwargs)
-decorate_axis(ax1, title1="", xsta=42, xend=99, ysta=0, yend=26, step=5)
+decorate_axis(ax1, title1="ccmp", xsta=42, xend=99, ysta=0, yend=26, step=5)
 oscar_ek_u.mean(dim='time').plot(ax=ax2, transform=ccrs.PlateCarree(), cbar_kwargs=cbar_kwargs)
-decorate_axis(ax2, title1="", xsta=42, xend=99, ysta=0, yend=26, step=5)
+decorate_axis(ax2, title1="oscar", xsta=42, xend=99, ysta=0, yend=26, step=5)
 
 plt.show()
