@@ -18,8 +18,10 @@ ds_oscar = xr.open_dataset(f_oscar)
 ds_ekman_interp = ds_ekman.interp(lon=ds_oscar.lon, lat=ds_oscar.lat)
 
 ccmp_ek_u = ds_ekman_interp.ekman_u
+ccmp_ek_u_tm = ccmp_ek_u.mean(dim='time')
 oscar_ek_u = ds_oscar.u - ds_oscar.ug
 oscar_ek_u = oscar_ek_u.transpose('time', 'latitude', 'longitude')
+oscar_ek_u_tm = oscar_ek_u.mean(dim='time')
 
 # 2x1 subplots of with Plate projection
 
@@ -31,9 +33,9 @@ cbar_kwargs = {
     'label': 'Ekman U-velocity (m/s)'
 }
 
-ccmp_ek_u.mean(dim='time').plot(ax=ax1, transform=ccrs.PlateCarree(), cbar_kwargs=cbar_kwargs)
+ccmp_ek_u_tm.plot(ax=ax1, transform=ccrs.PlateCarree(), cbar_kwargs=cbar_kwargs, robust=True)
 decorate_axis(ax1, title1="ccmp", xsta=42, xend=99, ysta=0, yend=26, step=5)
-oscar_ek_u.mean(dim='time').plot(ax=ax2, transform=ccrs.PlateCarree(), cbar_kwargs=cbar_kwargs)
+oscar_ek_u_tm.plot(ax=ax2, transform=ccrs.PlateCarree(), cbar_kwargs=cbar_kwargs, robust=True)
 decorate_axis(ax2, title1="oscar", xsta=42, xend=99, ysta=0, yend=26, step=5)
 
 plt.show()
