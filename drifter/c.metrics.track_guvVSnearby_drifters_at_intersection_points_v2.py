@@ -259,4 +259,6 @@ for i, r in df_all.iterrows():
 df_out["gu"] = gu_ats
 df_out["ve"] = ve_ats
 df_out["close_dist"] = close_dists
-df_out.to_csv(f"track_guvVSnearby_drifters_at_intersection_points_{sat1}_1.csv")
+df_out["lon_inters"] = lons_inters
+df_out["lat_inters"] = lats_inters
+df_out.to_csv(f"track_guvVSnearby_drifters_at_intersection_points_{sat1}_2.csv")

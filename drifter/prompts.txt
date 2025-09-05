@@ -1,3 +1,5 @@
+I need apply is_within_coast function on the lons_inter, lats_inter columns of df1 and retain only those rows which are within the threshold distance.
+
 probe the time dimensions/variables of attached drifter and satellite
 track files and their units. Recommend how their time axis has to be properly formatted so that their variables can be compared correctly.
 
