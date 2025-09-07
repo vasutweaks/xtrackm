@@ -59,6 +59,7 @@ cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 oscar_extracted_dir = f"/home/srinivasu/xtrackm/guv/oscar_at_intersections/"
+ekman_extracted_dir = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections/"
 
 sat = "TP+J1+J2+J3+S6A"
 df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
@@ -152,6 +153,50 @@ for i in range(ln):
     a1 = math.atan2(lat_coast_self - lat_equat_self,
                     lon_coast_self - lon_equat_self)
     gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
+
+    # -------------------- NEW: add Ekman u,v to gu, gv --------------------
+    # Ekman files are expected at:
+    # /home/srinivasu/xtrackm/ekman/ekman_at_intersections/
+    # named: ekman_at_intersection_{sat1}_{track_number_self}_{track_number_other}.nc
+    ek_fname = os.path.join(
+        ekman_extracted_dir,
+        f"ekman_at_intersection_{sat1}_{track_number_self}_{track_number_other}.nc",
+    )
+    if os.path.exists(ek_fname):
+        try:
+            ds_ek = xr.open_dataset(ek_fname)
+            ek_u = ds_ek.u
+            ek_v = ds_ek.v
+
+            # align Ekman times with gu/gv times similarly to OSCAR handling:
+            tfreq = sats_tfreq[sat] if sat in sats_tfreq else None
+            if tfreq is not None:
+                # resample to same temporal frequency then interp to gu.time
+                try:
+                    ek_u = ek_u.resample(time=f"{tfreq}D").mean()
+                    ek_v = ek_v.resample(time=f"{tfreq}D").mean()
+                except Exception:
+                    # if resample fails (e.g. non-datetime), skip resampling
+                    pass
+            # interpolate to gu/gv time (gu has same time as gv)
+            try:
+                ek_u = ek_u.interp(time=gu.time)
+                ek_v = ek_v.interp(time=gv.time)
+            except Exception:
+                # fallback: try aligning by nearest join
+                ek_u = ek_u.reindex_like(gu, method="nearest", tolerance=None)
+                ek_v = ek_v.reindex_like(gv, method="nearest", tolerance=None)
+
+            # add to geostrophic components
+            gu = gu + ek_u
+            gv = gv + ek_v
+
+            ds_ek.close()
+        except Exception as e:
+            warnings.warn(f"Error reading/processing Ekman file {ek_fname}: {e}")
+    else:
+        warnings.warn(f"No Ekman file found at {ek_fname}, proceeding without Ekman add.")
+    # -------------------- END NEW CODE --------------------
 
     fig = plt.figure(figsize=(12, 10))
     ax0 = fig.add_subplot(3, 1, 3)
@@ -279,12 +324,12 @@ df_out["corrs"] = corrs_u
 df_out["rmses"] = rmses_u
 df_out["biass"] = biass_u
 
-df_out.to_csv(f"oscar_onlyVStrack_corrs_rmses_biass_{sat1}_u.csv", index=False)
+df_out.to_csv(f"oscar_ekmnVStrack_corrs_rmses_biass_{sat1}_u.csv", index=False)
 
 df_out["corrs"] = corrs_v
 df_out["rmses"] = rmses_v
 df_out["biass"] = biass_v
 
-df_out.to_csv(f"oscar_onlyVStrack_corrs_rmses_biass_{sat1}_v.csv", index=False)
+df_out.to_csv(f"oscar_ekmnVStrack_corrs_rmses_biass_{sat1}_v.csv", index=False)
 dse.close()
 

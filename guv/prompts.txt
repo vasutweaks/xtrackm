@@ -1,3 +1,45 @@
+Write a python script to read oscar_onlyVStrack_corrs_rmses_biass_TP+J1+J2+J3+S6A_u.csv, oscar_ekmnVStrack_corrs_rmses_biass_TP+J1+J2+J3+S6A_u.csv to make comparison plot of the respective correlations, biases, rmses before and after applying ekman correction.
+Need to do the following steps. 
+Make a unique string column combining sat (zero padded to 20 width), track_self, track_other for both the dataframes. We need to take only those rows where this combination matches in both dataframes so that we can make correct comparison.
+While comparing a metric, we also need to drop nan values from the dataframes. We only take those rows whose values are valid in both the metric columns.
+Plot 2x2 grid of 3 bar charts comparing bias (first subplot), corr (next), rmse (next) of oscar only and oscar ekman from each file.
+Keep the code simple and dirty. No need of putting a lot of checks. Nobody is going to use this piece of code expect me. I am fully of aware of the context.
+
+When p value > 0.05, plot corr bar in black color
+
+Make following adjustments to the attached code:
+We need to add ekman u,v components to gu, gv before comparing them to oscar.
+Ekman currents extracted at the intersection of tracks are in the folder /home/srinivasu/xtrackm/ekman/ekman_at_intersections/
+in the format ekman_at_intersection_{sat1}_{track_number_self}_{track_number_other}.nc.
+We need to read these file under the loop and make necessary adjustments to add to gu, gv.
+meta data of one the extracted file is as follows
+netcdf ekman_at_intersection_TP+J1+J2+J3+S6A_81_220 {
+dimensions:
+	time = 10578 ;
+variables:
+	double time(time) ;
+		time:_FillValue = NaN ;
+		time:standard_name = "time" ;
+		time:axis = "T" ;
+		time:units = "days since 1993-01-02" ;
+		time:calendar = "proleptic_gregorian" ;
+	float lon ;
+		lon:_FillValue = NaNf ;
+		lon:axis = "X" ;
+	float lat ;
+		lat:_FillValue = NaNf ;
+		lat:axis = "Y" ;
+	float u(time) ;
+		u:_FillValue = NaNf ;
+		u:coordinates = "lat lon" ;
+		u:missing_value = NaNf ;
+	float v(time) ;
+		v:_FillValue = NaNf ;
+		v:coordinates = "lat lon" ;
+		v:missing_value = NaNf ;
+}
+
+
 I am trying to compare zonal component of current computed from two cross track geostrophic currents at the intersection point of the tracks with loess smoothed sla with oscar ocean currents. The meridional
 component of oscar compare well with computed geostrophic zonal component but zonal component does not compare well at all. What could be fundamental reason? Some studies claim that two tracks' cross track geostrophic currents are needed to compute components, but studies are doing with one track alone.
 
@@ -6,4 +48,3 @@ that of with oscar.
 track meridional velocities are usually poorly correlated with other products. What could be the reason?
 lots of difference between track gv and aviso gv at points very close to
 coast.
-
