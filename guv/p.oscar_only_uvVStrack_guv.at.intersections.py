@@ -56,12 +56,11 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
 
 cmap1 = cmo.cm.diff
 d = 1.5
-oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 oscar_extracted_dir = f"/home/srinivasu/xtrackm/guv/oscar_at_intersections/"
 
-sat = "TP+J1+J2+J3+S6A"
 sat = "S3B"
+sat = "TP+J1+J2+J3+S6A"
 df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
 df_out = df.copy()
 

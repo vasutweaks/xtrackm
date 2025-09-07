@@ -1,9 +1,11 @@
 [] gather all other important plots to show from xtracks and other locations
-
+[] standard deviation of aviso and track near the coast
 [] extract ekman at all intersection points and make the
-ekman corrected improvement plots for rama/omni/cb
+[] ekman corrected improvement plots for oscar
+[] ekman corrected improvement plots for rama/omni/cb
 ✓ stick with ekman computed with pickard for now
 [] drifter buoy scatter plots after ekman correction
-[] drifter buoy scatter plots for points very close to the coast
-✓ drifter .csv files have to save with lons_inter, lats_inter to filter to
-the points that are very close to the coast
+
+[✓] drifter buoy scatter plots for points very close to the coast
+✓ drifter .csv files have to save with lons_inter, lats_inter to filter to the points that are very close to the coast
+[✓] some oscar versus track guv plots

@@ -1,0 +1,4 @@
+[] Derive the formula for velocity components from the cross track geostrophic currents by thoroughly reading the papers
+parke_1987_orbits_current_components.pdf and 
+rosemary_morrow_1994_velocity_variance_geosat_altimetry.pdf
+and with help of AI apps.
