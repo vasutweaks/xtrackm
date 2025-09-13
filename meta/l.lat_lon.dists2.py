@@ -4,12 +4,21 @@ from collections import Counter
 import xarray as xr
 from geopy import distance
 from namesm import *
+import time
+import os
 
 # cmap1="viridis"
 
+# Get the process ID
+process_id = os.getpid()
+# Print the process ID
+print(f"The process ID of the current Python script is: {process_id}")
+
 sats_ints = {}
 
+start_time0 = time.time()
 for sat in sats_new:
+    start_time = time.time()
     delds = []
     for f in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")):
         # print(f)
@@ -37,9 +46,12 @@ for sat in sats_new:
                 lon2 = lons_track[i+1]
                 deld = distance.distance((lat1, lon1), (lat2, lon2)).km
                 delds.append(deld)
+        ds.close()
     delds1 = delds[:] # [x for x in delds if x!=0]
     mode_value = sum(delds1)/len(delds1)
     print(f"{sat} {mode_value}")
     sats_ints[sat] = mode_value
+    print(f"{sat} took {(time.time() - start_time)} seconds ---")
 
 print(sats_ints)
+print(f"total time {(time.time() - start_time0)} seconds ---")

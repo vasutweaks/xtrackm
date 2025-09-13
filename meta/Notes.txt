@@ -1,3 +1,8 @@
+saving lon,lats as .npz files can improve the speeds of all
+program in this folder
+
+one major gotcha is xarray opening or decoding files in loop is one of the reasons for the slow performance of many scripts
+
 for a given satellite mission, for all tracks the starting and 
 ending dates are same.
 

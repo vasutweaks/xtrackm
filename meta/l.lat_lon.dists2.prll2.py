@@ -1,139 +1,102 @@
-#!/usr/bin/env python3
-"""
-Parallelized distance calculator
-Based on your l.lat_lon.dists2.prll1.py (kept behavior, replaced geopy loop with vectorized haversine
-and added multiprocessing across files).
-"""
+# l.lat_lon.dists2.prll_files.py
+# Parallel (faster): multiprocessing over files + vectorized haversine per file.
+# Dirty style on purpose. Worker has no try/except around dataset reading.
 
 import glob
+import os
 import time
-from functools import partial
 from multiprocessing import Pool, cpu_count
 
-import xarray as xr
 import numpy as np
+import xarray as xr
+from namesm import *   # provides sats_new etc.
 
-# -----------------------
-# Parameters (tweakable)
-# -----------------------
-FILE_GLOB = f"../data/*_lon_ordered/ctoh.sla.ref.*.nindian.*.nc"
-N_WORKERS = 8  # set to 8, or use cpu_count()
-CHUNKSIZE = 1  # tune for performance; larger chunksize reduces scheduling overhead
-# -----------------------
+# Get the process ID
+process_id = os.getpid()
+# Print the process ID
+print(f"The process ID of the current Python script is: {process_id}")
 
-def haversine_km_between_consecutive(lats, lons):
-    """Vectorized haversine distances (km) between consecutive lat/lon points."""
-    # If arrays are short, keep safe behaviour
-    lats = np.asarray(lats, dtype=float)
-    lons = np.asarray(lons, dtype=float)
-    if lats.size < 2 or lons.size < 2:
-        return np.array([], dtype=float)
-    lat = np.radians(lats)
-    lon = np.radians(lons)
-    dlat = lat[1:] - lat[:-1]
-    dlon = lon[1:] - lon[:-1]
-    a = np.sin(dlat * 0.5)**2 + np.cos(lat[:-1]) * np.cos(lat[1:]) * np.sin(dlon * 0.5)**2
-    R = 6371.0088  # Earth radius in km
-    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
-    return R * c
+# adjust these paths/patterns to match your layout
+DATA_DIR = "../data"
+PATTERN = "ctoh.sla.ref.{sat}.nindian.*.nc"
 
-def process_one_file(fname, require_min_points=2):
+def haversine_sum_and_count(lats, lons):
     """
-    Open dataset, extract lon/lat arrays, compute consecutive haversine distances,
-    return list (or flattened array) of distances for that file or None on failure.
+    Vectorized haversine distances between successive points.
+    Returns (sum_of_distances_km, number_of_pairs)
+    lats, lons are 1D numpy arrays (degrees).
     """
-    try:
-        ds = xr.open_dataset(fname, mask_and_scale=False)  # avoid automatic masking if not needed
-    except Exception as e:
-        # Optionally print or log
-        # print(f"Failed to open {fname}: {e}")
-        return None
+    # require at least 2 points
+    if lats.size < 2:
+        return 0.0, 0
+    # convert to radians
+    lat1 = np.deg2rad(lats[:-1])
+    lat2 = np.deg2rad(lats[1:])
+    lon1 = np.deg2rad(lons[:-1])
+    lon2 = np.deg2rad(lons[1:])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = np.sin(dlat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0) ** 2
+    # numerical safety
+    a = np.minimum(1.0, np.maximum(0.0, a))
+    c = 2.0 * np.arctan2(np.sqrt(a), np.sqrt(1.0 - a))
+    R = 6371.0088  # mean Earth radius in km
+    dists = R * c
+    return float(dists.sum()), int(dists.size)
 
-    try:
-        # Try multiple likely coord names if necessary
-        # Original script used ds.lon and ds.lat
-        if hasattr(ds, "lon") and hasattr(ds, "lat"):
-            lons = ds.lon.values
-            lats = ds.lat.values
-        else:
-            # try other names / dims (adjust if your files use other naming)
-            # fallback: attempt to find first 1D coordinate-like arrays
-            coords = [v for v in ds.variables if getattr(ds[v], 'dims', None) and ds[v].ndim == 1]
-            # minimal fallback - this is heuristic; adapt if your files differ
-            if len(coords) >= 2:
-                lons = ds[coords[0]].values
-                lats = ds[coords[1]].values
-            else:
-                ds.close()
-                return None
+def worker_process_file(args):
+    """
+    Worker that reads one file and returns:
+      (sat_name, sum_delds_km, n_pairs)
+    No try/except (user requested).
+    """
+    fpath, sat = args
+    with xr.open_dataset(fpath) as ds:
+        # follow original logic: skip tiny tracks / use only ones with >100 points
+        if len(ds.points_numbers) == 0:
+            return (sat, 0.0, 0)
+        lons = ds.lon.values
+        lats = ds.lat.values
+        if lons.size <= 100:
+            return (sat, 0.0, 0)
+        s, n = haversine_sum_and_count(lats, lons)
+        return (sat, s, n)
 
-        # ensure 1D arrays
-        lons = np.asarray(lons).ravel()
-        lats = np.asarray(lats).ravel()
-
-        if lons.size < require_min_points or lats.size < require_min_points:
-            ds.close()
-            return None
-
-        distances = haversine_km_between_consecutive(lats, lons)
-        # convert to python list for pickling/transport via multiprocessing
-        out = distances.tolist()
-        ds.close()
-        return out
-
-    except Exception as e:
-        # print(f"Error processing {fname}: {e}")
-        try:
-            ds.close()
-        except Exception:
-            pass
-        return None
-
-def flatten_and_filter(list_of_lists):
-    """Flatten lists of floats and filter out None/empty results."""
-    out = []
-    for item in list_of_lists:
-        if not item:
-            continue
-        out.extend(item)
-    return out
-
-def main():
-    t0 = time.time()
-    filelist = sorted(glob.glob(FILE_GLOB))
-    if not filelist:
-        print("No files found for pattern:", FILE_GLOB)
-        return
-
-    n_workers = N_WORKERS or min(8, cpu_count())
-    print(f"Found {len(filelist)} files. Using {n_workers} workers.")
-
-    # Use multiprocessing.Pool to process files in parallel
-    worker = partial(process_one_file)
-    all_distances = []
-
-    # Pool.map returns results in input order; for large number of files, you can use imap_unordered
-    with Pool(processes=n_workers) as pool:
-        # Using map with chunksize to amortize scheduling cost
-        results = pool.map(worker, filelist, chunksize=CHUNKSIZE)
-
-    # Flatten
-    all_distances = flatten_and_filter(results)
-
-    if len(all_distances) == 0:
-        print("No distances computed (all files failed or had too few points).")
-    else:
-        # compute global stats
-        arr = np.asarray(all_distances, dtype=float)
-        mean_value = float(np.nanmean(arr))
-        median_value = float(np.nanmedian(arr))
-        n_pts = arr.size
-        print(f"Processed {len(filelist)} files, total {n_pts} distances.")
-        print(f"Mean distance (km): {mean_value:.6f}")
-        print(f"Median distance (km): {median_value:.6f}")
-
-    print(f"Elapsed time: {time.time() - t0:.2f} s")
+def gather_file_list_for_all_sats(sats):
+    tasks = []
+    for sat in sats:
+        pattern = os.path.join(DATA_DIR, f"{sat}_lon_ordered", PATTERN.format(sat=sat))
+        files = sorted(glob.glob(pattern))
+        for f in files:
+            tasks.append((f, sat))
+    return tasks
 
 if __name__ == "__main__":
-    main()
+    start_all = time.time()
+    sats = list(sats_new)
+    tasks = gather_file_list_for_all_sats(sats)
+    ncores = max(1, cpu_count() - 1)   # leave one core free
+    with Pool(processes=ncores) as pool:
+        # map over files; this returns a list of (sat, sum, count)
+        results = pool.map(worker_process_file, tasks)
+    # aggregate per-satellite sums and counts
+    sums = {}
+    counts = {}
+    for sat, s, n in results:
+        if n == 0:
+            continue
+        sums[sat] = sums.get(sat, 0.0) + s
+        counts[sat] = counts.get(sat, 0) + n
 
+    sats_ints = {}
+    for sat in sats:
+        if counts.get(sat, 0) == 0:
+            sats_ints[sat] = 0.0
+        else:
+            sats_ints[sat] = sums[sat] / counts[sat]
+    # print in same style as your scripts
+    for sat in sats:
+        print(f"{sat} {sats_ints[sat]}")
+        # We don't print per-sat timings here; measure whole run
+    print(sats_ints)
+    print("TOTAL TIME:", time.time() - start_all)

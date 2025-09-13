@@ -1,0 +1,1 @@
+htop -F python -u srinivasu -s PERCENT_CPU
