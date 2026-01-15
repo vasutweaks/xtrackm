@@ -1,3 +1,12 @@
+Usually work progresses through the following folders in order
+data
+meta
+schema
+computed
+guv
+
+selected -- is usually last one
+
 1. Downloading with data/download_xtrack.py
 new version v2.2 data has a total of 8 satellite missions.
 They have changed the path sligtly
