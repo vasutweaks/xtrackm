@@ -1473,7 +1473,7 @@ def get_total_tracks(sat):
 
 def get_time_limits(sat):
     f = get_first_file(sat)
-    ds = xr.open_dataset(f, engine="h5netcdf")
+    ds = xr.open_dataset(f, engine="netcdf4")
     # ds = xr.open_dataset(f)
     time = ds.time.isel(points_numbers=0).values
     first_time = time[0]
@@ -1486,7 +1486,7 @@ def get_time_limits(sat):
 
 def get_time_limits_o(sat):
     f = get_first_file(sat)
-    ds = xr.open_dataset(f, engine="h5netcdf")
+    ds = xr.open_dataset(f, engine="netcdf4")
     # ds = xr.open_dataset(f)
     time = ds.time.isel(points_numbers=0).values
     # these are cftime objects which are not very useful
@@ -1755,7 +1755,7 @@ def omni_nearby_track(omni_id, sat):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         # ds = xr.open_dataset(f, decode_times=False)
         track_number = ds.Pass
         lons_track = ds.lon.values
@@ -1794,7 +1794,7 @@ def rama_nearby_track(rama_id, sat):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
@@ -1827,7 +1827,7 @@ def rama_nearby_track_box(rama_id, sat, box_size=2.0):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
@@ -1871,7 +1871,7 @@ def coastal_nearby_track_box(coastal_id, sat, box_size=2.0):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
@@ -1915,7 +1915,7 @@ def omni_nearby_track_box(omni_id, sat, box_size=2.0):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         # ds = xr.open_dataset(f, decode_times=False)
         track_number = ds.Pass
         lons_track = ds.lon.values
@@ -1980,7 +1980,7 @@ def cb_nearby_track_box(cb_id, sat, box_size=2.0):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
@@ -2023,7 +2023,7 @@ def psmsl_nearby_track_box(psmsl_id, df_nio, sat, box_size=2.0):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         # ds = xr.open_dataset(f, decode_times=False)
         track_number = ds.Pass
         lons_track = ds.lon.values
@@ -2068,7 +2068,7 @@ def psmsl_nearby_track(psmsl_id, df_nio, sat):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         # ds = xr.open_dataset(f, decode_times=False)
         track_number = ds.Pass
         lons_track = ds.lon.values
@@ -2101,7 +2101,7 @@ def cb_nearby_track_new(cb_id, sat):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
@@ -2174,7 +2174,7 @@ def cb_nearby_track_normal(cb_id, sat):
             f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
-        ds = xr.open_dataset(f, decode_times=False, engine="h5netcdf")
+        ds = xr.open_dataset(f, decode_times=False, engine="netcdf4")
         track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values

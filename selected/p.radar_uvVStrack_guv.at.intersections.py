@@ -159,11 +159,11 @@ for idx, row in df_all.iterrows():
     f_other = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_other.zfill(3)}.nc"
     f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat1}_{track_number_self}_loess_0.2.nc"
     f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat1}_{track_number_other}_loess_0.2.nc"
-    ds_self = xr.open_dataset(f_self, engine="h5netcdf", decode_times=False)
+    ds_self = xr.open_dataset(f_self, decode_times=False)
     ds_self_smooth = xr.open_dataset(f_self_smooth)
     sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
     sla_self_smooth = ds_self_smooth.sla_smooth
-    ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
+    ds_other = xr.open_dataset(f_other, decode_times=False)
     ds_other_smooth = xr.open_dataset(f_other_smooth)
     sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
     sla_other_smooth = ds_other_smooth.sla_smooth

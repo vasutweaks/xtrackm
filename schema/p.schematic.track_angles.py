@@ -73,7 +73,7 @@ custom_lines = [
 dse = xr.open_dataset(
     "/home/srinivasu/allData/topo/etopo5.cdf")  # open etopo dataset
 
-for sat in sats:
+for sat in sats_new:
     oi = 0
     ei = 0
     fig, ax1 = plt.subplots(
