@@ -10,5 +10,5 @@ for sat in sats_new:
     ds = xr.open_dataset(f)
     mission = ds.Mission
     passn = ds.Pass
-    cycle = ds.cycle
+    cycle = ds.cycle.values[0]
     print(f"mission and pass : {mission} {passn} {cycle}")

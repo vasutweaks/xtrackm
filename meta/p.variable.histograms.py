@@ -4,6 +4,7 @@ from collections import Counter
 import xarray as xr
 from tools_xtrackm import *
 import numpy as np
+from math import sqrt, erf
 
 # initiate empyt sla numpy array
 sla_np = np.array([])
@@ -20,6 +21,14 @@ def stats_nan(sla_np):
     print(f"std is: {np.nanstd(sla_np)}")
 
 
+def perc_outside(std_limit = 3.5):
+    """Percentage of values outside 3.5 standard deviations in a standard normal distribution"""
+    phi0 = 0.5 * (1 + erf(std_limit / sqrt(2)))
+    perc0 = (2 * phi0 - 1) * 100
+    return 100 - perc0
+
+
+std_limit = 3.5
 for sat in sats_new:
     tracks_n = get_total_tracks(sat)
     print(f"number of tracks of {sat}: {tracks_n}")
@@ -42,10 +51,20 @@ for sat in sats_new:
     stats_nan(ocean_tide_np)
     print(40 * "*")
     stats_nan(ssb_np)
+    mean = np.nanmean(sla_np)
+    # print outliers above 3.5 standard deviations
+    std = np.nanstd(sla_np)
+    outliers = np.abs(sla_np - mean) > std_limit * std
+    # percentage of outliers
+    perc = outliers.sum() / len(sla_np) * 100
+    # normal percentage of outliers
+    perc_out = perc_outside(std_limit)
+    print(f"normal percentage of outliers: {perc_out}")
+    print(f"percentage of outliers: {perc}")
     break
 
     # plot histogram
-    # fig, ax = plt.subplots()
-    # ax.hist(sla_np, bins=100, label=f"{sat}")
-    # plt.legend()
-    # plt.show()
+    fig, ax = plt.subplots()
+    ax.hist(sla_np, bins=100, label=f"{sat}")
+    plt.legend()
+    plt.show()
