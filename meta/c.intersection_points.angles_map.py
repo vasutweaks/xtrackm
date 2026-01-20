@@ -104,7 +104,7 @@ for f_self in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.ni
             glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")):
         # print(f)
         ds_other = xr.open_dataset(f_other,
-                                   engine="h5netcdf",
+                                   engine="netcdf4",
                                    decode_times=False)
         if len(ds_other.points_numbers) == 0:
             continue

@@ -32,11 +32,11 @@ for sat in sats_new[:]:
         color="c",
     )
     print(len(gshhg_np), i)
-    f_lfit = f"xtrack_sla_valid_count_{sat}_loess_fit.nc"
+    f_lfit = f"xtrack_sla_valid_count_{sat}_loess_fit_6km.nc"
     ds_lfit = xr.open_dataset(f_lfit, decode_times=False)
     print(ds_lfit)
-    xout = ds_lfit.gshhg_resampled.values
-    # xout = ds_lfit.standard_6km.values
+    # xout = ds_lfit.gshhg_resampled.values
+    xout = ds_lfit.standard_6km.values
     yout = ds_lfit.valid_count.values
     ax.plot(xout, yout, label=f"lowess {frac1}")
     ax.set_xlabel("distance from coast")

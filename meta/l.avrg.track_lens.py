@@ -17,7 +17,7 @@ for sat in sats_new:
         ds = xr.open_dataset(f, decode_times=False)
         if len(ds.points_numbers) == 0:
             continue
-        track_number = ds.pass_number
+        track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         # time_s = ds.time.isel(cycles_numbers=0).isel(points_numbers=0)

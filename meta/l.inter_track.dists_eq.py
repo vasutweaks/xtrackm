@@ -18,7 +18,7 @@ for sat in sats_new:
         glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")
     ):
         # print(f)
-        ds = xr.open_dataset(f, engine="h5netcdf", decode_times=False)
+        ds = xr.open_dataset(f, engine="netcdf4", decode_times=False)
         if len(ds.points_numbers) == 0:
             continue
         track_number = ds.Pass

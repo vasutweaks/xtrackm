@@ -38,7 +38,7 @@ lats_psmsl = df_nio["latitude"]
 pd.set_option("display.max_rows", None)
 
 df_coast = pd.read_excel(
-    "/home/srinivasu/forecast_e/coastal/CoastalADCPMeta_correction.xlsx",
+    "/home/srinivasu/allData/coastal/CoastalADCPMeta_correction.xlsx",
     parse_dates=[6, 7],
 )
 print(df_coast.columns)

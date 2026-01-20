@@ -1,3 +1,6 @@
+The number of outlies is close to zero, no of NaNs is around 4% for all
+the tracks
+
 saving lon,lats as .npz files can improve the speeds of all
 program in this folder
 

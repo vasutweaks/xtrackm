@@ -78,13 +78,35 @@ def load_and_filter_sla_data_corrected(file_path):
         print(f"Final valid points: {valid_filtered} ({valid_filtered/total_points*100:.1f}%)")
     return sla_filtered, outlier_mask
 
-sat = "GFO"
-passn = "008"
-file1 = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{passn}.nc"
+max_perc = []
+max_valid= []
 
 for sat in sats_new:
     for f in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")):
-        file1 = f
-        ds = xr.open_dataset(file1,decode_times=False)
-        # print(ds)
-        sla_filtered, outlier_mask = load_and_filter_sla_data_corrected(file1)
+        ds = xr.open_dataset(f)
+        sla = ds["sla"]  # Assuming 'sla' is the variable name
+        # Detect outliers along time dimension (cycles_numbers)
+        outlier_mask = mad_outlier_detection_fixed(sla, threshold=3.5, dim='cycles_numbers')
+        # Remove outliers
+        sla_filtered = sla.where(~outlier_mask)
+        # Print summary statistics
+        total_points = sla.size
+        valid_original = sla.count().values
+        outliers_detected = outlier_mask.sum().values
+        valid_filtered = sla_filtered.count().values
+        if outliers_detected != 0:
+            print(f"\n=== Outlier Detection Summary ===")
+            print(f"Total data points: {total_points}")
+            print(f"Originally valid: {valid_original} ({valid_original/total_points*100:.1f}%)")
+            print(f"Outliers detected: {outliers_detected} ({outliers_detected/total_points*100:.1f}%)")
+            print(f"Final valid points: {valid_filtered} ({valid_filtered/total_points*100:.1f}%)")
+            sla_filtered, outlier_mask = load_and_filter_sla_data_corrected(f)
+            outliers_detected = outlier_mask.sum().values
+            valid_filtered = sla_filtered.count().values
+            perc = outliers_detected/valid_filtered*100
+            valid_perc = valid_
+            max_perc.append(perc)
+            max_valid.append(valid_filtered)
+
+print(max_perc)
+print(max_valid)

@@ -1,0 +1,2486 @@
+
+=== Outlier Detection Summary ===
+Total data points: 63426
+Originally valid: 49889 (78.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 49888 (78.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 84816
+Originally valid: 67282 (79.3%)
+Outliers detected: 2 (0.0%)
+Final valid points: 67280 (79.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 33108
+Originally valid: 24961 (75.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 24959 (75.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 85002
+Originally valid: 68996 (81.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 68995 (81.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 51150
+Originally valid: 40424 (79.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 40421 (79.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 56358
+Originally valid: 44317 (78.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 44316 (78.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 57474
+Originally valid: 45907 (79.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 45905 (79.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 69378
+Originally valid: 56003 (80.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 56001 (80.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 60078
+Originally valid: 48519 (80.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 48518 (80.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 63054
+Originally valid: 49891 (79.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 49889 (79.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 66960
+Originally valid: 52461 (78.3%)
+Outliers detected: 2 (0.0%)
+Final valid points: 52459 (78.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 37944
+Originally valid: 28966 (76.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 28965 (76.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 84816
+Originally valid: 66621 (78.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 66620 (78.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 56544
+Originally valid: 44225 (78.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 44223 (78.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 23808
+Originally valid: 17534 (73.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17533 (73.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 58032
+Originally valid: 46092 (79.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46091 (79.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 63984
+Originally valid: 50952 (79.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 50951 (79.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 32890
+Originally valid: 31285 (95.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 31284 (95.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 49105
+Originally valid: 47215 (96.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 47214 (96.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 47955
+Originally valid: 46124 (96.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46123 (96.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 48875
+Originally valid: 46830 (95.8%)
+Outliers detected: 14 (0.0%)
+Final valid points: 46816 (95.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 49220
+Originally valid: 47112 (95.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 47111 (95.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 49335
+Originally valid: 47836 (97.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 47834 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17710
+Originally valid: 17094 (96.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17093 (96.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 41860
+Originally valid: 39710 (94.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 39709 (94.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 24035
+Originally valid: 21764 (90.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21763 (90.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 3680
+Originally valid: 3414 (92.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 3413 (92.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 7600
+Originally valid: 7352 (96.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7351 (96.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 21920
+Originally valid: 21191 (96.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21190 (96.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 25520
+Originally valid: 24594 (96.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 24593 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 20480
+Originally valid: 19738 (96.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 19736 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 20880
+Originally valid: 20265 (97.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20264 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 34000
+Originally valid: 32995 (97.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 32994 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 22480
+Originally valid: 21613 (96.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21612 (96.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 32935 (96.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 32933 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 34400
+Originally valid: 33244 (96.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 33242 (96.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 25600
+Originally valid: 24788 (96.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 24787 (96.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 32320
+Originally valid: 30582 (94.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 30581 (94.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33100 (96.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33099 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 34080
+Originally valid: 32991 (96.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 32990 (96.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33101 (96.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33100 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 34080
+Originally valid: 32544 (95.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 32542 (95.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33097 (96.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 33095 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 31120
+Originally valid: 29616 (95.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 29615 (95.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 14240
+Originally valid: 13601 (95.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13600 (95.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 29040
+Originally valid: 27955 (96.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 27954 (96.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 17680
+Originally valid: 16859 (95.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16858 (95.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 29440
+Originally valid: 28092 (95.4%)
+Outliers detected: 3 (0.0%)
+Final valid points: 28089 (95.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 3920
+Originally valid: 2491 (63.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 2490 (63.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 492
+Originally valid: 151 (30.7%)
+Outliers detected: 1 (0.2%)
+Final valid points: 150 (30.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 1230
+Originally valid: 822 (66.8%)
+Outliers detected: 2 (0.2%)
+Final valid points: 820 (66.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 43296
+Originally valid: 33245 (76.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33244 (76.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 61500
+Originally valid: 46493 (75.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 46491 (75.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 77736
+Originally valid: 57627 (74.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 57625 (74.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 58056
+Originally valid: 45813 (78.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 45812 (78.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 63714
+Originally valid: 49355 (77.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 49354 (77.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 76260
+Originally valid: 60128 (78.8%)
+Outliers detected: 2 (0.0%)
+Final valid points: 60126 (78.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 79458
+Originally valid: 60864 (76.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 60863 (76.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 65928
+Originally valid: 46764 (70.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46763 (70.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 88314
+Originally valid: 67234 (76.1%)
+Outliers detected: 4 (0.0%)
+Final valid points: 67230 (76.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 40590
+Originally valid: 25497 (62.8%)
+Outliers detected: 3 (0.0%)
+Final valid points: 25494 (62.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 77982
+Originally valid: 58834 (75.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 58832 (75.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 61254
+Originally valid: 43606 (71.2%)
+Outliers detected: 8 (0.0%)
+Final valid points: 43598 (71.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 21648
+Originally valid: 13702 (63.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13701 (63.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 5610
+Originally valid: 4730 (84.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 4729 (84.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 15810
+Originally valid: 13522 (85.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13521 (85.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 19992
+Originally valid: 17578 (87.9%)
+Outliers detected: 5 (0.0%)
+Final valid points: 17573 (87.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 22440
+Originally valid: 18289 (81.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 18288 (81.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 22593
+Originally valid: 19268 (85.3%)
+Outliers detected: 3 (0.0%)
+Final valid points: 19265 (85.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 15147
+Originally valid: 12600 (83.2%)
+Outliers detected: 9 (0.1%)
+Final valid points: 12591 (83.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22695
+Originally valid: 20636 (90.9%)
+Outliers detected: 7 (0.0%)
+Final valid points: 20629 (90.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 16014
+Originally valid: 13717 (85.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13716 (85.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 22134
+Originally valid: 19396 (87.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 19395 (87.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 16881
+Originally valid: 14103 (83.5%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14100 (83.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 20910
+Originally valid: 19603 (93.7%)
+Outliers detected: 5 (0.0%)
+Final valid points: 19598 (93.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 18054
+Originally valid: 16804 (93.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16803 (93.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 16888 (87.6%)
+Outliers detected: 3 (0.0%)
+Final valid points: 16885 (87.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 18717
+Originally valid: 17276 (92.3%)
+Outliers detected: 5 (0.0%)
+Final valid points: 17271 (92.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 22542
+Originally valid: 20196 (89.6%)
+Outliers detected: 3 (0.0%)
+Final valid points: 20193 (89.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 16677
+Originally valid: 13668 (82.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 13665 (81.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 22593
+Originally valid: 20612 (91.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20611 (91.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 22644
+Originally valid: 19705 (87.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 19702 (87.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 10914
+Originally valid: 8426 (77.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 8424 (77.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 22287
+Originally valid: 19197 (86.1%)
+Outliers detected: 5 (0.0%)
+Final valid points: 19192 (86.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 8823
+Originally valid: 7638 (86.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7637 (86.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 19635
+Originally valid: 16975 (86.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16974 (86.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 14229
+Originally valid: 11947 (84.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 11946 (84.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 14280
+Originally valid: 12796 (89.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12794 (89.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 17799
+Originally valid: 14606 (82.1%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14603 (82.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 5916
+Originally valid: 5025 (84.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 5024 (84.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 15869 (82.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15868 (82.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 14076
+Originally valid: 11467 (81.5%)
+Outliers detected: 13 (0.1%)
+Final valid points: 11454 (81.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 19431
+Originally valid: 17656 (90.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 17654 (90.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 18870
+Originally valid: 15858 (84.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15857 (84.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 16065
+Originally valid: 13175 (82.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 13173 (82.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17238
+Originally valid: 15879 (92.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15878 (92.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 17289
+Originally valid: 16142 (93.4%)
+Outliers detected: 4 (0.0%)
+Final valid points: 16138 (93.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 14229
+Originally valid: 11577 (81.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 11576 (81.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 14688
+Originally valid: 12696 (86.4%)
+Outliers detected: 3 (0.0%)
+Final valid points: 12693 (86.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 16322 (84.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 16320 (84.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 12036
+Originally valid: 9282 (77.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9281 (77.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19125
+Originally valid: 17305 (90.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 17303 (90.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 11214
+Originally valid: 7782 (69.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7781 (69.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 18585
+Originally valid: 13773 (74.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13772 (74.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19719
+Originally valid: 13126 (66.6%)
+Outliers detected: 4 (0.0%)
+Final valid points: 13122 (66.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 12348
+Originally valid: 9400 (76.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9399 (76.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 24633
+Originally valid: 17046 (69.2%)
+Outliers detected: 10 (0.0%)
+Final valid points: 17036 (69.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 16632
+Originally valid: 12064 (72.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12062 (72.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 27909
+Originally valid: 18540 (66.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 18539 (66.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 18711
+Originally valid: 12510 (66.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12508 (66.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 28098
+Originally valid: 17743 (63.1%)
+Outliers detected: 4 (0.0%)
+Final valid points: 17739 (63.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19719
+Originally valid: 14573 (73.9%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14570 (73.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 27405
+Originally valid: 19038 (69.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 19036 (69.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 22302
+Originally valid: 16217 (72.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16216 (72.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 24003
+Originally valid: 16970 (70.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16969 (70.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 27783
+Originally valid: 18257 (65.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 18255 (65.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 16947
+Originally valid: 11875 (70.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 11873 (70.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 27972
+Originally valid: 20462 (73.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20461 (73.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 13545
+Originally valid: 9023 (66.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 9021 (66.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 24066
+Originally valid: 16775 (69.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 16773 (69.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 9009
+Originally valid: 6027 (66.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 6025 (66.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 23058
+Originally valid: 15682 (68.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 15680 (68.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17703
+Originally valid: 11731 (66.3%)
+Outliers detected: 5 (0.0%)
+Final valid points: 11726 (66.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 9891
+Originally valid: 7136 (72.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7135 (72.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22050
+Originally valid: 17073 (77.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17072 (77.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 23877
+Originally valid: 17128 (71.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17127 (71.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 24129
+Originally valid: 16462 (68.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16461 (68.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 23310
+Originally valid: 15826 (67.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15825 (67.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 19782
+Originally valid: 12691 (64.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12689 (64.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 21420
+Originally valid: 14393 (67.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 14392 (67.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 21357
+Originally valid: 14254 (66.7%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14251 (66.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 17514
+Originally valid: 12021 (68.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 12020 (68.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 18207
+Originally valid: 12165 (66.8%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12163 (66.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 23877
+Originally valid: 16142 (67.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16141 (67.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 14490
+Originally valid: 9314 (64.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9313 (64.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 23625
+Originally valid: 15121 (64.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 15119 (64.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 6552
+Originally valid: 4071 (62.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 4070 (62.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22302
+Originally valid: 15229 (68.3%)
+Outliers detected: 4 (0.0%)
+Final valid points: 15225 (68.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 63426
+Originally valid: 49889 (78.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 49888 (78.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 84816
+Originally valid: 67282 (79.3%)
+Outliers detected: 2 (0.0%)
+Final valid points: 67280 (79.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 33108
+Originally valid: 24961 (75.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 24959 (75.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 85002
+Originally valid: 68996 (81.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 68995 (81.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 51150
+Originally valid: 40424 (79.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 40421 (79.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 56358
+Originally valid: 44317 (78.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 44316 (78.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 57474
+Originally valid: 45907 (79.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 45905 (79.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 69378
+Originally valid: 56003 (80.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 56001 (80.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 60078
+Originally valid: 48519 (80.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 48518 (80.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 63054
+Originally valid: 49891 (79.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 49889 (79.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 66960
+Originally valid: 52461 (78.3%)
+Outliers detected: 2 (0.0%)
+Final valid points: 52459 (78.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 37944
+Originally valid: 28966 (76.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 28965 (76.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 84816
+Originally valid: 66621 (78.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 66620 (78.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 56544
+Originally valid: 44225 (78.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 44223 (78.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 23808
+Originally valid: 17534 (73.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17533 (73.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 58032
+Originally valid: 46092 (79.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46091 (79.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 63984
+Originally valid: 50952 (79.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 50951 (79.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 32890
+Originally valid: 31285 (95.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 31284 (95.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 49105
+Originally valid: 47215 (96.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 47214 (96.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 47955
+Originally valid: 46124 (96.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46123 (96.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 48875
+Originally valid: 46830 (95.8%)
+Outliers detected: 14 (0.0%)
+Final valid points: 46816 (95.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 49220
+Originally valid: 47112 (95.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 47111 (95.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 49335
+Originally valid: 47836 (97.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 47834 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17710
+Originally valid: 17094 (96.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17093 (96.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 41860
+Originally valid: 39710 (94.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 39709 (94.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 24035
+Originally valid: 21764 (90.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21763 (90.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 3680
+Originally valid: 3414 (92.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 3413 (92.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 7600
+Originally valid: 7352 (96.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7351 (96.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 21920
+Originally valid: 21191 (96.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21190 (96.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 25520
+Originally valid: 24594 (96.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 24593 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 20480
+Originally valid: 19738 (96.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 19736 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 20880
+Originally valid: 20265 (97.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20264 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 34000
+Originally valid: 32995 (97.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 32994 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 22480
+Originally valid: 21613 (96.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21612 (96.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 32935 (96.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 32933 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 34400
+Originally valid: 33244 (96.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 33242 (96.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 25600
+Originally valid: 24788 (96.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 24787 (96.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 32320
+Originally valid: 30582 (94.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 30581 (94.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33100 (96.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33099 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 34080
+Originally valid: 32991 (96.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 32990 (96.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33101 (96.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33100 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 34080
+Originally valid: 32544 (95.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 32542 (95.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33097 (96.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 33095 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 31120
+Originally valid: 29616 (95.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 29615 (95.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 14240
+Originally valid: 13601 (95.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13600 (95.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 29040
+Originally valid: 27955 (96.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 27954 (96.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 17680
+Originally valid: 16859 (95.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16858 (95.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 29440
+Originally valid: 28092 (95.4%)
+Outliers detected: 3 (0.0%)
+Final valid points: 28089 (95.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 3920
+Originally valid: 2491 (63.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 2490 (63.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 492
+Originally valid: 151 (30.7%)
+Outliers detected: 1 (0.2%)
+Final valid points: 150 (30.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 1230
+Originally valid: 822 (66.8%)
+Outliers detected: 2 (0.2%)
+Final valid points: 820 (66.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 43296
+Originally valid: 33245 (76.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33244 (76.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 61500
+Originally valid: 46493 (75.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 46491 (75.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 77736
+Originally valid: 57627 (74.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 57625 (74.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 58056
+Originally valid: 45813 (78.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 45812 (78.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 63714
+Originally valid: 49355 (77.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 49354 (77.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 76260
+Originally valid: 60128 (78.8%)
+Outliers detected: 2 (0.0%)
+Final valid points: 60126 (78.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 79458
+Originally valid: 60864 (76.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 60863 (76.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 65928
+Originally valid: 46764 (70.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46763 (70.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 88314
+Originally valid: 67234 (76.1%)
+Outliers detected: 4 (0.0%)
+Final valid points: 67230 (76.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 40590
+Originally valid: 25497 (62.8%)
+Outliers detected: 3 (0.0%)
+Final valid points: 25494 (62.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 77982
+Originally valid: 58834 (75.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 58832 (75.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 61254
+Originally valid: 43606 (71.2%)
+Outliers detected: 8 (0.0%)
+Final valid points: 43598 (71.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 21648
+Originally valid: 13702 (63.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13701 (63.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 5610
+Originally valid: 4730 (84.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 4729 (84.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 15810
+Originally valid: 13522 (85.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13521 (85.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 19992
+Originally valid: 17578 (87.9%)
+Outliers detected: 5 (0.0%)
+Final valid points: 17573 (87.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 22440
+Originally valid: 18289 (81.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 18288 (81.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 22593
+Originally valid: 19268 (85.3%)
+Outliers detected: 3 (0.0%)
+Final valid points: 19265 (85.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 15147
+Originally valid: 12600 (83.2%)
+Outliers detected: 9 (0.1%)
+Final valid points: 12591 (83.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22695
+Originally valid: 20636 (90.9%)
+Outliers detected: 7 (0.0%)
+Final valid points: 20629 (90.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 16014
+Originally valid: 13717 (85.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13716 (85.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 22134
+Originally valid: 19396 (87.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 19395 (87.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 16881
+Originally valid: 14103 (83.5%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14100 (83.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 20910
+Originally valid: 19603 (93.7%)
+Outliers detected: 5 (0.0%)
+Final valid points: 19598 (93.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 18054
+Originally valid: 16804 (93.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16803 (93.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 16888 (87.6%)
+Outliers detected: 3 (0.0%)
+Final valid points: 16885 (87.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 18717
+Originally valid: 17276 (92.3%)
+Outliers detected: 5 (0.0%)
+Final valid points: 17271 (92.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 22542
+Originally valid: 20196 (89.6%)
+Outliers detected: 3 (0.0%)
+Final valid points: 20193 (89.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 16677
+Originally valid: 13668 (82.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 13665 (81.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 22593
+Originally valid: 20612 (91.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20611 (91.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 22644
+Originally valid: 19705 (87.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 19702 (87.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 10914
+Originally valid: 8426 (77.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 8424 (77.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 22287
+Originally valid: 19197 (86.1%)
+Outliers detected: 5 (0.0%)
+Final valid points: 19192 (86.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 8823
+Originally valid: 7638 (86.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7637 (86.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 19635
+Originally valid: 16975 (86.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16974 (86.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 14229
+Originally valid: 11947 (84.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 11946 (84.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 14280
+Originally valid: 12796 (89.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12794 (89.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 17799
+Originally valid: 14606 (82.1%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14603 (82.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 5916
+Originally valid: 5025 (84.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 5024 (84.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 15869 (82.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15868 (82.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 14076
+Originally valid: 11467 (81.5%)
+Outliers detected: 13 (0.1%)
+Final valid points: 11454 (81.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 19431
+Originally valid: 17656 (90.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 17654 (90.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 18870
+Originally valid: 15858 (84.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15857 (84.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 16065
+Originally valid: 13175 (82.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 13173 (82.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17238
+Originally valid: 15879 (92.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15878 (92.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 17289
+Originally valid: 16142 (93.4%)
+Outliers detected: 4 (0.0%)
+Final valid points: 16138 (93.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 14229
+Originally valid: 11577 (81.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 11576 (81.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 14688
+Originally valid: 12696 (86.4%)
+Outliers detected: 3 (0.0%)
+Final valid points: 12693 (86.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 16322 (84.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 16320 (84.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 12036
+Originally valid: 9282 (77.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9281 (77.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19125
+Originally valid: 17305 (90.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 17303 (90.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 11214
+Originally valid: 7782 (69.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7781 (69.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 18585
+Originally valid: 13773 (74.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13772 (74.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19719
+Originally valid: 13126 (66.6%)
+Outliers detected: 4 (0.0%)
+Final valid points: 13122 (66.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 12348
+Originally valid: 9400 (76.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9399 (76.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 24633
+Originally valid: 17046 (69.2%)
+Outliers detected: 10 (0.0%)
+Final valid points: 17036 (69.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 16632
+Originally valid: 12064 (72.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12062 (72.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 27909
+Originally valid: 18540 (66.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 18539 (66.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 18711
+Originally valid: 12510 (66.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12508 (66.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 28098
+Originally valid: 17743 (63.1%)
+Outliers detected: 4 (0.0%)
+Final valid points: 17739 (63.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19719
+Originally valid: 14573 (73.9%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14570 (73.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 27405
+Originally valid: 19038 (69.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 19036 (69.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 22302
+Originally valid: 16217 (72.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16216 (72.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 24003
+Originally valid: 16970 (70.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16969 (70.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 27783
+Originally valid: 18257 (65.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 18255 (65.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 16947
+Originally valid: 11875 (70.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 11873 (70.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 27972
+Originally valid: 20462 (73.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20461 (73.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 13545
+Originally valid: 9023 (66.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 9021 (66.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 24066
+Originally valid: 16775 (69.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 16773 (69.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 9009
+Originally valid: 6027 (66.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 6025 (66.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 23058
+Originally valid: 15682 (68.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 15680 (68.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17703
+Originally valid: 11731 (66.3%)
+Outliers detected: 5 (0.0%)
+Final valid points: 11726 (66.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 9891
+Originally valid: 7136 (72.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7135 (72.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22050
+Originally valid: 17073 (77.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17072 (77.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 23877
+Originally valid: 17128 (71.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17127 (71.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 24129
+Originally valid: 16462 (68.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16461 (68.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 23310
+Originally valid: 15826 (67.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15825 (67.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 19782
+Originally valid: 12691 (64.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12689 (64.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 21420
+Originally valid: 14393 (67.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 14392 (67.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 21357
+Originally valid: 14254 (66.7%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14251 (66.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 17514
+Originally valid: 12021 (68.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 12020 (68.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 18207
+Originally valid: 12165 (66.8%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12163 (66.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 23877
+Originally valid: 16142 (67.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16141 (67.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 14490
+Originally valid: 9314 (64.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9313 (64.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 23625
+Originally valid: 15121 (64.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 15119 (64.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 6552
+Originally valid: 4071 (62.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 4070 (62.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22302
+Originally valid: 15229 (68.3%)
+Outliers detected: 4 (0.0%)
+Final valid points: 15225 (68.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 63426
+Originally valid: 49889 (78.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 49888 (78.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 84816
+Originally valid: 67282 (79.3%)
+Outliers detected: 2 (0.0%)
+Final valid points: 67280 (79.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 33108
+Originally valid: 24961 (75.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 24959 (75.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 85002
+Originally valid: 68996 (81.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 68995 (81.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 51150
+Originally valid: 40424 (79.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 40421 (79.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 56358
+Originally valid: 44317 (78.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 44316 (78.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 57474
+Originally valid: 45907 (79.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 45905 (79.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 69378
+Originally valid: 56003 (80.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 56001 (80.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 60078
+Originally valid: 48519 (80.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 48518 (80.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 63054
+Originally valid: 49891 (79.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 49889 (79.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 66960
+Originally valid: 52461 (78.3%)
+Outliers detected: 2 (0.0%)
+Final valid points: 52459 (78.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 37944
+Originally valid: 28966 (76.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 28965 (76.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 84816
+Originally valid: 66621 (78.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 66620 (78.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 56544
+Originally valid: 44225 (78.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 44223 (78.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 23808
+Originally valid: 17534 (73.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17533 (73.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 58032
+Originally valid: 46092 (79.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46091 (79.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 63984
+Originally valid: 50952 (79.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 50951 (79.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 32890
+Originally valid: 31285 (95.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 31284 (95.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 49105
+Originally valid: 47215 (96.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 47214 (96.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 47955
+Originally valid: 46124 (96.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46123 (96.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 48875
+Originally valid: 46830 (95.8%)
+Outliers detected: 14 (0.0%)
+Final valid points: 46816 (95.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 49220
+Originally valid: 47112 (95.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 47111 (95.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 49335
+Originally valid: 47836 (97.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 47834 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17710
+Originally valid: 17094 (96.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17093 (96.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 41860
+Originally valid: 39710 (94.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 39709 (94.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 24035
+Originally valid: 21764 (90.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21763 (90.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 3680
+Originally valid: 3414 (92.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 3413 (92.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 7600
+Originally valid: 7352 (96.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7351 (96.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 21920
+Originally valid: 21191 (96.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21190 (96.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 25520
+Originally valid: 24594 (96.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 24593 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 20480
+Originally valid: 19738 (96.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 19736 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 20880
+Originally valid: 20265 (97.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20264 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 34000
+Originally valid: 32995 (97.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 32994 (97.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 22480
+Originally valid: 21613 (96.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 21612 (96.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 32935 (96.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 32933 (96.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 34400
+Originally valid: 33244 (96.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 33242 (96.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 25600
+Originally valid: 24788 (96.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 24787 (96.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 32320
+Originally valid: 30582 (94.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 30581 (94.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33100 (96.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33099 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 34080
+Originally valid: 32991 (96.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 32990 (96.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33101 (96.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33100 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 34080
+Originally valid: 32544 (95.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 32542 (95.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 34160
+Originally valid: 33097 (96.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 33095 (96.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 31120
+Originally valid: 29616 (95.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 29615 (95.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 14240
+Originally valid: 13601 (95.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13600 (95.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 29040
+Originally valid: 27955 (96.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 27954 (96.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 17680
+Originally valid: 16859 (95.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16858 (95.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 29440
+Originally valid: 28092 (95.4%)
+Outliers detected: 3 (0.0%)
+Final valid points: 28089 (95.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 3920
+Originally valid: 2491 (63.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 2490 (63.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 492
+Originally valid: 151 (30.7%)
+Outliers detected: 1 (0.2%)
+Final valid points: 150 (30.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 1230
+Originally valid: 822 (66.8%)
+Outliers detected: 2 (0.2%)
+Final valid points: 820 (66.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 43296
+Originally valid: 33245 (76.8%)
+Outliers detected: 1 (0.0%)
+Final valid points: 33244 (76.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 61500
+Originally valid: 46493 (75.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 46491 (75.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 77736
+Originally valid: 57627 (74.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 57625 (74.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 58056
+Originally valid: 45813 (78.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 45812 (78.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 63714
+Originally valid: 49355 (77.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 49354 (77.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 76260
+Originally valid: 60128 (78.8%)
+Outliers detected: 2 (0.0%)
+Final valid points: 60126 (78.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 79458
+Originally valid: 60864 (76.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 60863 (76.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 65928
+Originally valid: 46764 (70.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 46763 (70.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 88314
+Originally valid: 67234 (76.1%)
+Outliers detected: 4 (0.0%)
+Final valid points: 67230 (76.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 40590
+Originally valid: 25497 (62.8%)
+Outliers detected: 3 (0.0%)
+Final valid points: 25494 (62.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 77982
+Originally valid: 58834 (75.4%)
+Outliers detected: 2 (0.0%)
+Final valid points: 58832 (75.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 61254
+Originally valid: 43606 (71.2%)
+Outliers detected: 8 (0.0%)
+Final valid points: 43598 (71.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 21648
+Originally valid: 13702 (63.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13701 (63.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 5610
+Originally valid: 4730 (84.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 4729 (84.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 15810
+Originally valid: 13522 (85.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13521 (85.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 19992
+Originally valid: 17578 (87.9%)
+Outliers detected: 5 (0.0%)
+Final valid points: 17573 (87.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 22440
+Originally valid: 18289 (81.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 18288 (81.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 22593
+Originally valid: 19268 (85.3%)
+Outliers detected: 3 (0.0%)
+Final valid points: 19265 (85.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 15147
+Originally valid: 12600 (83.2%)
+Outliers detected: 9 (0.1%)
+Final valid points: 12591 (83.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22695
+Originally valid: 20636 (90.9%)
+Outliers detected: 7 (0.0%)
+Final valid points: 20629 (90.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 16014
+Originally valid: 13717 (85.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13716 (85.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 22134
+Originally valid: 19396 (87.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 19395 (87.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 16881
+Originally valid: 14103 (83.5%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14100 (83.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 20910
+Originally valid: 19603 (93.7%)
+Outliers detected: 5 (0.0%)
+Final valid points: 19598 (93.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 18054
+Originally valid: 16804 (93.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16803 (93.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 16888 (87.6%)
+Outliers detected: 3 (0.0%)
+Final valid points: 16885 (87.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 18717
+Originally valid: 17276 (92.3%)
+Outliers detected: 5 (0.0%)
+Final valid points: 17271 (92.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 22542
+Originally valid: 20196 (89.6%)
+Outliers detected: 3 (0.0%)
+Final valid points: 20193 (89.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 16677
+Originally valid: 13668 (82.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 13665 (81.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 22593
+Originally valid: 20612 (91.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20611 (91.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 22644
+Originally valid: 19705 (87.0%)
+Outliers detected: 3 (0.0%)
+Final valid points: 19702 (87.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 10914
+Originally valid: 8426 (77.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 8424 (77.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 22287
+Originally valid: 19197 (86.1%)
+Outliers detected: 5 (0.0%)
+Final valid points: 19192 (86.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 8823
+Originally valid: 7638 (86.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7637 (86.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 19635
+Originally valid: 16975 (86.5%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16974 (86.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 14229
+Originally valid: 11947 (84.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 11946 (84.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 14280
+Originally valid: 12796 (89.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12794 (89.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 17799
+Originally valid: 14606 (82.1%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14603 (82.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 5916
+Originally valid: 5025 (84.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 5024 (84.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 15869 (82.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15868 (82.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 14076
+Originally valid: 11467 (81.5%)
+Outliers detected: 13 (0.1%)
+Final valid points: 11454 (81.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 19431
+Originally valid: 17656 (90.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 17654 (90.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 18870
+Originally valid: 15858 (84.0%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15857 (84.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 16065
+Originally valid: 13175 (82.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 13173 (82.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17238
+Originally valid: 15879 (92.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15878 (92.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 17289
+Originally valid: 16142 (93.4%)
+Outliers detected: 4 (0.0%)
+Final valid points: 16138 (93.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 14229
+Originally valid: 11577 (81.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 11576 (81.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 14688
+Originally valid: 12696 (86.4%)
+Outliers detected: 3 (0.0%)
+Final valid points: 12693 (86.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 19278
+Originally valid: 16322 (84.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 16320 (84.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 12036
+Originally valid: 9282 (77.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9281 (77.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19125
+Originally valid: 17305 (90.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 17303 (90.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 11214
+Originally valid: 7782 (69.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7781 (69.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 18585
+Originally valid: 13773 (74.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 13772 (74.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19719
+Originally valid: 13126 (66.6%)
+Outliers detected: 4 (0.0%)
+Final valid points: 13122 (66.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 12348
+Originally valid: 9400 (76.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9399 (76.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 24633
+Originally valid: 17046 (69.2%)
+Outliers detected: 10 (0.0%)
+Final valid points: 17036 (69.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 16632
+Originally valid: 12064 (72.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12062 (72.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 27909
+Originally valid: 18540 (66.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 18539 (66.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 18711
+Originally valid: 12510 (66.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12508 (66.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 28098
+Originally valid: 17743 (63.1%)
+Outliers detected: 4 (0.0%)
+Final valid points: 17739 (63.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 19719
+Originally valid: 14573 (73.9%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14570 (73.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 27405
+Originally valid: 19038 (69.5%)
+Outliers detected: 2 (0.0%)
+Final valid points: 19036 (69.5%)
+
+=== Outlier Detection Summary ===
+Total data points: 22302
+Originally valid: 16217 (72.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16216 (72.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 24003
+Originally valid: 16970 (70.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16969 (70.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 27783
+Originally valid: 18257 (65.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 18255 (65.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 16947
+Originally valid: 11875 (70.1%)
+Outliers detected: 2 (0.0%)
+Final valid points: 11873 (70.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 27972
+Originally valid: 20462 (73.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 20461 (73.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 13545
+Originally valid: 9023 (66.6%)
+Outliers detected: 2 (0.0%)
+Final valid points: 9021 (66.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 24066
+Originally valid: 16775 (69.7%)
+Outliers detected: 2 (0.0%)
+Final valid points: 16773 (69.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 9009
+Originally valid: 6027 (66.9%)
+Outliers detected: 2 (0.0%)
+Final valid points: 6025 (66.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 23058
+Originally valid: 15682 (68.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 15680 (68.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 17703
+Originally valid: 11731 (66.3%)
+Outliers detected: 5 (0.0%)
+Final valid points: 11726 (66.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 9891
+Originally valid: 7136 (72.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 7135 (72.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22050
+Originally valid: 17073 (77.4%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17072 (77.4%)
+
+=== Outlier Detection Summary ===
+Total data points: 23877
+Originally valid: 17128 (71.7%)
+Outliers detected: 1 (0.0%)
+Final valid points: 17127 (71.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 24129
+Originally valid: 16462 (68.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16461 (68.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 23310
+Originally valid: 15826 (67.9%)
+Outliers detected: 1 (0.0%)
+Final valid points: 15825 (67.9%)
+
+=== Outlier Detection Summary ===
+Total data points: 19782
+Originally valid: 12691 (64.2%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12689 (64.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 21420
+Originally valid: 14393 (67.2%)
+Outliers detected: 1 (0.0%)
+Final valid points: 14392 (67.2%)
+
+=== Outlier Detection Summary ===
+Total data points: 21357
+Originally valid: 14254 (66.7%)
+Outliers detected: 3 (0.0%)
+Final valid points: 14251 (66.7%)
+
+=== Outlier Detection Summary ===
+Total data points: 17514
+Originally valid: 12021 (68.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 12020 (68.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 18207
+Originally valid: 12165 (66.8%)
+Outliers detected: 2 (0.0%)
+Final valid points: 12163 (66.8%)
+
+=== Outlier Detection Summary ===
+Total data points: 23877
+Originally valid: 16142 (67.6%)
+Outliers detected: 1 (0.0%)
+Final valid points: 16141 (67.6%)
+
+=== Outlier Detection Summary ===
+Total data points: 14490
+Originally valid: 9314 (64.3%)
+Outliers detected: 1 (0.0%)
+Final valid points: 9313 (64.3%)
+
+=== Outlier Detection Summary ===
+Total data points: 23625
+Originally valid: 15121 (64.0%)
+Outliers detected: 2 (0.0%)
+Final valid points: 15119 (64.0%)
+
+=== Outlier Detection Summary ===
+Total data points: 6552
+Originally valid: 4071 (62.1%)
+Outliers detected: 1 (0.0%)
+Final valid points: 4070 (62.1%)
+
+=== Outlier Detection Summary ===
+Total data points: 22302
+Originally valid: 15229 (68.3%)
+Outliers detected: 4 (0.0%)
+Final valid points: 15225 (68.3%)
+[np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0020044900577293133), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.002972651605231867), np.float64(0.008013141552145518), np.float64(0.001449380389883325), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.007421884663912323), np.float64(0.0), np.float64(0.00225652134669194), np.float64(0.0), np.float64(0.0043568238753948375), np.float64(0.0035713647970571955), np.float64(0.0020610907292139), np.float64(0.0), np.float64(0.004008899757461565), np.float64(0.0), np.float64(0.003812501191406622), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0034524426031417228), np.float64(0.0), np.float64(0.0), np.float64(0.0015010507355148605), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.004522533523279741), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0057035304853704435), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.002169620967217027), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.001962670016290161), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0031965221838639564), np.float64(0.0), np.float64(0.0), np.float64(0.002118015842758504), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0021681156906532533), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.029904306220095694), np.float64(0.0), np.float64(0.0021226465156757445), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0041811263954509344), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.005850348095711695), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0025183207837014276), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.004594954739695814), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.02929973630237328), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.013603591348115902), np.float64(0.0), np.float64(0.0), np.float64(0.004719207173194903), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0040661976985321025), np.float64(0.0), np.float64(0.0), np.float64(0.010133765707336847), np.float64(0.0), np.float64(0.00493485984998026), np.float64(0.0030308540946838818), np.float64(0.0), np.float64(0.0), np.float64(0.004627059041273367), np.float64(0.0060729359608902925), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.006016485169364058), np.float64(0.0), np.float64(0.0), np.float64(0.0040343728567394195), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0032700042510055267), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0030212393123659324), np.float64(0.0), np.float64(0.003031221582297666), np.float64(0.0), np.float64(0.0030211480362537764), np.float64(0.0), np.float64(0.006145903755147193), np.float64(0.0), np.float64(0.006043208943949237), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0033766672294445383), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.007352941176470587), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.003577305573442083), np.float64(0.005931901767706727), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.010680337498664958), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.040160642570281124), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.6666666666666667), np.float64(0.24390243902439024), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0030080616051016726), np.float64(0.0), np.float64(0.004301907896151943), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.003470715835140998), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.002182834191914782), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.002026178222636463), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0033263480025280245), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0016430343558483807), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0021384427859632614), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.005949724825226833), np.float64(0.011767474699929396), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.003399510470492249), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.01834946557181522), np.float64(0.0), np.float64(0.0), np.float64(0.007298737318443909), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.02114611968703743), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.007395902669920864), np.float64(0.0), np.float64(0.02845273999886189), np.float64(0.0), np.float64(0.0054680664916885394), np.float64(0.0), np.float64(0.015572281339216195), np.float64(0.07147962830593281), np.float64(0.0339328130302002), np.float64(0.007290755322251386), np.float64(0.005155968032998195), np.float64(0.02127659574468085), np.float64(0.025512807429329522), np.float64(0.005951318216985062), np.float64(0.017767249037607343), np.float64(0.0), np.float64(0.02895026344739737), np.float64(0.014856633486851881), np.float64(0.02195389681668496), np.float64(0.004851778176701761), np.float64(0.0), np.float64(0.015226880519744187), np.float64(0.023741690408357077), np.float64(0.026052521884118385), np.float64(0.013094146916328401), np.float64(0.005891363261458701), np.float64(0.0), np.float64(0.0), np.float64(0.008371002846140967), np.float64(0.0), np.float64(0.01563232765358762), np.float64(0.0), np.float64(0.020543723892350887), np.float64(0.019904458598726117), np.float64(0.006301991429291657), np.float64(0.11349746813340317), np.float64(0.011328877308258751), np.float64(0.0), np.float64(0.006306363120388472), np.float64(0.015182570409170273), np.float64(0.006298022420959819), np.float64(0.024786218862312553), np.float64(0.008638562543192813), np.float64(0.0), np.float64(0.02363507445048452), np.float64(0.012254901960784314), np.float64(0.010774701002047193), np.float64(0.011558689244639658), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.0), np.float64(0.012851818532322323), np.float64(0.0), np.float64(0.007261109497531223), np.float64(0.0), np.float64(0.030483158055174518), np.float64(0.010639429726566656), np.float64(0.058699225170227756), np.float64(0.0165809981760902), np.float64(0.0), np.float64(0.0), np.float64(0.005394034198176816), np.float64(0.01598976654940838), np.float64(0.02254918541067704), np.float64(0.02059025394646534), np.float64(0.010506408909434755), np.float64(0.0), np.float64(0.0), np.float64(0.006166748889985201), np.float64(0.005893099180859214), np.float64(0.0), np.float64(0.0), np.float64(0.010955902492467817), np.float64(0.0), np.float64(0.0), np.float64(0.0168449423060726), np.float64(0.004887346659498558), np.float64(0.022170491076377342), np.float64(0.0), np.float64(0.0), np.float64(0.01192392535622727), np.float64(0.03319502074688797), np.float64(0.012755102040816327), np.float64(0.042640286542725565), np.float64(0.0), np.float64(0.0), np.float64(0.01401541695865452), np.float64(0.005857544517338332), np.float64(0.0), np.float64(0.005838734162433585), np.float64(0.0), np.float64(0.006074965068950854), np.float64(0.0), np.float64(0.00631911532385466), np.float64(0.01576168334778154), np.float64(0.006948304613674263), np.float64(0.021051154304961055), np.float64(0.008319467554076539), np.float64(0.0), np.float64(0.01644331168297295), np.float64(0.006195403010965863), np.float64(0.010737678513905294), np.float64(0.013228388120907467), np.float64(0.02457002457002457), np.float64(0.026272577996715927), np.float64(0.0), np.float64(0.0), np.float64(0.0)]
+[array(7246), array(2074), array(1816), array(5808), array(13672), array(4412), array(5939), array(23171), array(6173), array(46850), array(11637), array(49888), array(16400), array(62522), array(21371), array(67280), array(24959), array(68995), array(30371), array(68254), array(35584), array(65702), array(40273), array(62204), array(40421), array(63113), array(44316), array(57259), array(45905), array(56001), array(48518), array(54349), array(49889), array(49522), array(52459), array(43283), array(54740), array(39198), array(62729), array(33627), array(70162), array(28965), array(65677), array(24411), array(66620), array(22882), array(65530), array(40086), array(69600), array(44223), array(62907), array(51004), array(56212), array(58413), array(24438), array(56400), array(24612), array(55761), array(53829), array(17533), array(33403), array(49508), array(41561), array(46773), array(44504), array(40455), array(46091), array(41710), array(47055), array(38018), array(50951), array(28695), array(51435), array(16103), array(55246), array(11998), array(52168), array(3650), array(42567), array(9165), array(47016), array(29743), array(71115), array(46341), array(26275), array(165138), array(66475), array(384868), array(167724), array(554250), array(237336), array(555800), array(326082), array(545779), array(350466), array(505949), array(375307), array(455313), array(412796), array(408072), array(471405), array(318567), array(561326), array(240921), array(553772), array(176114), array(558091), array(348200), array(455144), array(469330), array(196869), array(483477), array(220479), array(429373), array(353164), array(319250), array(387839), array(340108), array(424348), array(208106), array(462773), array(57385), array(403077), array(175262), array(2282), array(1189), array(6767), array(4231), array(2513), array(8868), array(5355), array(3599), array(10103), array(8396), array(13606), array(10097), array(16836), array(11553), array(21989), array(13796), array(31263), array(15579), array(31700), array(18578), array(31306), array(21014), array(33588), array(23965), array(36298), array(27974), array(42337), array(28358), array(47047), array(29477), array(47028), array(30365), array(47169), array(31284), array(47564), array(31560), array(47214), array(33125), array(47091), array(33482), array(47826), array(35126), array(46123), array(36769), array(44916), array(37483), array(43578), array(41264), array(41623), array(46395), array(39894), array(47207), array(38899), array(47041), array(39512), array(47014), array(39251), array(46816), array(33547), array(47111), array(30017), array(47706), array(27331), array(47834), array(24350), array(46458), array(21529), array(43690), array(19868), array(40030), array(16776), array(38771), array(15359), array(39355), array(17093), array(30526), array(24974), array(20989), array(25624), array(15207), array(27659), array(16169), array(32392), array(17232), array(36919), array(13065), array(37536), array(17693), array(40638), array(29627), array(40241), array(29725), array(40082), array(30817), array(40662), array(32512), array(41396), array(33541), array(38621), array(34016), array(36309), array(36095), array(34877), array(36960), array(32660), array(37337), array(28700), array(40005), array(28966), array(39709), array(30024), array(39689), array(27099), array(39896), array(21763), array(39597), array(16405), array(35428), array(10213), array(28737), array(5523), array(21686), array(1165), array(22593), array(9911), array(230), array(308), array(3965), array(2243), array(1305), array(5624), array(3328), array(2177), array(6354), array(3413), array(8221), array(6542), array(10351), array(7351), array(13445), array(9229), array(21190), array(10132), array(22006), array(12135), array(21925), array(13822), array(23285), array(15804), array(24593), array(17135), array(28259), array(19736), array(31541), array(20264), array(32994), array(21033), array(32762), array(21612), array(32933), array(22176), array(32712), array(22389), array(33046), array(23357), array(33242), array(24167), array(32692), array(24787), array(31642), array(26737), array(30545), array(27969), array(30014), array(30581), array(28420), array(32631), array(27507), array(33099), array(27139), array(32990), array(28228), array(33100), array(24879), array(32542), array(22143), array(33095), array(19721), array(33131), array(18351), array(33244), array(15955), array(30896), array(14369), array(29615), array(12815), array(27709), array(11089), array(27175), array(10743), array(27262), array(13600), array(16113), array(21048), array(11004), array(18452), array(10707), array(21032), array(12013), array(25284), array(10226), array(26012), array(10431), array(27954), array(16858), array(28041), array(20739), array(28197), array(21369), array(28407), array(21954), array(28890), array(23043), array(27724), array(23826), array(25963), array(24631), array(25572), array(24845), array(21383), array(25971), array(20374), array(27380), array(19970), array(28023), array(21158), array(27465), array(20883), array(28089), array(16680), array(26707), array(12623), array(26692), array(7311), array(23431), array(5910), array(18097), array(14608), array(1998), array(2490), array(11927), array(3143), array(1267), array(30960), array(14424), array(10637), array(93523), array(33237), array(118248), array(50991), array(145538), array(71312), array(144323), array(86965), array(137411), array(95093), array(121537), array(103796), array(114259), array(114120), array(84683), array(141332), array(63959), array(138709), array(46937), array(133344), array(84129), array(124749), array(99227), array(51961), array(121614), array(42122), array(116186), array(86938), array(102214), array(94763), array(85904), array(104250), array(74371), array(110560), array(30792), array(106791), array(98350), array(4153), array(21214), array(150), array(820), array(8645), array(3851), array(2576), array(10947), array(6253), array(4103), array(13543), array(7679), array(5566), array(14797), array(9570), array(18671), array(14131), array(22390), array(15596), array(26218), array(17647), array(33244), array(20932), array(46491), array(22159), array(48714), array(25270), array(49375), array(29240), array(49004), array(32119), array(50597), array(34549), array(55459), array(38716), array(57625), array(44083), array(64548), array(45516), array(73371), array(45812), array(72702), array(48299), array(74156), array(47195), array(73212), array(48834), array(73055), array(49354), array(72567), array(50786), array(68242), array(52802), array(69138), array(51651), array(72470), array(55628), array(68207), array(55458), array(70972), array(60126), array(68938), array(59631), array(66643), array(63955), array(60934), array(70413), array(61793), array(74564), array(60403), array(75355), array(59716), array(74711), array(60040), array(71235), array(60863), array(71915), array(53672), array(74560), array(46763), array(71361), array(39813), array(73564), array(35555), array(73099), array(33504), array(74472), array(30064), array(72341), array(26985), array(67230), array(25494), array(64400), array(22166), array(59675), array(24700), array(59945), array(23506), array(59563), array(26032), array(59216), array(32653), array(34952), array(46649), array(26340), array(38027), array(23281), array(41488), array(24652), array(47885), array(27096), array(55154), array(28439), array(56845), array(19051), array(58153), array(26032), array(61868), array(43166), array(60858), array(46976), array(62833), array(47675), array(60288), array(46572), array(62660), array(51307), array(59733), array(51600), array(62769), array(52940), array(57707), array(54125), array(56097), array(55457), array(53418), array(56449), array(46150), array(58251), array(43669), array(59759), array(43889), array(62740), array(43602), array(62196), array(46373), array(60197), array(44965), array(62448), array(39039), array(59549), array(34506), array(58832), array(24940), array(59716), array(17124), array(53806), array(14110), array(43598), array(8383), array(33154), array(13701), array(34434), array(2630), array(32163), array(109), array(174), array(3398), array(1931), array(1220), array(4729), array(3878), array(8151), array(5302), array(11648), array(7053), array(13521), array(9051), array(17573), array(12491), array(18288), array(12609), array(19265), array(12591), array(20629), array(13716), array(19395), array(14100), array(19598), array(16803), array(16885), array(18702), array(17271), array(20193), array(13665), array(20611), array(11983), array(19702), array(8424), array(19192), array(7637), array(16974), array(5603), array(17280), array(11946), array(8343), array(12794), array(7177), array(14603), array(5024), array(15868), array(11454), array(17654), array(12885), array(15857), array(13173), array(15878), array(16138), array(11576), array(14765), array(12693), array(16320), array(9281), array(17303), array(4372), array(15402), array(1014), array(3441), array(9418), array(125), array(150), array(3375), array(2114), array(1249), array(4602), array(3747), array(7781), array(4806), array(13772), array(6718), array(13122), array(9399), array(17036), array(12062), array(20424), array(12215), array(18539), array(12508), array(17739), array(14570), array(19036), array(15599), array(19154), array(16216), array(16969), array(20962), array(16008), array(18255), array(14982), array(18513), array(11873), array(20461), array(9021), array(20413), array(7606), array(16773), array(6025), array(15680), array(11726), array(8213), array(11708), array(7135), array(17072), array(5327), array(17127), array(12392), array(16461), array(12563), array(15825), array(12689), array(14392), array(14251), array(12020), array(17014), array(12163), array(16141), array(9313), array(15119), array(4070), array(15225), array(1040), array(3335), array(8926)]
