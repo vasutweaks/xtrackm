@@ -81,6 +81,7 @@ def load_and_filter_sla_data_corrected(file_path):
 max_perc = []
 max_valid= []
 
+found = False
 for sat in sats_new:
     for f in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")):
         ds = xr.open_dataset(f)
@@ -90,23 +91,33 @@ for sat in sats_new:
         # Remove outliers
         sla_filtered = sla.where(~outlier_mask)
         # Print summary statistics
-        total_points = sla.size
-        valid_original = sla.count().values
-        outliers_detected = outlier_mask.sum().values
-        valid_filtered = sla_filtered.count().values
-        if outliers_detected != 0:
-            print(f"\n=== Outlier Detection Summary ===")
-            print(f"Total data points: {total_points}")
-            print(f"Originally valid: {valid_original} ({valid_original/total_points*100:.1f}%)")
-            print(f"Outliers detected: {outliers_detected} ({outliers_detected/total_points*100:.1f}%)")
-            print(f"Final valid points: {valid_filtered} ({valid_filtered/total_points*100:.1f}%)")
-            sla_filtered, outlier_mask = load_and_filter_sla_data_corrected(f)
-            outliers_detected = outlier_mask.sum().values
-            valid_filtered = sla_filtered.count().values
-            perc = outliers_detected/valid_filtered*100
-            valid_perc = valid_
-            max_perc.append(perc)
-            max_valid.append(valid_filtered)
+        n_orig1 = sla.size
+        n_valid = sla.count().values # Without nans
+        n_nans1 = n_orig1 - n_valid
 
-print(max_perc)
-print(max_valid)
+        valid_filtered = sla_filtered.count().values
+        n_outliers = outlier_mask.sum().values
+
+        perc_outliers = n_outliers/valid_filtered*100
+        if n_outliers != 0:
+            found = True
+            break
+    if found:
+        break
+
+#         if outliers_detected != 0:
+#             print(f"\n=== Outlier Detection Summary ===")
+#             print(f"Total data points: {total_points}")
+#             print(f"Originally valid: {valid_original} ({valid_original/total_points*100:.1f}%)")
+#             print(f"Outliers detected: {outliers_detected} ({outliers_detected/total_points*100:.1f}%)")
+#             print(f"Final valid points: {valid_filtered} ({valid_filtered/total_points*100:.1f}%)")
+#             sla_filtered, outlier_mask = load_and_filter_sla_data_corrected(f)
+#             outliers_detected = outlier_mask.sum().values
+#             valid_filtered = sla_filtered.count().values
+#             perc = outliers_detected/valid_filtered*100
+#             valid_perc = valid_
+#             max_perc.append(perc)
+#             max_valid.append(valid_filtered)
+#
+# print(max_perc)
+# print(max_valid)
