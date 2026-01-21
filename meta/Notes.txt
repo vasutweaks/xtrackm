@@ -1,3 +1,41 @@
+There are huge gaps in the data for TPN+J1N+J2N+J3N in time
+
+Satellite: GFO ----------------
+Processed 82 files across for GFO.
+Average NaN Percentage: 21.71088%
+Average Outlier Percentage (relative to valid data): 0.00078%
+Satellite: TP+J1+J2+J3+S6A ----------------
+Processed 42 files across for TP+J1+J2+J3+S6A.
+Average NaN Percentage: 7.43071%
+Average Outlier Percentage (relative to valid data): 0.00000%
+Satellite: S3A ----------------
+Processed 125 files across for S3A.
+Average NaN Percentage: 4.58146%
+Average Outlier Percentage (relative to valid data): 0.00062%
+Satellite: S3B ----------------
+Processed 126 files across for S3B.
+Average NaN Percentage: 4.18374%
+Average Outlier Percentage (relative to valid data): 0.00115%
+Satellite: TPN+J1N+J2N+J3N ----------------
+Processed 44 files across for TPN+J1N+J2N+J3N.
+Average NaN Percentage: 66.34210%
+Average Outlier Percentage (relative to valid data): 0.00000%
+Satellite: ERS1+ERS2+ENV+SRL ----------------
+Processed 163 files across for ERS1+ERS2+ENV+SRL.
+Average NaN Percentage: 23.85020%
+Average Outlier Percentage (relative to valid data): 0.00043%
+Satellite: HY2A ----------------
+Processed 64 files across for HY2A.
+Average NaN Percentage: 13.49256%
+Average Outlier Percentage (relative to valid data): 0.01353%
+Satellite: HY2B ----------------
+Processed 64 files across for HY2B.
+Average NaN Percentage: 30.35783%
+Average Outlier Percentage (relative to valid data): 0.00960%
+
+Outliers as percentage of valid data is close to zero for almost all satellites.
+NaN percentage for TPN+J1N+J2N+J3N is very huge. Why?
+
 The number of outlies is close to zero, no of NaNs is around 4% for all
 the tracks
 

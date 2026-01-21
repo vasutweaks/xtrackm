@@ -1,0 +1,2 @@
+write a python program to cycle through all files in xtrackm/data/TPN+J1N+J2N+J3N
+1. plot 2-D sla shade plots (cycles_numbers as x-axis and points_numbers as y-axis) for each file and save them a directory. Use xarray for reading files.

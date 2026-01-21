@@ -7,39 +7,27 @@ from namesm import sats_new
 def mad_outlier_detection_fixed(data, threshold=3.5, dim="cycles_numbers"):
     """
     MAD outlier detection using your actual dimension names.
-    Parameters:
-    -----------
-    data : xarray.DataArray
-        Input SLA data
-    threshold : float
-        MAD threshold (3.5 is commonly used in X-TRACK)
-    dim : str
-        Dimension along which to detect outliers ('cycles_numbers' or 'points_numbers')
-    Returns:
-    --------
-    xarray.DataArray : Boolean mask where True indicates outliers
     """
     def mad_filter_1d(x, thresh):
-        """Apply MAD filter to 1D array"""
         if len(x) < 3 or np.all(np.isnan(x)):
             return np.zeros_like(x, dtype=bool)
-        # Remove NaNs for calculation
         valid_mask = ~np.isnan(x)
         if np.sum(valid_mask) < 3:
             return np.zeros_like(x, dtype=bool)
+        # size of valid data might be less than x depending on the
+        # number of NaNs
         valid_data = x[valid_mask]
         median = np.median(valid_data)
         mad = median_abs_deviation(valid_data, scale='normal')
         if mad == 0:
-            # If MAD is 0, use modified approach
             mad = np.median(np.abs(valid_data - median)) * 1.4826
             if mad == 0:
                 return np.zeros_like(x, dtype=bool)
-        # Calculate modified Z-score
         modified_z_scores = 0.6745 * (x - median) / mad
         outliers = np.abs(modified_z_scores) > thresh
+        # size of outliers is same as the size of x
         return outliers
-    # Apply MAD filter along specified dimension
+
     outlier_mask = xr.apply_ufunc(
         lambda x: mad_filter_1d(x, threshold),
         data,
@@ -51,73 +39,37 @@ def mad_outlier_detection_fixed(data, threshold=3.5, dim="cycles_numbers"):
     )
     return outlier_mask
 
-
-def load_and_filter_sla_data_corrected(file_path):
-    """
-    Load and filter SLA data using correct dimension names.
-    """
-    # Load your netCDF file
-    ds = xr.open_dataset(file_path)
-    sla = ds["sla"]  # Assuming 'sla' is the variable name
-    # print(f"SLA data shape: {sla.shape}")
-    # print(f"SLA dimensions: {sla.dims}")
-    # Detect outliers along time dimension (cycles_numbers)
-    outlier_mask = mad_outlier_detection_fixed(sla, threshold=3.5, dim='cycles_numbers')
-    # Remove outliers
-    sla_filtered = sla.where(~outlier_mask)
-    # Print summary statistics
-    total_points = sla.size
-    valid_original = sla.count().values
-    outliers_detected = outlier_mask.sum().values
-    valid_filtered = sla_filtered.count().values
-    if outliers_detected != 0:
-        print(f"\n=== Outlier Detection Summary ===")
-        print(f"Total data points: {total_points}")
-        print(f"Originally valid: {valid_original} ({valid_original/total_points*100:.1f}%)")
-        print(f"Outliers detected: {outliers_detected} ({outliers_detected/total_points*100:.1f}%)")
-        print(f"Final valid points: {valid_filtered} ({valid_filtered/total_points*100:.1f}%)")
-    return sla_filtered, outlier_mask
-
-max_perc = []
-max_valid= []
-
-found = False
 for sat in sats_new:
-    for f in sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc")):
+    total_size = 0      # Total size (n_orig1)
+    total_initial_nans = 0
+    total_initial_valid = 0
+    # Outliers are numerical values and counted over valid values
+    total_outliers = 0
+    file_count = 0
+    file_list = sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"))
+    for f in file_list:
         ds = xr.open_dataset(f)
-        sla = ds["sla"]  # Assuming 'sla' is the variable name
-        # Detect outliers along time dimension (cycles_numbers)
+        sla = ds["sla"]
         outlier_mask = mad_outlier_detection_fixed(sla, threshold=3.5, dim='cycles_numbers')
-        # Remove outliers
-        sla_filtered = sla.where(~outlier_mask)
-        # Print summary statistics
-        n_orig1 = sla.size
-        n_valid = sla.count().values # Without nans
-        n_nans1 = n_orig1 - n_valid
-
-        valid_filtered = sla_filtered.count().values
-        n_outliers = outlier_mask.sum().values
-
-        perc_outliers = n_outliers/valid_filtered*100
-        if n_outliers != 0:
-            found = True
-            break
-    if found:
-        break
-
-#         if outliers_detected != 0:
-#             print(f"\n=== Outlier Detection Summary ===")
-#             print(f"Total data points: {total_points}")
-#             print(f"Originally valid: {valid_original} ({valid_original/total_points*100:.1f}%)")
-#             print(f"Outliers detected: {outliers_detected} ({outliers_detected/total_points*100:.1f}%)")
-#             print(f"Final valid points: {valid_filtered} ({valid_filtered/total_points*100:.1f}%)")
-#             sla_filtered, outlier_mask = load_and_filter_sla_data_corrected(f)
-#             outliers_detected = outlier_mask.sum().values
-#             valid_filtered = sla_filtered.count().values
-#             perc = outliers_detected/valid_filtered*100
-#             valid_perc = valid_
-#             max_perc.append(perc)
-#             max_valid.append(valid_filtered)
-#
-# print(max_perc)
-# print(max_valid)
+        n_orig1 = sla.size                         # Total size
+        n_valid = int(sla.count().values)          # Non-NaNs before filtering
+        n_nans = n_orig1 - n_valid                 # Initial NaNs
+        n_outliers = int(outlier_mask.sum().values) # Outliers found in n_valid
+        # 3. Accumulate
+        total_size += n_orig1
+        total_initial_nans += n_nans
+        total_initial_valid += n_valid
+        total_outliers += n_outliers
+        file_count += 1
+        ds.close() # Good practice for large batches
+    # --- Final Statistics ---
+    print(f"Satellite: {sat} ----------------")
+    if total_size > 0:
+        avg_nan_perc = (total_initial_nans / total_size) * 100
+        # Outlier percentage is typically calculated relative to the valid data points
+        avg_outlier_perc = (total_outliers / total_initial_valid) * 100 if total_initial_valid > 0 else 0
+        print(f"Processed {file_count} files across for {sat}.")
+        print(f"Average NaN Percentage: {avg_nan_perc:.5f}%")
+        print(f"Average Outlier Percentage (relative to valid data): {avg_outlier_perc:.5f}%")
+    else:
+        print("No files found.")
