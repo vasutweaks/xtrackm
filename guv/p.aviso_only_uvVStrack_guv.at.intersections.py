@@ -8,6 +8,8 @@ import xarray as xr
 from tools_xtrackm import *
 import xskillscore as xs
 import sys
+# from rich.traceback import install
+# install(show_locals=True, suppress=["site-packages"])
 
 
 def geostrophic_components_from_a(gc1, gc2, a1, a2):
@@ -85,11 +87,6 @@ ngp_v = []
 ln = len(df)
 count = 0
 for i in range(ln):
-    ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u_nio.nc")
-    ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v_nio.nc")
-    # print(ds_aviso_u)
-    aviso_u = ds_aviso_u.ugosa
-    aviso_v = ds_aviso_v.vgosa
     sat1 = df["sat"].values[i]
     track_number_self = df["track_self"].apply(lambda x: str(x)).values[i]
     track_number_other = df["track_other"].apply(lambda x: str(x)).values[i]
@@ -126,11 +123,11 @@ for i in range(ln):
     f_other = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_other.zfill(3)}.nc"
     f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_self}_loess_0.2.nc"
     f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_other}_loess_0.2.nc"
-    ds_self = xr.open_dataset(f_self, engine="h5netcdf", decode_times=False)
+    ds_self = xr.open_dataset(f_self, engine="netcdf4", decode_times=False)
     ds_self_smooth = xr.open_dataset(f_self_smooth)
     sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
     sla_self_smooth = ds_self_smooth.sla_smooth
-    ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
+    ds_other = xr.open_dataset(f_other, engine="netcdf4", decode_times=False)
     ds_other_smooth = xr.open_dataset(f_other_smooth)
     sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
     sla_other_smooth = ds_other_smooth.sla_smooth
@@ -177,36 +174,36 @@ for i in range(ln):
     gv_cut_ngp = 100 * gv_cut.count(dim="time")/len(gv_cut.time)
     tfreq = sats_tfreq[sat]
 
-    aviso_u = aviso_u.sel(longitude=lon1, latitude=lat1, method="nearest")
-    aviso_u = aviso_u.interp(time=gu_cut.time)
-    aviso_max_u = aviso_u.max().item()
+    aviso_u1 = aviso_u.sel(longitude=lon1, latitude=lat1, method="nearest")
+    aviso_u2 = aviso_u1.interp(time=gu_cut.time)
+    aviso_max_u = aviso_u2.max().item()
     gu_cut = gu_cut.where(gu_cut < aviso_max_u, np.nan)
     gu_cut = gu_cut.where(gu_cut > -aviso_max_u, np.nan)
 
-    aviso_v = aviso_v.sel(longitude=lon1, latitude=lat1, method="nearest")
-    aviso_v = aviso_v.interp(time=gv_cut.time)
-    aviso_max_v = aviso_v.max().item()
+    aviso_v1 = aviso_v.sel(longitude=lon1, latitude=lat1, method="nearest")
+    aviso_v2 = aviso_v1.interp(time=gv_cut.time)
+    aviso_max_v = aviso_v2.max().item()
     gv_cut = gv_cut.where(gv_cut < aviso_max_v, np.nan)
     gv_cut = gv_cut.where(gv_cut > -aviso_max_v, np.nan)
 
-    aviso_u.plot(ax=ax0, color="b", linewidth=2, label="aviso u")
+    aviso_u2.plot(ax=ax0, color="b", linewidth=2, label="aviso u")
     gu_cut.plot(ax=ax0, label=f"track zonal", color="r", linewidth=2)
     # ax0.set_xlim(datetime(2010, 1, 1), datetime(2020, 1, 1))
     ax0.legend()
     ax0.set_ylabel("aviso u m/s")
 
-    aviso_v.plot(ax=ax1, color="b", linewidth=2, label="aviso v")
+    aviso_v2.plot(ax=ax1, color="b", linewidth=2, label="aviso v")
     gv_cut.plot(ax=ax1, label=f"track meridional", color="r", linewidth=2)
 
     # percentage of good points of gu_cut
-    corr_u = xs.pearson_r(gu_cut, aviso_u, dim="time", skipna=True)
-    rmse_u = xs.rmse(gu_cut, aviso_u, dim="time", skipna=True)
-    bias_var_u = aviso_u - gu_cut
+    corr_u = xs.pearson_r(gu_cut, aviso_u2, dim="time", skipna=True)
+    rmse_u = xs.rmse(gu_cut, aviso_u2, dim="time", skipna=True)
+    bias_var_u = aviso_u2 - gu_cut
     bias_u = bias_var_u.mean(dim="time")
 
-    corr_v = xs.pearson_r(gv_cut, aviso_v, dim="time", skipna=True)
-    rmse_v = xs.rmse(gv_cut, aviso_v, dim="time", skipna=True)
-    bias_var_v = aviso_v - gv_cut
+    corr_v = xs.pearson_r(gv_cut, aviso_v2, dim="time", skipna=True)
+    rmse_v = xs.rmse(gv_cut, aviso_v2, dim="time", skipna=True)
+    bias_var_v = aviso_v2 - gv_cut
     bias_v = bias_var_v.mean(dim="time")
 
     corrs_u.append(corr_u.item())
@@ -290,9 +287,9 @@ for i in range(ln):
     plt.savefig(
         f"track_guvVSaviso_at_intersection_points/guv_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
     )
-    # plt.show()
+    plt.show()
     plt.close("all")
-    ds_aviso_u.close()
+    # ds_aviso_u.close()
 
 # add corrs, rmses, biass to dataframe df_out
 df_out["corrs"] = corrs_u

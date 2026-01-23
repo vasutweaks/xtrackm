@@ -1295,7 +1295,8 @@ def track_dist_time_asn(ds, var_str="sla", units_in="m"):
         dates = [dt0 + timedelta(days=int(d)) for d in dvals]
     var1 = ds[var_str]
     # now sla values oriented from coast
-    var1_rev = var1.isel(points_numbers=slice(None, None, -1)).values
+    # var1_rev = var1.isel(points_numbers=slice(None, None, -1)).values
+    var1_rev = var1.load().isel(points_numbers=slice(None, None, -1)).values
     var2 = xr.DataArray(
         var1_rev,
         coords=[dists_rev, dates],
