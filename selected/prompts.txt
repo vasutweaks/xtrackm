@@ -1,0 +1,1 @@
+Combine two scripts in a way the two scatter plots come in side by side subplots sharing the y-axis
