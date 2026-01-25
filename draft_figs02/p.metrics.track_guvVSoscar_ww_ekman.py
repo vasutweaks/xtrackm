@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from tools_xtrackm import ln_sf
 
 only_df = pd.read_csv(
     "oscar_onlyVStrack_corrs_rmses_biass_TP+J1+J2+J3+S6A_u.csv")
@@ -80,4 +81,5 @@ ax_sum.annotate(
 )
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.savefig(f"track_guvVSoscar_ww_ekman_u.png")
+ln_sf("track_guvVSoscar_ww_ekman_u.png", "fig04.png")
 plt.show()

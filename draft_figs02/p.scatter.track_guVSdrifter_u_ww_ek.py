@@ -1,7 +1,9 @@
 import sys
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from tools_xtrackm import ln_sf
 
 
 # -------------------------------------------------------------------
@@ -71,7 +73,8 @@ def scatter_with_fit(ax, x, y, xlabel, title):
 # -------------------------------------------------------------------
 # Main
 # -------------------------------------------------------------------
-sat = sys.argv[1]
+# sat = sys.argv[1]
+sat = "TP+J1+J2+J3+S6A"
 
 # Read data
 df_no_ek = pd.read_csv(
@@ -118,4 +121,5 @@ scatter_with_fit(
 
 plt.tight_layout()
 plt.savefig(f"scatter_{sat}_gu_vs_ve_and_guEk_vs_ve.png", dpi=300)
+ln_sf(f"scatter_{sat}_gu_vs_ve_and_guEk_vs_ve.png", "fig05.png")
 plt.show()

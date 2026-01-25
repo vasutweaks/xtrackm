@@ -2,6 +2,7 @@ import math
 import pickle
 from datetime import datetime
 import sys
+import os
 
 import cmocean as cmo
 import matplotlib.gridspec as gridspec
@@ -270,5 +271,7 @@ for sat, trackn, x1, y1, mindist, id in filtered_list:
         f"tseries_loess_adj_allsat_map_box_separate_{sat}_{trackn}.png",
         bbox_inches="tight",
     )
+    ln_sf(
+        f"tseries_loess_adj_allsat_map_box_separate_{sat}_{trackn}.png", "fig01.png")
     plt.show()
     plt.close("all")

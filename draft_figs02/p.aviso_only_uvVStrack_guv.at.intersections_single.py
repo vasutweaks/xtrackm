@@ -294,6 +294,10 @@ for i in range(ln):
     plt.savefig(
         f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
     )
+    ln_sf(
+        f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
+        "fig03.png",
+    )
     plt.show()
     plt.close("all")
     # ds_aviso_u.close()

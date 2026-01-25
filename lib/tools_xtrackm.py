@@ -1,5 +1,6 @@
 import functools
 from joblib import Parallel, delayed
+import os
 import glob
 import time
 from datetime import datetime, timedelta
@@ -23,6 +24,15 @@ from scipy.signal import butter, filtfilt
 from shapely.geometry import Point, Polygon
 from namesm import *
 import math
+
+
+def ln_sf(src, dst):
+    try:
+        os.remove(dst)   # works for files and symlinks
+    except FileNotFoundError:
+        pass
+    os.symlink(src, dst)
+
 
 def read_drifter_data(file_path):
     # Define column names

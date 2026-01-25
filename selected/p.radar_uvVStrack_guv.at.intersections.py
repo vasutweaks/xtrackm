@@ -64,6 +64,7 @@ dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 oscar_extracted_dir = f"/home/srinivasu/xtrackm/guv/oscar_at_intersections/"
 
 radar_str = "OR"
+radar_str = "TN"
 width, height = 13, 6
 REG = radar_extents[radar_str + "_BLOCK"]
 TRACKS_REG = (73, 99, 0, 26)
@@ -343,7 +344,7 @@ for idx, row in df_all.iterrows():
     plt.savefig(
         f"track_guvVSoscar_at_intersection_points/guv_timeseries_{sat1}_{track_number_self}_{track_number_other}_{radar_str}.png",
     )
-    # plt.show()
+    plt.show()
     plt.close("all")
 
 # add corrs, rmses, biass to dataframe df_out
