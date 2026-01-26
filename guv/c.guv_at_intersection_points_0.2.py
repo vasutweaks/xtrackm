@@ -4,6 +4,35 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from tools_xtrackm import *
+from matplotlib import pyplot as plt
+from scipy.stats import median_abs_deviation
+
+
+def mad_filter_1d_xr(da, thresh):
+    x = da.values
+    time = da.time
+    if len(x) < 3 or np.all(np.isnan(x)):
+        return np.zeros_like(x, dtype=bool)
+    valid_mask = ~np.isnan(x)
+    if np.sum(valid_mask) < 3:
+        return np.zeros_like(x, dtype=bool)
+    # size of valid data might be less than x depending on the
+    # number of NaNs
+    valid_data = x[valid_mask]
+    median = np.median(valid_data)
+    mad = median_abs_deviation(valid_data, scale='normal')
+    if mad == 0:
+        mad = np.median(np.abs(valid_data - median)) * 1.4826
+        if mad == 0:
+            return np.zeros_like(x, dtype=bool)
+    modified_z_scores = 0.6745 * (x - median) / mad
+    # size of outliers is same as the size of x
+    outliers = np.abs(modified_z_scores) > thresh
+    x_filtered = np.zeros_like(x)
+    x_filtered[valid_mask] = x[valid_mask]
+    x_filtered[outliers] = np.nan
+    da_out = xr.DataArray(x_filtered, coords={"time": time}, dims=["time"])
+    return da_out
 
 
 def geostrophic_components_from_a(gc1, gc2, a1, a2):
@@ -85,13 +114,13 @@ for sat in sats_new:
         f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_self}_loess_0.2.nc"
         f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_other}_loess_0.2.nc"
         ds_self = xr.open_dataset(f_self,
-                                  engine="h5netcdf",
+                                  engine="netcdf4",
                                   decode_times=False)
         ds_self_smooth = xr.open_dataset(f_self_smooth)
         sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
         sla_self_smooth = ds_self_smooth.sla_smooth
         ds_other = xr.open_dataset(f_other,
-                                   engine="h5netcdf",
+                                   engine="netcdf4",
                                    decode_times=False)
         ds_other_smooth = xr.open_dataset(f_other_smooth)
         sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
@@ -129,10 +158,17 @@ for sat in sats_new:
                         lon_coast_self - lon_equat_self)
         print(f"azimuths {a1:.2f} {a2:.2f}")
         gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
+        # filter xarray dataarray gu if greater than 3.5 or less than -3.5
+        gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))
+        gu_filtered = mad_filter_1d_xr(gu_filt, 3.5)
+        gu.plot(label="gu", marker=".")
+        gu_filtered.plot(label="gu_filtered", marker="x")
+        plt.legend()
+        plt.show()
         # create a ds_out with gu and gv
-        ds_out = xr.Dataset({"gu": gu, "gv": gv})
-        filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}.nc"
-        print(filename)
-        ds_out.to_netcdf(filename)
-        break
+        # ds_out = xr.Dataset({"gu": gu, "gv": gv})
+        # filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}.nc"
+        # print(filename)
+        # ds_out.to_netcdf(filename)
     # close df
+    df.close()

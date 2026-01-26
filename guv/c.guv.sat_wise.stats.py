@@ -53,7 +53,7 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
     return u, v
 
 
-for sat in sats_new[:1]:
+for sat in sats_new:
     gu_all = []
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
     for i, row in df.iterrows():
@@ -129,8 +129,9 @@ for sat in sats_new[:1]:
         gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
         # gu.plot()
         gu_all.extend(gu.values)
+        # save as npz file
         # break
-
-# plot histogram of gu_all
-plt.hist(gu_all, bins=100)
-plt.show()
+    # plot histogram of gu_all
+    plt.hist(gu_all, bins=100, label=f"{sat}")
+    np.savez(f"guv_at_intersections_{sat}_0.2.npz", gu_all=gu_all)
+    # plt.show()

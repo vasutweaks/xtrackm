@@ -4,6 +4,7 @@ from scipy.stats import median_abs_deviation
 import glob
 from namesm import sats_new
 
+
 def mad_outlier_detection_fixed(data, threshold=3.5, dim="cycles_numbers"):
     """
     MAD outlier detection using your actual dimension names.
@@ -38,6 +39,7 @@ def mad_outlier_detection_fixed(data, threshold=3.5, dim="cycles_numbers"):
         output_dtypes=[bool]
     )
     return outlier_mask
+
 
 for sat in sats_new:
     total_size = 0      # Total size (n_orig1)

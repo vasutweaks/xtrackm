@@ -26,6 +26,69 @@ from namesm import *
 import math
 
 
+def mad_filter_1d_xr(da, thresh):
+    x = da.values
+    time = da.time
+    if len(x) < 3 or np.all(np.isnan(x)):
+        return np.zeros_like(x, dtype=bool)
+    valid_mask = ~np.isnan(x)
+    if np.sum(valid_mask) < 3:
+        return np.zeros_like(x, dtype=bool)
+    # size of valid data might be less than x depending on the
+    # number of NaNs
+    valid_data = x[valid_mask]
+    median = np.median(valid_data)
+    mad = median_abs_deviation(valid_data, scale='normal')
+    if mad == 0:
+        mad = np.median(np.abs(valid_data - median)) * 1.4826
+        if mad == 0:
+            return np.zeros_like(x, dtype=bool)
+    modified_z_scores = 0.6745 * (x - median) / mad
+    # size of outliers is same as the size of x
+    outliers = np.abs(modified_z_scores) > thresh
+    x_filtered = np.zeros_like(x)
+    x_filtered[valid_mask] = x[valid_mask]
+    x_filtered[outliers] = np.nan
+    da_out = xr.DataArray(x_filtered, coords={"time": time}, dims=["time"])
+    return da_out
+
+
+def mad_outlier_detection_fixed(data, threshold=3.5, dim="cycles_numbers"):
+    """
+    MAD outlier detection using your actual dimension names.
+    """
+    def mad_filter_1d(x, thresh):
+        if len(x) < 3 or np.all(np.isnan(x)):
+            return np.zeros_like(x, dtype=bool)
+        valid_mask = ~np.isnan(x)
+        if np.sum(valid_mask) < 3:
+            return np.zeros_like(x, dtype=bool)
+        # size of valid data might be less than x depending on the
+        # number of NaNs
+        valid_data = x[valid_mask]
+        median = np.median(valid_data)
+        mad = median_abs_deviation(valid_data, scale='normal')
+        if mad == 0:
+            mad = np.median(np.abs(valid_data - median)) * 1.4826
+            if mad == 0:
+                return np.zeros_like(x, dtype=bool)
+        modified_z_scores = 0.6745 * (x - median) / mad
+        outliers = np.abs(modified_z_scores) > thresh
+        # size of outliers is same as the size of x
+        return outliers
+
+    outlier_mask = xr.apply_ufunc(
+        lambda x: mad_filter_1d(x, threshold),
+        data,
+        input_core_dims=[[dim]],
+        output_core_dims=[[dim]],
+        vectorize=True,
+        dask="allowed",
+        output_dtypes=[bool]
+    )
+    return outlier_mask
+
+
 def ln_sf(src, dst):
     try:
         os.remove(dst)   # works for files and symlinks

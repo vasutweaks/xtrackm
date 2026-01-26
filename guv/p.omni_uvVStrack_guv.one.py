@@ -8,6 +8,7 @@ import sys
 import math
 import numpy as np
 
+
 def geostrophic_components_from_slopes(gc1, gc2, slope1, slope2):
     """
     Compute zonal and meridional geostrophic current components from 
