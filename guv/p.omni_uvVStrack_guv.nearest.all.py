@@ -147,7 +147,7 @@ for omni_id in omni_d.keys():
     ds_self_smooth = xr.open_dataset(f_self_smooth)
     sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
     sla_self_smooth = ds_self_smooth.sla_smooth
-    ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
+    ds_other = xr.open_dataset(f_other, engine="netcdf4", decode_times=False)
     ds_other_smooth = xr.open_dataset(f_other_smooth)
     sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
     sla_other_smooth = ds_other_smooth.sla_smooth

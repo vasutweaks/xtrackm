@@ -1,0 +1,2 @@
+cp p.omni_uvVStrack_guv.nearest.all.py p.omni_uvVStrack_guv_c.nearest.all.py
+guv_c usually uses pre-computed and filtered guv

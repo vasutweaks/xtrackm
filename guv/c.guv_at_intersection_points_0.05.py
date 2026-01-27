@@ -161,14 +161,15 @@ for sat in sats_new:
         # filter xarray dataarray gu if greater than 3.5 or less than -3.5
         gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))
         gu_filtered = mad_filter_1d_xr(gu_filt, 3.5)
-        gu.plot(label="gu", marker=".")
-        gu_filtered.plot(label="gu_filtered", marker="x")
-        plt.legend()
-        plt.show()
+        gv_filt = gv.where((gv <= 3.5) & (gv >= -3.5))
+        gv_filtered = mad_filter_1d_xr(gv_filt, 3.5)
+        # gu.plot(label="gu", marker=".")
+        # gu_filtered.plot(label="gu_filtered", marker="x")
+        # plt.legend()
+        # plt.show()
         # create a ds_out with gu and gv
-        # ds_out = xr.Dataset({"gu": gu, "gv": gv})
-        # filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_0.05.nc"
-        # print(filename)
-        # ds_out.to_netcdf(filename)
+        ds_out = xr.Dataset({"gu": gu_filtered, "gv": gv_filtered})
+        filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_0.05.nc"
+        print(filename)
+        ds_out.to_netcdf(filename)
     # close df
-    df.close()
