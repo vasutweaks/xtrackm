@@ -1,3 +1,7 @@
+I am computing zonal and meridional components of velocities from cross track
+geostrophic velocities at the intersection point of ascending and descending
+satellite altimetry tracks. Do you find any major issues with the above script.
+
 Write a python script to read oscar_onlyVStrack_corrs_rmses_biass_TP+J1+J2+J3+S6A_u.csv, oscar_ekmnVStrack_corrs_rmses_biass_TP+J1+J2+J3+S6A_u.csv to make comparison plot of the respective correlations, biases, rmses before and after applying ekman correction.
 Need to do the following steps. 
 Make a unique string column combining sat (zero padded to 20 width), track_self, track_other for both the dataframes. We need to take only those rows where this combination matches in both dataframes so that we can make correct comparison.

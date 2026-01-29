@@ -199,7 +199,7 @@ for omni_id in omni_d.keys():
                                    add_colorbar=False,
                                    add_labels=False,
                                    cmap=cmap1)
-        decorate_axis(ax2, "", *TRACKS_REG)
+        decorate_axis(ax2, "", *TRACKS_REG, step=5)
         ax2.grid()
         ax2.plot(
             lon_omni,
