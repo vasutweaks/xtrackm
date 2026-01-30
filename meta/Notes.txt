@@ -1,3 +1,6 @@
+How to say whether a track is descending or ascending?
+Its relationship with the track number?
+
 There are huge gaps in the data for TPN+J1N+J2N+J3N in time
 
 Satellite: GFO ----------------

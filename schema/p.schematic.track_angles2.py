@@ -2,8 +2,8 @@ import cmocean as cmo
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from tools_xtrackd import *
 from matplotlib.lines import Line2D
+from tools_xtrackm import *
 
 cmap1 = cmo.cm.topo
 cmap1 = cmo.cm.diff
@@ -51,11 +51,10 @@ def point_at_distance(lonm, latm, m, d):
     return lonm1, latm1
 
 
-dse = xr.open_dataset(
-    "/home/srinivasu/allData/topo/etopo5.cdf")  # open etopo dataset
+dse = xr.open_dataset("/home/srinivasu/allData/topo/etopo5.cdf")  # open etopo dataset
 
-sats = ["GFO"]
-for sat in sats:
+# sats = ["GFO"]
+for sat in sats_new:
     ODD = False
     EVEN = False
     fig, ax1 = plt.subplots(
@@ -66,12 +65,14 @@ for sat in sats:
         layout="constrained",
     )
     dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(*NIO[2:])).plot(
-        ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap1)
+        ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap1
+    )
     decorate_axis(ax1, "", *NIO)
     for f in sorted(glob.glob(f"../data/ctoh.sla.ref.{sat}.nindian.*.nc")):
         ds = xr.open_dataset(f, decode_times=False)
         # print(ds)
-        track_number = ds.pass_number
+        track_number = ds.Pass
+        track_number = int(track_number)
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         if len(lons_track) == 0:
@@ -80,8 +81,9 @@ for sat in sats:
         lat_eq = lats_track[0]
         m = (lats_track[-1] - lats_track[0]) / (lons_track[-1] - lons_track[0])
         angle_radian = np.arctan(m)
-        angle_radian = np.arctan2(lats_track[-1] - lats_track[0],
-                                  lons_track[-1] - lons_track[0])
+        angle_radian = np.arctan2(
+            lats_track[-1] - lats_track[0], lons_track[-1] - lons_track[0]
+        )
         angle = np.rad2deg(angle_radian)
         angle_str = str(round(angle, 2))
         print(angle, angle_radian, "-----------------------------")
@@ -91,8 +93,8 @@ for sat in sats:
         xh, yh = horizontal_line(lonm, latm)
         xy, yy = vertical_line(lonm, latm)
         # Horizontal and vertical arrow parameters
-        x_start, x_end = lonm, lonm+5
-        y_start, y_end = latm, latm+5
+        x_start, x_end = lonm, lonm + 5
+        y_start, y_end = latm, latm + 5
         # get the coordinates of a point at a distance d from the point (lonm, latm)
         # above the line with slope m
         d = 0.5
@@ -102,14 +104,18 @@ for sat in sats:
             ax1.scatter(lons_track, lats_track, linewidths=0.0, s=2, color="b")
             ax1.scatter(xp, yp, linewidths=0.0, s=2, color="b")
             ax1.annotate(
-                '', xy=(x_end, 0), xytext=(x_start, 0), 
-                arrowprops=dict(arrowstyle='->', color='blue', lw=1),
-                transform=ccrs.PlateCarree()  # Ensure projection compatibility
+                "",
+                xy=(x_end, 0),
+                xytext=(x_start, 0),
+                arrowprops=dict(arrowstyle="->", color="blue", lw=1),
+                transform=ccrs.PlateCarree(),  # Ensure projection compatibility
             )
             ax1.annotate(
-                '', xy=(0, y_end), xytext=(0, y_start), 
-                arrowprops=dict(arrowstyle='->', color='red', lw=1),
-                transform=ccrs.PlateCarree()  # Ensure projection compatibility
+                "",
+                xy=(0, y_end),
+                xytext=(0, y_start),
+                arrowprops=dict(arrowstyle="->", color="red", lw=1),
+                transform=ccrs.PlateCarree(),  # Ensure projection compatibility
             )
             if is_within_region(lonm, latm, *NIO):
                 plt.text(
@@ -139,14 +145,18 @@ for sat in sats:
             ax1.scatter(lons_track, lats_track, linewidths=0.0, s=2, color="g")
             ax1.scatter(xp, yp, linewidths=0.0, s=2, color="g")
             ax1.annotate(
-                '', xy=(x_end, 0), xytext=(x_start, 0), 
-                arrowprops=dict(arrowstyle='->', color='blue', lw=1),
-                transform=ccrs.PlateCarree()  # Ensure projection compatibility
+                "",
+                xy=(x_end, 0),
+                xytext=(x_start, 0),
+                arrowprops=dict(arrowstyle="->", color="blue", lw=1),
+                transform=ccrs.PlateCarree(),  # Ensure projection compatibility
             )
             ax1.annotate(
-                '', xy=(0, y_end), xytext=(0, y_start), 
-                arrowprops=dict(arrowstyle='->', color='red', lw=1),
-                transform=ccrs.PlateCarree()  # Ensure projection compatibility
+                "",
+                xy=(0, y_end),
+                xytext=(0, y_start),
+                arrowprops=dict(arrowstyle="->", color="red", lw=1),
+                transform=ccrs.PlateCarree(),  # Ensure projection compatibility
             )
             try:
                 lonm = lons_track[-15]
@@ -180,22 +190,18 @@ for sat in sats:
         if ODD and EVEN:
             break
     info = f"{sat}"
-    ax1.text(0.4,
-             0.9,
-             info,
-             transform=ax1.transAxes,
-             fontsize=30,
-             fontweight="bold")
+    ax1.text(0.4, 0.9, info, transform=ax1.transAxes, fontsize=30, fontweight="bold")
 
-# Create a custom legend with specific markers and colors
+    # Create a custom legend with specific markers and colors
     custom_lines = [
-        Line2D([0], [0], color='blue', lw=2, linestyle='dashed', label='Ascending'),
-        Line2D([0], [0], color='green', lw=2, linestyle='dashed', label='descending'),
+        Line2D([0], [0], color="blue", lw=2, linestyle="dashed", label="Ascending"),
+        Line2D([0], [0], color="green", lw=2, linestyle="dashed", label="descending"),
     ]
 
-    plt.legend(handles=custom_lines, loc='upper right')
+    plt.legend(handles=custom_lines, loc="upper right")
     plt.savefig(
         f"p.track.angles.{sat}.png",
         bbox_inches="tight",
     )
     plt.show()
+    break
