@@ -272,6 +272,6 @@ for sat, trackn, x1, y1, mindist, id in filtered_list:
         bbox_inches="tight",
     )
     ln_sf(
-        f"tseries_loess_adj_allsat_map_box_separate_{sat}_{trackn}.png", "fig01.png")
+        f"tseries_loess_adj_allsat_map_box_separate_{sat}_{trackn}.png", "fig02.png")
     plt.show()
     plt.close("all")
