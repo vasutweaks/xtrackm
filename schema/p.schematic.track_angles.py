@@ -89,9 +89,9 @@ for sat in sats_new:
                         add_labels=False,
                         cmap=cmap1)
     decorate_axis(ax1, "", *NIO)
-    for f in sorted(glob.glob(f"../data/ctoh.sla.ref.{sat}.nindian.*.nc")):
+    for f in sorted(glob.glob(f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc")):
         ds = xr.open_dataset(f, decode_times=False)
-        track_number = ds.pass_number
+        track_number = ds.Pass
         orbit_str = orbit_type(track_number)
         lons_track = ds.lon.values
         lats_track = ds.lat.values

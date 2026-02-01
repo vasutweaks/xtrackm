@@ -68,9 +68,9 @@ for sat in sats_new:
         ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap1
     )
     decorate_axis(ax1, "", *NIO)
-    for f in sorted(glob.glob(f"../data/ctoh.sla.ref.{sat}.nindian.*.nc")):
+    for f in sorted(glob.glob(f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc")):
         ds = xr.open_dataset(f, decode_times=False)
-        # print(ds)
+        print(ds)
         track_number = ds.Pass
         track_number = int(track_number)
         lons_track = ds.lon.values
