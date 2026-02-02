@@ -6,6 +6,7 @@ import xarray as xr
 from tools_xtrackm import *
 from matplotlib import pyplot as plt
 from scipy.stats import median_abs_deviation
+import math
 
 
 def mad_filter_1d_xr(da, thresh):
@@ -76,8 +77,21 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
     u = -1 * u
     return u, v
 
+def local_angle(lons, lats, ii, ioff=3, degrees=False):
+    ln = len(lons)
+    if ii + ioff >= ln or ii - ioff < 0:
+        dlon1 = lons[0] - lons[-1]
+        dlat1 = lats[0] - lats[-1]
+    else:
+        dlon1 = lons[ii + ioff] - lons[ii - ioff]
+        dlat1 = lats[ii + ioff] - lats[ii - ioff]
+    a1 = math.atan2(dlat1, dlon1)
+    if degrees:
+        a1 = math.degrees(a1)
+    return a1
+    
 
-ioff = 5
+ioff = 2
 out_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections/"
 for sat in sats_new:
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
@@ -136,8 +150,11 @@ for sat in sats_new:
         lat_equat_other = lats_track_other[0]
         lon_coast_other = lons_track_other[-1]
         lat_coast_other = lats_track_other[-1]
+        slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
+                                                             lon_equat_other)
         a1l = math.atan2(lat_coast_self - lat_equat_self,
                         lon_coast_self - lon_equat_self)
+        a1l_d = math.degrees(a1l)
         ii_self = index_at_lat(ds_self, lats_inter1)
         dlon1 = lons_track_self[ii_self + ioff] - lons_track_self[ii_self]
         dlat1 = lats_track_self[ii_self + ioff] - lats_track_self[ii_self]
@@ -149,20 +166,21 @@ for sat in sats_new:
             lat_coast_other - lat_equat_other,
             lon_coast_other - lon_equat_other,
         )
+        a2l_d = math.degrees(a2l)
         a2 = math.atan2(dlat2, dlon2)
-        print(f"azimuths {a1:.2f} {a1l:.2f}")
-        print(f"azimuths {a2:.2f} {a2l:.2f}")
-        slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
-                                                             lon_equat_other)
-        gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
-        gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-        gc_self_at = gc_self.sel(x=x_from_coast_self1,
-                                 method="nearest",
-                                 drop=True)
-        gc_other_at = gc_other.sel(x=x_from_coast_other1,
-                                   method="nearest",
-                                   drop=True)
-        gc_other_at = gc_other_at.interp(time=gc_self_at.time)
+        # print(f"azimuths {a1:.2f} {a1l:.2f}")
+        # print(f"azimuths {a2:.2f} {a2l:.2f}")
+        # print(f"azimuths {sat}: a1 = {a1l_d:.2f}, a2 = {a2l_d:.2f}")
+        print(f"azimuths {sat}: a1 = {a1_d:.2f}, a2 = {a2_d:.2f}")
+        # gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
+        # gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
+        # gc_self_at = gc_self.sel(x=x_from_coast_self1,
+        #                          method="nearest",
+        #                          drop=True)
+        # gc_other_at = gc_other.sel(x=x_from_coast_other1,
+        #                            method="nearest",
+        #                            drop=True)
+        # gc_other_at = gc_other_at.interp(time=gc_self_at.time)
         # gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
         # # filter xarray dataarray gu if greater than 3.5 or less than -3.5
         # gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))

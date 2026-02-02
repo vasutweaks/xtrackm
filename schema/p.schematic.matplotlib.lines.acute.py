@@ -32,10 +32,10 @@ y_intersect = y_parallel
 
 # Plot and annotate the intersection point P
 ax.plot(x_intersect, y_intersect, "ko", markersize=4)  # Mark intersection point
-ax.text(x_intersect + 0.2, y_intersect + 0.2, "P", fontsize=14)
+ax.text(x_intersect - 0.3, y_intersect - 0.3, "P", fontsize=14)
 
 # Label the angle θ near the x-axis
-ax.text(-0.2, -1.8, r"$\theta$", fontsize=14)
+ax.text(-0.2, -1.8, r"$\alpha$", fontsize=14)
 
 # Draw vertical and horizontal arrows at the intersection point (P)
 # Vertical arrow (u-bar)
@@ -121,18 +121,34 @@ x_perpendicular = np.array([x_intersect - length / 2, x_intersect + length / 2])
 y_perpendicular = perpendicular_slope * (x_perpendicular - x_intersect) + y_intersect
 
 # Draw the thin, dotted perpendicular line with arrows
-ax.plot(x_perpendicular, y_perpendicular, 'k--', lw=1)  # Dotted line
+ax.plot(x_perpendicular, y_perpendicular, "k--", lw=1)  # Dotted line
 
 # Calculate direction vectors for arrow alignment
 dx = (x_perpendicular[1] - x_perpendicular[0]) / 10  # Small increment for arrow length
 dy = (y_perpendicular[1] - y_perpendicular[0]) / 10  # Small increment for arrow length
 
 # Add arrows along the perpendicular line pointing correctly in both directions
-ax.arrow(x_perpendicular[0], y_perpendicular[0], -dx, -dy, 
-         head_width=0.2, head_length=0.2, fc='k', ec='k')
+ax.arrow(
+    x_perpendicular[0],
+    y_perpendicular[0],
+    -dx,
+    -dy,
+    head_width=0.2,
+    head_length=0.2,
+    fc="k",
+    ec="k",
+)
 
-ax.arrow(x_perpendicular[1], y_perpendicular[1], dx, dy, 
-         head_width=0.2, head_length=0.2, fc='k', ec='k')
+ax.arrow(
+    x_perpendicular[1],
+    y_perpendicular[1],
+    dx,
+    dy,
+    head_width=0.2,
+    head_length=0.2,
+    fc="k",
+    ec="k",
+)
 
 ax.text(
     x_perpendicular[1] + 0.5,
@@ -151,14 +167,14 @@ ax.text(
 # Set axis limits and aspect ratio
 ax.set_xlim(-6, 7)
 ax.set_ylim(-2, 10)
-ax.set_aspect('equal', 'box')
+ax.set_aspect("equal", "box")
 
 # Add grid, legend, and labels
-ax.grid(True, linestyle='--', alpha=0.7)
+ax.grid(True, linestyle="--", alpha=0.7)
 ax.legend()
-ax.set_xlabel('X-axis')
-ax.set_ylabel('Y-axis')
-plt.savefig('p.schematic.matplotlib.lines.acute.png', bbox_inches='tight', dpi=300)
+ax.set_xlabel("X-axis")
+ax.set_ylabel("Y-axis")
+plt.savefig("p.schematic.matplotlib.lines.acute.png", bbox_inches="tight", dpi=300)
 
 # Display the plot
 plt.show()

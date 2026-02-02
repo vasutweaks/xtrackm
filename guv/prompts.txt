@@ -1,3 +1,5 @@
+if g_a=u*sin(α)-v*cos(α) and g_d=u*sin(β)-v*cos(β), solve for u and v.
+
 I am computing zonal and meridional components of velocities from cross track
 geostrophic velocities at the intersection point of ascending and descending
 satellite altimetry tracks. Do you find any major issues with the above script.
