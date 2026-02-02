@@ -1,3 +1,5 @@
+Are the time units along points_numbers and cycles_numbers different?
+
 How to say whether a track is descending or ascending?
 Its relationship with the track number?
 

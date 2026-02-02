@@ -77,6 +77,7 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
     u = -1 * u
     return u, v
 
+
 def local_angle(lons, lats, ii, ioff=3, degrees=False):
     ln = len(lons)
     if ii + ioff >= ln or ii - ioff < 0:
@@ -168,10 +169,10 @@ for sat in sats_new:
         )
         a2l_d = math.degrees(a2l)
         a2 = math.atan2(dlat2, dlon2)
-        # print(f"azimuths {a1:.2f} {a1l:.2f}")
-        # print(f"azimuths {a2:.2f} {a2l:.2f}")
-        # print(f"azimuths {sat}: a1 = {a1l_d:.2f}, a2 = {a2l_d:.2f}")
-        print(f"azimuths {sat}: a1 = {a1_d:.2f}, a2 = {a2_d:.2f}")
+        # print(f"heading angle {a1:.2f} {a1l:.2f}")
+        # print(f"heading angle {a2:.2f} {a2l:.2f}")
+        # print(f"heading angle {sat}: a1 = {a1l_d:.2f}, a2 = {a2l_d:.2f}")
+        print(f"heading angle {sat}: a1 = {a1_d:.2f}, a2 = {a2_d:.2f}")
         # gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
         # gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
         # gc_self_at = gc_self.sel(x=x_from_coast_self1,

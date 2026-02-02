@@ -1,4 +1,6 @@
-if g_a=u*sin(α)-v*cos(α) and g_d=u*sin(β)-v*cos(β), solve for u and v.
+If g_1=u*sin(α)-v*cos(α) and g_2=u*sin(β)-v*cos(β), solve for u and v.
+Here α+β=π, α is acute and β is obtuse
+in g_1=u*sin(α)-v*cos(α), substitude α=π-β and simplify.
 
 I am computing zonal and meridional components of velocities from cross track
 geostrophic velocities at the intersection point of ascending and descending

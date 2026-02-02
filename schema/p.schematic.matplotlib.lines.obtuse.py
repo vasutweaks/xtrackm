@@ -32,11 +32,11 @@ y_intersect = y_parallel
 
 # Plot and annotate the intersection point P
 ax.plot(x_intersect, y_intersect, "ko", markersize=4)  # Mark intersection point
-ax.text(x_intersect + 0.2, y_intersect + 0.2, "P", fontsize=14)
+ax.text(x_intersect - 0.4, y_intersect - 0.4, "P", fontsize=14)
 
 # Label the angle θ near the x-axis
-ax.text(0.0, -1.8, r"$\alpha$", fontsize=14)
-ax.text(1.0, -1.8, r"$\theta$", fontsize=14)
+# ax.text(0.0, -1.8, r"$\alpha$", fontsize=14)
+ax.text(0.8, -1.9, r"$\beta$", fontsize=14)
 
 # Draw vertical and horizontal arrows at the intersection point (P)
 # Vertical arrow (u-bar)
