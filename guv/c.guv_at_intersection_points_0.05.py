@@ -72,20 +72,26 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
     # Solve for velocity components using the derived formulas:
     # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
     # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
-    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
-    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
-    u = -1 * u
+    u = (gc1 * cos_a1 - gc2 * cos_a2) / math.sin(a2 - a1)
+    v = (gc2 * sin_a1 - gc1 * sin_a2) / math.sin(a2 - a1)
     return u, v
 
 
 def local_angle(lons, lats, ii, ioff=3, degrees=False):
     ln = len(lons)
-    if ii + ioff >= ln or ii - ioff < 0:
-        dlon1 = lons[0] - lons[-1]
-        dlat1 = lats[0] - lats[-1]
+    if ii - ioff < 0:
+        idx_start = ii
+        idx_end = min(ii + ioff, ln - 1) # Ensure we don't go over
+    # If we are too close to the end, look backward only
+    elif ii + ioff >= ln:
+        idx_start = max(ii - ioff, 0)
+        idx_end = ii
+    # Normal case: Centered difference
     else:
-        dlon1 = lons[ii + ioff] - lons[ii - ioff]
-        dlat1 = lats[ii + ioff] - lats[ii - ioff]
+        idx_start = ii - ioff
+        idx_end = ii + ioff
+    dlat1 = lats[idx_end] - lats[idx_start]
+    dlon1 = lons[idx_end] - lons[idx_start]
     a1 = math.atan2(dlat1, dlon1)
     if degrees:
         a1 = math.degrees(a1)
@@ -94,7 +100,8 @@ def local_angle(lons, lats, ii, ioff=3, degrees=False):
 
 ioff = 2
 out_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections/"
-for sat in sats_new:
+print(sats_new)
+for sat in sats_new[:]:
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
     for i, r in df.iterrows():
         sat1 = r["sat"]
@@ -157,44 +164,39 @@ for sat in sats_new:
                         lon_coast_self - lon_equat_self)
         a1l_d = math.degrees(a1l)
         ii_self = index_at_lat(ds_self, lats_inter1)
-        dlon1 = lons_track_self[ii_self + ioff] - lons_track_self[ii_self]
-        dlat1 = lats_track_self[ii_self + ioff] - lats_track_self[ii_self]
-        a1 = math.atan2(dlat1, dlon1)
+        a1 = local_angle(lons_track_self, lats_track_self, ii_self, ioff=ioff)
+        a1_d = math.degrees(a1)
         ii_other = index_at_lat(ds_other, lats_inter1)
-        dlon2 = lons_track_other[ii_other + ioff] - lons_track_other[ii_other]
-        dlat2 = lats_track_other[ii_other + ioff] - lats_track_other[ii_other]
         a2l = math.atan2(
             lat_coast_other - lat_equat_other,
             lon_coast_other - lon_equat_other,
         )
         a2l_d = math.degrees(a2l)
-        a2 = math.atan2(dlat2, dlon2)
-        # print(f"heading angle {a1:.2f} {a1l:.2f}")
-        # print(f"heading angle {a2:.2f} {a2l:.2f}")
+        a2 = local_angle(lons_track_other, lats_track_other, ii_other, ioff=ioff)
+        a2_d = math.degrees(a2)
         # print(f"heading angle {sat}: a1 = {a1l_d:.2f}, a2 = {a2l_d:.2f}")
         print(f"heading angle {sat}: a1 = {a1_d:.2f}, a2 = {a2_d:.2f}")
-        # gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
-        # gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-        # gc_self_at = gc_self.sel(x=x_from_coast_self1,
-        #                          method="nearest",
-        #                          drop=True)
-        # gc_other_at = gc_other.sel(x=x_from_coast_other1,
-        #                            method="nearest",
-        #                            drop=True)
-        # gc_other_at = gc_other_at.interp(time=gc_self_at.time)
-        # gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
-        # # filter xarray dataarray gu if greater than 3.5 or less than -3.5
-        # gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))
-        # gu_filtered = mad_filter_1d_xr(gu_filt, 3.5)
-        # gv_filt = gv.where((gv <= 3.5) & (gv >= -3.5))
-        # gv_filtered = mad_filter_1d_xr(gv_filt, 3.5)
-        # # gu.plot(label="gu", marker=".")
-        # # gu_filtered.plot(label="gu_filtered", marker="x")
-        # # plt.legend()
-        # # plt.show()
-        # # create a ds_out with gu and gv
-        # ds_out = xr.Dataset({"gu": gu_filtered, "gv": gv_filtered})
-        # filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_0.05.nc"
-        # print(filename)
-        # ds_out.to_netcdf(filename)
-    # close df
+        gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
+        gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
+        gc_self_at = gc_self.sel(x=x_from_coast_self1,
+                                 method="nearest",
+                                 drop=True)
+        gc_other_at = gc_other.sel(x=x_from_coast_other1,
+                                   method="nearest",
+                                   drop=True)
+        gc_other_at = gc_other_at.interp(time=gc_self_at.time)
+        gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
+        # filter xarray dataarray gu if greater than 3.5 or less than -3.5
+        gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))
+        gu_filtered = mad_filter_1d_xr(gu_filt, 3.5)
+        gv_filt = gv.where((gv <= 3.5) & (gv >= -3.5))
+        gv_filtered = mad_filter_1d_xr(gv_filt, 3.5)
+        # gu.plot(label="gu", marker=".")
+        # gu_filtered.plot(label="gu_filtered", marker="x")
+        # plt.legend()
+        # plt.show()
+        # create a ds_out with gu and gv
+        ds_out = xr.Dataset({"gu": gu_filtered, "gv": gv_filtered})
+        filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_0.05.nc"
+        print(filename)
+        ds_out.to_netcdf(filename)
