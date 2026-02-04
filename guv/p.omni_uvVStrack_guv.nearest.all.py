@@ -18,10 +18,6 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
         Cross-track geostrophic velocity from track 1 (m/s)
     gc2 : float or array-like
         Cross-track geostrophic velocity from track 2 (m/s)
-    slope1 : float
-        Slope of track 1 (dy/dx = rise/run)
-    slope2 : float
-        Slope of track 2 (dy/dx = rise/run)
     Returns:
     --------
     u : float or array-like
@@ -48,8 +44,8 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
     # Solve for velocity components using the derived formulas:
     # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
     # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
-    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
-    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
+    u = (gc1 * cos_a2 - gc2 * cos_a1) / math.sin(a1 - a2)
+    v = (gc2 * sin_a2 - gc1 * sin_a1) / math.sin(a1 - a2)
     return u, v
 
 
