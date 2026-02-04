@@ -1,0 +1,11 @@
+-uu is parallel to x-axis and -vv is parallel to y-axis. The slant line is
+ground track of a satellite. If α (an acute angle) is the angle made by the
+satellite track with positive x-axis counter clock wise, and the dashed line
+(gg) is perpendicular to the ground track at the intersection point P, then
+solve for the angle between uP+g.
+
+-uu is parallel to x-axis and -vv is parallel to y-axis. The slant line is
+ground track of a satellite. The dashed line (gg) is perpendicular to the
+ground track at the intersection point P. If β (an obtuse angle) is the angle
+made by the satellite track with positive x-axis counter clock wise, then solve
+for the angle between uP+g.

@@ -11,49 +11,6 @@ from tools_xtrackm import *
 import xskillscore as xs
 
 
-def geostrophic_components_from_a(gc1, gc2, a1, a2):
-    """
-    Compute zonal and meridional geostrophic current components from
-    cross-track velocities and track slopes of two intersecting satellite tracks.
-    Parameters:
-    -----------
-    gc1 : float or array-like
-        Cross-track geostrophic velocity from track 1 (m/s)
-    gc2 : float or array-like
-        Cross-track geostrophic velocity from track 2 (m/s)
-    slope1 : float
-        Slope of track 1 (dy/dx = rise/run)
-    slope2 : float or array-like
-        Slope of track 2 (dy/dx = rise/run)
-    Returns:
-    --------
-    u : float or array-like
-        Zonal (eastward) velocity component (m/s)
-    v : float or array-like
-        Meridional (northward) velocity component (m/s)
-    Raises:
-    -------
-    ValueError: If tracks are parallel (same slope)
-    """
-    # Calculate intersection angle
-    theta = a2 - a1
-    sin_theta = math.sin(theta)
-    # Additional check using sine of intersection angle
-    if abs(sin_theta) < 1e-6:
-        raise ValueError(
-            f"Tracks are nearly parallel (intersection angle = {math.degrees(theta):.2f}°). "
-            "Cannot resolve both velocity components.")
-    # Calculate trigonometric values
-    cos_a1 = math.cos(a1)
-    cos_a2 = math.cos(a2)
-    sin_a1 = math.sin(a1)
-    sin_a2 = math.sin(a2)
-    # Solve for velocity components:
-    u = (gc1 * cos_a1 - gc2 * cos_a2) / math.sin(a2 - a1)
-    v = (gc2 * sin_a1 - gc1 * sin_a2) / math.sin(a2 - a1)
-    return u, v
-
-
 cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
@@ -151,14 +108,19 @@ for i in range(ln):
                     lon_coast_other - lon_equat_other)
     a1 = math.atan2(lat_coast_self - lat_equat_self,
                     lon_coast_self - lon_equat_self)
-    gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
+    gu, gv = geostrophic_components(gc_self_at, gc_other_at, a1, a2)
+
+    gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))
+    gu_filtered = mad_filter_1d_xr(gu_filt, 3.5)
+    gv_filt = gv.where((gv <= 3.5) & (gv >= -3.5))
+    gv_filtered = mad_filter_1d_xr(gv_filt, 3.5)
 
     fig = plt.figure(figsize=(12, 10))
     ax0 = fig.add_subplot(3, 1, 3)
     ax1 = fig.add_subplot(3, 1, 2)
 
-    gu_cut = gu
-    gv_cut = gv
+    gu_cut = gu_filtered
+    gv_cut = gv_filtered
     tfreq = sats_tfreq[sat]
 
     oscar_u = oscar_u.resample(time=f"{tfreq}D").mean()
