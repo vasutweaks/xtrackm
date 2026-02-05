@@ -110,6 +110,8 @@ for i in range(ln):
                     lon_coast_self - lon_equat_self)
     gu, gv = geostrophic_components(gc_self_at, gc_other_at, a1, a2)
 
+    gv = -1 * gv
+
     gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))
     gu_filtered = mad_filter_1d_xr(gu_filt, 3.5)
     gv_filt = gv.where((gv <= 3.5) & (gv >= -3.5))
