@@ -27,6 +27,29 @@ from namesm import *
 import math
 
 
+def local_angle(lons, lats, ii, ioff=3, degrees=False):
+    ln = len(lons)
+    if ii - ioff < 0: # at the beginning
+        # forward difference in to the increasing side
+        idx_start = ii
+        idx_end = min(ii + ioff, ln - 1) # Ensure we don't go over
+    # If we are too close to the end, look backward only
+    elif ii + ioff >= ln: # at the end
+        # backward difference in to the decreasing side
+        idx_start = max(ii - ioff, 0)
+        idx_end = ii
+    # Normal case: Centered difference
+    else:
+        idx_start = ii - ioff
+        idx_end = ii + ioff
+    dlat1 = lats[idx_end] - lats[idx_start]
+    dlon1 = lons[idx_end] - lons[idx_start]
+    a1 = math.atan2(dlat1, dlon1)
+    if degrees:
+        a1 = math.degrees(a1)
+    return a1
+    
+
 def mad_filter_1d_xr(da, thresh):
     x = da.values
     time = da.time
