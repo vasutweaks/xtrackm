@@ -1,7 +1,6 @@
 [] drifter comparison only withing 200km or 50km
 [] standard deviation of aviso and track near the coast
 [] decadal eicc strength using TPS6A mission at intersection points
-
 [✔] Derive the formula for velocity components from the cross track geostrophic currents by thoroughly reading the papers
 parke_1987_orbits_current_components.pdf and 
 rosemary_morrow_1994_velocity_variance_geosat_altimetry.pdf
