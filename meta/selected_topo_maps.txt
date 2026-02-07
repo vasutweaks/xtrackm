@@ -1,0 +1,14 @@
+twilight_shifted
+RdBu_r
+coolwarm
+rainbow
+gist_ncar
+jet
+gist_gray_r
+gist_yarg
+binary
+BrBG_r
+GnBu
+GnBu_r
+PuOr_r
+bwr
