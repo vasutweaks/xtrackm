@@ -11,62 +11,16 @@ import sys
 # from rich.traceback import install
 # install(show_locals=True, suppress=["site-packages"])
 
-
-def geostrophic_components_from_a(gc1, gc2, a1, a2):
-    """
-    Compute zonal and meridional geostrophic current components from
-    cross-track velocities and track slopes of two intersecting satellite tracks.
-    Parameters:
-    -----------
-    gc1 : float or array-like
-        Cross-track geostrophic velocity from track 1 (m/s)
-    gc2 : float or array-like
-        Cross-track geostrophic velocity from track 2 (m/s)
-    slope1 : float
-        Slope of track 1 (dy/dx = rise/run)
-    slope2 : float
-        Slope of track 2 (dy/dx = rise/run)
-    Returns:
-    --------
-    u : float or array-like
-        Zonal (eastward) velocity component (m/s)
-    v : float or array-like
-        Meridional (northward) velocity component (m/s)
-    Raises:
-    -------
-    ValueError: If tracks are parallel (same slope)
-    """
-    # Calculate intersection angle
-    theta = a2 - a1
-    sin_theta = math.sin(theta)
-    # Additional check using sine of intersection angle
-    if abs(sin_theta) < 1e-6:
-        raise ValueError(
-            f"Tracks are nearly parallel (intersection angle = {math.degrees(theta):.2f}°). "
-            "Cannot resolve both velocity components.")
-    # Calculate trigonometric values
-    cos_a1 = math.cos(a1)
-    cos_a2 = math.cos(a2)
-    sin_a1 = math.sin(a1)
-    sin_a2 = math.sin(a2)
-    # Solve for velocity components using the derived formulas:
-    # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
-    # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
-    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
-    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
-    u = -1 * u
-    return u, v
-
-
 cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 aviso_msla_uv_dir = "/home/srinivasu/sealevel/data/msla_uv/"
-ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u_nio.nc")
-ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v_nio.nc")
+aviso_msla_uv_dir = "/home/srinivasu/allData/aviso/msla_uv/"
+ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u.nc")
+ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v.nc")
 print(ds_aviso_u)
-aviso_u = ds_aviso_u.ugosa
-aviso_v = ds_aviso_v.vgosa
+aviso_u = ds_aviso_u.u
+aviso_v = ds_aviso_v.v
 # sys.exit()
 
 sat = "S3B"
@@ -86,6 +40,7 @@ ngp_v = []
 
 ln = len(df)
 count = 0
+frac1 = "0.05"
 for i in range(ln):
     sat1 = df["sat"].values[i]
     track_number_self = df["track_self"].apply(lambda x: str(x)).values[i]
@@ -121,8 +76,8 @@ for i in range(ln):
     )
     f_self = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
     f_other = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_other.zfill(3)}.nc"
-    f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_self}_loess_0.2.nc"
-    f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_other}_loess_0.2.nc"
+    f_self_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_self}_loess_{frac1}.nc"
+    f_other_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_other}_loess_{frac1}.nc"
     ds_self = xr.open_dataset(f_self, engine="netcdf4", decode_times=False)
     ds_self_smooth = xr.open_dataset(f_self_smooth)
     sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
@@ -163,12 +118,12 @@ for i in range(ln):
     a1 = math.atan2(lat_coast_self - lat_equat_self,
                     lon_coast_self - lon_equat_self)
     print(f"azimuths {a1:.2f} {a2:.2f}")
-    gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
+    gu, gv = geostrophic_components(gc_self_at, gc_other_at, a1, a2)
     fig = plt.figure(figsize=(12, 10))
     ax1 = fig.add_subplot(3, 1, 3)
     ax0 = fig.add_subplot(3, 1, 2)
 
-    gu_cut = -1 * gu.resample(time="1ME").mean()
+    gu_cut = gu.resample(time="1ME").mean()
     gu_cut_ngp = 100 * gu_cut.count(dim="time")/len(gu_cut.time)
     gv_cut = gv.resample(time="1ME").mean()
     gv_cut_ngp = 100 * gv_cut.count(dim="time")/len(gv_cut.time)

@@ -825,7 +825,7 @@ def geostrophic_components(gc1, gc2, a1_r, a2_r):
     sin_a2 = math.sin(a2_r)
     # Solve for velocity components using the derived formulas:
     u = (gc1 * cos_a2 - gc2 * cos_a1) / math.sin(a1_r - a2_r)
-    v = (gc2 * sin_a2 - gc1 * sin_a1) / math.sin(a1_r - a2_r)
+    v = (gc1 * sin_a2 - gc2 * sin_a1) / math.sin(a1_r - a2_r)
     return u, v
 
 

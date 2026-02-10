@@ -8,16 +8,20 @@ import xarray as xr
 from tools_xtrackm import *
 
 
-def geostrophic_components_from_a(gc1, gc2, a1, a2):
+def geostrophic_components(gc1, gc2, a1_r, a2_r):
     """
-    Compute zonal and meridional geostrophic current components from
-    cross-track velocities and track slopes of two intersecting satellite tracks.
+    Compute zonal and meridional geostrophic current components from 
+    cross-track velocities measured by two intersecting satellite tracks.
     Parameters:
     -----------
     gc1 : float or array-like
         Cross-track geostrophic velocity from track 1 (m/s)
-    gc2 : float or array-like
+    gc2 : float or array-like  
         Cross-track geostrophic velocity from track 2 (m/s)
+    a1_r : float
+        Heading angle of track 1 in radians (measured counter-clockwise from east)
+    a2_r : float
+        Heading angle of track 2 in radians (measured counter-clockwise from east)
     Returns:
     --------
     u : float or array-like
@@ -26,26 +30,26 @@ def geostrophic_components_from_a(gc1, gc2, a1, a2):
         Meridional (northward) velocity component (m/s)
     Raises:
     -------
-    ValueError: If tracks are parallel (same slope)
+    ValueError: If tracks are parallel (intersection angle ≈ 0°)
     """
-    # Calculate intersection angle
-    theta = a2 - a1
+    # Convert azimuths from degrees to radians
+    theta = a2_r - a1_r
+    assert a2_r < 3, "check if heading angles are in radians or not"
+    assert a1_r < 3, "check if heading angles are in radians or not"
     sin_theta = math.sin(theta)
-    # Additional check using sine of intersection angle
+    # Check for parallel tracks
     if abs(sin_theta) < 1e-6:
-        raise ValueError(
-            f"Tracks are nearly parallel (intersection angle = {math.degrees(theta):.2f}°). "
-            "Cannot resolve both velocity components.")
+        raise ValueError(f"Tracks are nearly parallel"
+                         "(angle = {math.degrees(theta):.2f}°). "
+                        "Cannot resolve both velocity components.")
     # Calculate trigonometric values
-    cos_a1 = math.cos(a1)
-    cos_a2 = math.cos(a2)
-    sin_a1 = math.sin(a1)
-    sin_a2 = math.sin(a2)
+    cos_a1 = math.cos(a1_r)
+    cos_a2 = math.cos(a2_r)
+    sin_a1 = math.sin(a1_r)
+    sin_a2 = math.sin(a2_r)
     # Solve for velocity components using the derived formulas:
-    # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
-    # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
-    u = (gc1 * cos_a2 - gc2 * cos_a1) / math.sin(a1 - a2)
-    v = (gc2 * sin_a2 - gc1 * sin_a1) / math.sin(a1 - a2)
+    u = (gc1 * cos_a2 - gc2 * cos_a1) / math.sin(a1_r - a2_r)
+    v = (gc2 * sin_a2 - gc1 * sin_a1) / math.sin(a1_r - a2_r)
     return u, v
 
 

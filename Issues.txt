@@ -3,5 +3,8 @@ in the above line should we shift the time axis of gc_other_at to
 match the time axis of gc_self_at
 Or interp is right?
 
-[] meridional component sign issue
-[] medidional component in correct resolution
+In fig03.py, ideally there should be perfect match between our gu, gv with 
+aviso msla_uv. Because both are just geostrophic.
+
+[x] meridional component sign issue
+[x] medidional component in correct resolution

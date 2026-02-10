@@ -15,16 +15,19 @@ cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 aviso_msla_uv_dir = "/home/srinivasu/sealevel/data/msla_uv/"
-ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u_nio.nc")
-ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v_nio.nc")
+aviso_msla_uv_dir = "/home/srinivasu/allData/aviso/msla_uv/"
+ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u.nc")
+ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v.nc")
 print(ds_aviso_u)
-aviso_u = ds_aviso_u.ugosa
-aviso_v = ds_aviso_v.vgosa
+aviso_u = ds_aviso_u.u
+aviso_v = ds_aviso_v.v
 # sys.exit()
 
 sat_val = "TP+J1+J2+J3+S6A"
 track_self_val = 29
 track_other_val = 92
+track_self_val = 53
+track_other_val = 14
 df = pd.read_csv(f"tracks_intersections_{sat_val}_1.csv")
 df_out = df.copy()
 
@@ -46,6 +49,7 @@ ngp_v = []
 
 ln = len(rows)
 count = 0
+frac1 = "0.05"
 for i in range(ln):
     sat1 = rows["sat"].values[i]
     track_number_self = rows["track_self"].apply(lambda x: str(x)).values[i]
@@ -81,8 +85,8 @@ for i in range(ln):
     )
     f_self = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_self.zfill(3)}.nc"
     f_other = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_other.zfill(3)}.nc"
-    f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat1}_{track_number_self}_loess_0.2.nc"
-    f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat1}_{track_number_other}_loess_0.2.nc"
+    f_self_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat1}_{track_number_self}_loess_{frac1}.nc"
+    f_other_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat1}_{track_number_other}_loess_{frac1}.nc"
     ds_self = xr.open_dataset(f_self, engine="netcdf4", decode_times=False)
     ds_self_smooth = xr.open_dataset(f_self_smooth)
     sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
@@ -142,6 +146,7 @@ for i in range(ln):
 
     aviso_v1 = aviso_v.sel(longitude=lon1, latitude=lat1, method="nearest")
     aviso_v2 = aviso_v1.interp(time=gv_cut.time)
+
     aviso_max_v = aviso_v2.max().item()
     gv_cut = gv_cut.where(gv_cut < aviso_max_v, np.nan)
     gv_cut = gv_cut.where(gv_cut > -aviso_max_v, np.nan)
