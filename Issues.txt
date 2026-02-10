@@ -1,3 +1,4 @@
+Major:
 gc_other_at = gc_other_at.interp(time=gc_self_at.time)
 in the above line should we shift the time axis of gc_other_at to
 match the time axis of gc_self_at
@@ -8,3 +9,6 @@ aviso msla_uv. Because both are just geostrophic.
 
 [x] meridional component sign issue
 [x] medidional component in correct resolution
+
+Minor:
+While precomputing guv and comparing with omni, there is time mismatch issue

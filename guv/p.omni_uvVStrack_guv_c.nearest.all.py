@@ -36,7 +36,7 @@ dpth = 15.0
 oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/"
-nth = 0
+frac1 = "0.05"
 
 # ds_oscar_u = xr.open_dataset(f"{oscar_dir}/oscar_0.25_u_full_xr_concat.nc")
 # ds_oscar_v = xr.open_dataset(f"{oscar_dir}/oscar_0.25_v_full_xr_concat.nc")
@@ -108,8 +108,10 @@ for omni_id in omni_d.keys():
         angle_other = np.rad2deg(np.arctan(slope_other))
         # u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
         # v_oscar_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
-        f_guv = f"guv_at_intersections/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_0.05.nc"
-        ds_guv = xr.open_dataset(f_guv)
+        f_guv = f"guv_at_intersections/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+        # ds_guv = xr.open_dataset(f_guv)
+        ds_guv = xr.open_dataset(f_guv, decode_times=False)
+        ds_guv = change_time(ds_guv, "time")
         gu = ds_guv.gu
         gv = ds_guv.gv
         # other_times.append((track_number_other, abs(dist_time)))
@@ -128,8 +130,8 @@ for omni_id in omni_d.keys():
         gu_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
         # gv_cut.plot(ax=ax1, label=f"track meridional", color="r", linewidth=2)
         tfreq = sats_tfreq[sat]
-        omni_u = omni_u.resample(time=f"{tfreq}D").mean()
-        omni_u = omni_u.interp(time=gu_cut.time)
+        # omni_u = omni_u.resample(time=f"{tfreq}D").mean()
+        # omni_u = omni_u.interp(time=gu_cut.time)
         omni_v = omni_v.resample(time=f"{tfreq}D").mean()
         omni_v = omni_v.interp(time=gv_cut.time)
         omni_u.plot(ax=ax1, color="b", linewidth=2, label="omni zonal")

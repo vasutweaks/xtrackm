@@ -49,7 +49,7 @@ def geostrophic_components(gc1, gc2, a1_r, a2_r):
     sin_a2 = math.sin(a2_r)
     # Solve for velocity components using the derived formulas:
     u = (gc1 * cos_a2 - gc2 * cos_a1) / math.sin(a1_r - a2_r)
-    v = (gc2 * sin_a2 - gc1 * sin_a1) / math.sin(a1_r - a2_r)
+    v = (gc1 * sin_a2 - gc2 * sin_a1) / math.sin(a1_r - a2_r)
     return u, v
 
 
@@ -82,7 +82,7 @@ height, width = 9, 9
 oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/"
-nth = 0
+frac1 = "0.05"
 
 # ds_oscar_u = xr.open_dataset(f"{oscar_dir}/oscar_0.25_u_full_xr_concat.nc")
 # ds_oscar_v = xr.open_dataset(f"{oscar_dir}/oscar_0.25_v_full_xr_concat.nc")
@@ -113,174 +113,175 @@ for omni_id in omni_d.keys():
     print(N)
     df_4 = find_n_closest_points(df_all, lon_omni, lat_omni, n=4)
     # print(omni_id, lon_omni, lat_omni, "\n", df_4.head(1))
-    sat = df_4["sat"].values[nth]
-    track_number_self = df_4["track_self"].apply(lambda x: str(x)).values[nth]
-    track_number_other = df_4["track_other"].apply(lambda x: str(x)).values[nth]
-    lons_inter1 = df_4["lons_inter"].values[nth]
-    lats_inter1 = df_4["lats_inter"].values[nth]
-    lon1 = lons_inter1
-    lat1 = lats_inter1
-    x_from_coast_self1 = df_4["x_from_coast_self"].values[nth]
-    x_from_coast_other1 = df_4["x_from_coast_other"].values[nth]
-    angle_acute = df_4["angle_acute"].values[nth]
-    angle_obtuse = df_4["angle_obtuse"].values[nth]
-    distance_km = df_4["distance_km"].values[nth]
-    if abs(lat1) < 2:
-        continue
-    print(
-        sat,
-        omni_id,
-        track_number_self,
-        track_number_other,
-        lons_inter1,
-        lats_inter1,
-        x_from_coast_self1,
-        x_from_coast_other1,
-        angle_acute,
-        angle_obtuse,
-    )
-    f_self = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
-    f_other = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_other.zfill(3)}.nc"
-    f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_self}_loess_0.2.nc"
-    f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_other}_loess_0.2.nc"
-    ds_self = xr.open_dataset(f_self, decode_times=False)
-    ds_self_smooth = xr.open_dataset(f_self_smooth)
-    sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
-    sla_self_smooth = ds_self_smooth.sla_smooth
-    ds_other = xr.open_dataset(f_other, engine="netcdf4", decode_times=False)
-    ds_other_smooth = xr.open_dataset(f_other_smooth)
-    sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
-    sla_other_smooth = ds_other_smooth.sla_smooth
-    lons_track_self = ds_self.lon.values
-    lats_track_self = ds_self.lat.values
-    lon_coast_self = lons_track_self[-1]  # this on coast
-    lat_coast_self = lats_track_self[-1]  # this on coast
-    lon_equat_self = lons_track_self[0]  # this on equator
-    lat_equat_self = lats_track_self[0]  # this on equator
-    slope_self = (lats_track_self[-1] - lats_track_self[0]) / (
-        lons_track_self[-1] - lons_track_self[0])
-    angle_self = np.rad2deg(np.arctan(slope_self))
-    track_path_self = sg.LineString(zip(lons_track_self, lats_track_self))
-    lons_track_other = ds_other.lon.values
-    lats_track_other = ds_other.lat.values
-    lon_equat_other = lons_track_other[0]
-    lat_equat_other = lats_track_other[0]
-    lon_coast_other = lons_track_other[-1]
-    lat_coast_other = lats_track_other[-1]
-    slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
-                                                         lon_equat_other)
-    angle_other = np.rad2deg(np.arctan(slope_other))
-    track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
-    # u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
-    # v_oscar_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
-    gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
-    gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-    # if track_path_self.intersects(track_path_other):
-    gc_self_at = gc_self.sel(x=x_from_coast_self1, method="nearest", drop=True)
-    gc_other_at = gc_other.sel(x=x_from_coast_other1,
-                               method="nearest",
-                               drop=True)
-    gc_other_at = gc_other_at.interp(time=gc_self_at.time)
-    # Better approach:
-    a2 = math.atan2(lat_coast_other - lat_equat_other,
-                    lon_coast_other - lon_equat_other)
-    a1 = math.atan2(lat_coast_self - lat_equat_self,
-                    lon_coast_self - lon_equat_self)
+    for nth in range(4):
+        sat = df_4["sat"].values[nth]
+        track_number_self = df_4["track_self"].apply(lambda x: str(x)).values[nth]
+        track_number_other = df_4["track_other"].apply(lambda x: str(x)).values[nth]
+        lons_inter1 = df_4["lons_inter"].values[nth]
+        lats_inter1 = df_4["lats_inter"].values[nth]
+        lon1 = lons_inter1
+        lat1 = lats_inter1
+        x_from_coast_self1 = df_4["x_from_coast_self"].values[nth]
+        x_from_coast_other1 = df_4["x_from_coast_other"].values[nth]
+        angle_acute = df_4["angle_acute"].values[nth]
+        angle_obtuse = df_4["angle_obtuse"].values[nth]
+        distance_km = df_4["distance_km"].values[nth]
+        if abs(lat1) < 2:
+            continue
+        print(
+            sat,
+            omni_id,
+            track_number_self,
+            track_number_other,
+            lons_inter1,
+            lats_inter1,
+            x_from_coast_self1,
+            x_from_coast_other1,
+            angle_acute,
+            angle_obtuse,
+        )
+        f_self = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
+        f_other = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_other.zfill(3)}.nc"
+        f_self_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_self}_loess_{frac1}.nc"
+        f_other_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_other}_loess_{frac1}.nc"
+        ds_self = xr.open_dataset(f_self, decode_times=False)
+        ds_self_smooth = xr.open_dataset(f_self_smooth)
+        sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
+        sla_self_smooth = ds_self_smooth.sla_smooth
+        ds_other = xr.open_dataset(f_other, engine="netcdf4", decode_times=False)
+        ds_other_smooth = xr.open_dataset(f_other_smooth)
+        sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
+        sla_other_smooth = ds_other_smooth.sla_smooth
+        lons_track_self = ds_self.lon.values
+        lats_track_self = ds_self.lat.values
+        lon_coast_self = lons_track_self[-1]  # this on coast
+        lat_coast_self = lats_track_self[-1]  # this on coast
+        lon_equat_self = lons_track_self[0]  # this on equator
+        lat_equat_self = lats_track_self[0]  # this on equator
+        slope_self = (lats_track_self[-1] - lats_track_self[0]) / (
+            lons_track_self[-1] - lons_track_self[0])
+        angle_self = np.rad2deg(np.arctan(slope_self))
+        track_path_self = sg.LineString(zip(lons_track_self, lats_track_self))
+        lons_track_other = ds_other.lon.values
+        lats_track_other = ds_other.lat.values
+        lon_equat_other = lons_track_other[0]
+        lat_equat_other = lats_track_other[0]
+        lon_coast_other = lons_track_other[-1]
+        lat_coast_other = lats_track_other[-1]
+        slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
+                                                             lon_equat_other)
+        angle_other = np.rad2deg(np.arctan(slope_other))
+        track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
+        # u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
+        # v_oscar_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
+        gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
+        gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
+        # if track_path_self.intersects(track_path_other):
+        gc_self_at = gc_self.sel(x=x_from_coast_self1, method="nearest", drop=True)
+        gc_other_at = gc_other.sel(x=x_from_coast_other1,
+                                   method="nearest",
+                                   drop=True)
+        gc_other_at = gc_other_at.interp(time=gc_self_at.time)
+        # Better approach:
+        a2 = math.atan2(lat_coast_other - lat_equat_other,
+                        lon_coast_other - lon_equat_other)
+        a1 = math.atan2(lat_coast_self - lat_equat_self,
+                        lon_coast_self - lon_equat_self)
 
-    gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
-    # other_times.append((track_number_other, abs(dist_time)))
-    fig1, ax1 = plt.subplots(1, 1, figsize=(12, 8), layout="constrained")
-    # gu_cut = -1 * gu.interp(time=omni_u.time)
-    # gv_cut = gv.interp(time=omni_v.time)
-    gu_cut = -1 * gu
-    gv_cut = gv
-    # gu_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
-    # omni_u.plot(ax=ax1, color="b", linewidth=2, label="omni")
-    # u_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar u")
-    # corr = xs.pearson_r(gu_cut, omni_u, dim="time", skipna=True)
-    gv_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
-    tfreq = sats_tfreq[sat]
-    omni_v = omni_v.resample(time=f"{tfreq}D").mean()
-    omni_v = omni_v.interp(time=gv_cut.time)
-    omni_v.plot(ax=ax1, color="b", linewidth=2, label="omni")
-    # v_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar v")
-    corr = xs.pearson_r(gv_cut, omni_v, dim="time", skipna=True)
-    corr1 = corr.item()
-    # print(f"Correlation between gu and u_oscar_at: {corr1}")
-    print(f"Correlation between gv and v_oscar_at: {corr1}")
-    info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km}",
-    plt.text(
-        0.15,
-        0.95,
+        gu, gv = geostrophic_components(gc_self_at, gc_other_at, a1, a2)
+        # other_times.append((track_number_other, abs(dist_time)))
+        # gu_cut = -1 * gu.interp(time=omni_u.time)
+        # gv_cut = gv.interp(time=omni_v.time)
+        gu_cut = gu
+        gv_cut = gv
+        # gu_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
+        # omni_u.plot(ax=ax1, color="b", linewidth=2, label="omni")
+        # u_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar u")
+        # corr = xs.pearson_r(gu_cut, omni_u, dim="time", skipna=True)
+        if distance_km > 30:
+            continue
+        fig = plt.figure(figsize=(12, 8), layout="constrained")
+        ax1 = fig.add_subplot(2, 1, 1)
+        gu_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
+        tfreq = sats_tfreq[sat]
+        omni_v = omni_v.resample(time=f"{tfreq}D").mean()
+        omni_v = omni_v.interp(time=gv_cut.time)
+        omni_u.plot(ax=ax1, color="b", linewidth=2, label="omni")
+        # v_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar v")
+        corr = xs.pearson_r(gv_cut, omni_v, dim="time", skipna=True)
+        corr1 = corr.item()
+        # print(f"Correlation between gu and u_oscar_at: {corr1}")
+        print(f"Correlation between gv and v_oscar_at: {corr1}")
+        info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km}"
+        plt.text(
+            0.15,
+            0.95,
         info,
         transform=ax1.transAxes,
         fontsize=14,
         fontweight="bold",
-    )
-    plt.legend()
-    fig2, ax2 = plt.subplots(
-        1,
-        1,
-        subplot_kw={"projection": ccrs.PlateCarree()},
-        figsize=(width, height),
-        layout="constrained",
-    )
-    dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
-        *TRACKS_REG[2:])).plot(ax=ax2,
-                               add_colorbar=False,
-                               add_labels=False,
-                               cmap=cmap1)
-    decorate_axis(ax2, "", *TRACKS_REG)
-    ax2.grid()
-    ax2.plot(
-        lon_omni,
-        lat_omni,
-        c="r",
-        marker="o",
-        markersize=6,
-        markerfacecolor="red",
-        markeredgecolor="black",
-        markeredgewidth=2,
-    )
-    # plot plat form code of omni at lon_omni, lat_omni
-    plt.text(lon_omni, lat_omni, f"{omni_id}", fontsize=10, color="k")
-    ax2.scatter(
-        lons_track_self,
-        lats_track_self,
-        marker=".",
-        color="c",
-        s=4,
-    )
-    ax2.scatter(
-        lons_track_other,
-        lats_track_other,
-        marker=".",
-        color="c",
-        s=4,
-    )
-    lonm, latm = get_point_at_distance(lon_equat_self, lat_equat_self,
-                                       lon_coast_self, lat_coast_self, d)
-    if is_within_region(lonm, latm, *TRACKS_REG):
-        plt.text(
-            lonm,
-            latm,
-            s=track_number_self,
-            fontsize=14,
-            rotation=angle_self,
-            color="w",
         )
-    lonm, latm = get_point_at_distance(lon_equat_other, lat_equat_other,
-                                       lon_coast_other, lat_coast_other, d)
-    if is_within_region(lonm, latm, *TRACKS_REG):
-        plt.text(
-            lonm,
-            latm,
-            s=track_number_other,
-            fontsize=14,
-            rotation=angle_other,
-            color="w",
+        plt.legend()
+        ax2 = fig.add_subplot(2, 1, 2, projection=ccrs.PlateCarree())
+        dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
+            *TRACKS_REG[2:])).plot(ax=ax2,
+                                   add_colorbar=False,
+                                   add_labels=False,
+                                   cmap=cmap1)
+        decorate_axis(ax2, "", *TRACKS_REG)
+        ax2.grid()
+        ax2.plot(
+            lon_omni,
+            lat_omni,
+            c="r",
+            marker="o",
+            markersize=6,
+            markerfacecolor="red",
+            markeredgecolor="black",
+            markeredgewidth=2,
         )
-    plt.show()
-    plt.close("all")
+        # plot plat form code of omni at lon_omni, lat_omni
+        plt.text(lon_omni, lat_omni, f"{omni_id}", fontsize=10, color="k")
+        ax2.scatter(
+            lons_track_self,
+            lats_track_self,
+            marker=".",
+            color="c",
+            s=4,
+        )
+        ax2.scatter(
+            lons_track_other,
+            lats_track_other,
+            marker=".",
+            color="c",
+            s=4,
+        )
+        lonm, latm = get_point_at_distance(lon_equat_self, lat_equat_self,
+                                           lon_coast_self, lat_coast_self, d)
+        if is_within_region(lonm, latm, *TRACKS_REG):
+            plt.text(
+                lonm,
+                latm,
+                s=track_number_self,
+                fontsize=14,
+                rotation=angle_self,
+                color="w",
+            )
+        lonm, latm = get_point_at_distance(lon_equat_other, lat_equat_other,
+                                           lon_coast_other, lat_coast_other, d)
+        if is_within_region(lonm, latm, *TRACKS_REG):
+            plt.text(
+                lonm,
+                latm,
+                s=track_number_other,
+                fontsize=14,
+                rotation=angle_other,
+                color="w",
+            )
+        plt.savefig(
+            f"omniVStrack_guv_pngs/{omni_id}_{sat}_{track_number_self}_{track_number_other}.png"
+        )
+        # plt.show()
+        plt.close("all")
 
-dse.close()
+    dse.close()

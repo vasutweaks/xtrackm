@@ -27,6 +27,28 @@ from namesm import *
 import math
 
 
+def haversine_distance(lon1, lat1, lon2, lat2):
+    """Calculate great-circle distance between (lon1, lat1)
+    and arrays (lon2, lat2) in kilometers."""
+    R = 6371  # Radius of Earth in km
+    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = (np.sin(dlat / 2)**2 +
+         np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2)
+    return 2 * R * np.arcsin(np.sqrt(a))
+
+
+def find_n_closest_points(df, lon0, lat0, n=4):
+    """Return the n rows in df closest to (lon0, lat0) based on
+    lons_inter/lats_inter."""
+    distances = haversine_distance(lon0, lat0, df["lons_inter"].values,
+                                   df["lats_inter"].values)
+    df = df.copy()
+    df["distance_km"] = distances
+    return df.nsmallest(n, "distance_km")
+
+
 def local_angle(lons, lats, ii, ioff=3, degrees=False):
     ln = len(lons)
     if ii - ioff < 0: # at the beginning

@@ -1,0 +1,2 @@
+cmocean balance, curl, delta, diff
+cmaps twilight, twilight_shifted

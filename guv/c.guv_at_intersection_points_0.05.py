@@ -10,6 +10,7 @@ import math
 
 
 ioff = 3
+frac1 = "0.05"
 out_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections/"
 print(sats_new)
 for sat in sats_new[:]:
@@ -41,8 +42,8 @@ for sat in sats_new[:]:
         # )
         f_self = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
         f_other = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_other.zfill(3)}.nc"
-        f_self_smooth = f"../computed/sla_loess_0.05a/track_sla_along_{sat}_{track_number_self}_loess_0.05.nc"
-        f_other_smooth = f"../computed/sla_loess_0.05a/track_sla_along_{sat}_{track_number_other}_loess_0.05.nc"
+        f_self_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_self}_loess_{frac1}.nc"
+        f_other_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_other}_loess_{frac1}.nc"
         ds_self = xr.open_dataset(f_self,
                                   engine="netcdf4",
                                   decode_times=False)
