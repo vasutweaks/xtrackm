@@ -18,6 +18,7 @@ files = sorted(
     )
 )
 tracks_n = len(files)
+east_coast_tracks = []
 for f in files:
     ds = xr.open_dataset(f, decode_times=False)
     lon_eq = ds.lon.values[0]
@@ -41,6 +42,8 @@ for f in files:
                     lon_coast - lon_equat)
     a1_d = math.degrees(a1)
     if a1_d > 90:
+        # append 4 zero padded track number
+        east_coast_tracks.append(track_number.zfill(4))
         fig = plt.figure(figsize=(10, 5))
         ax1 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
         dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(*NIO[2:])).plot(
@@ -92,6 +95,8 @@ for f in files:
             rotation=90,
         )
         ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
-        plt.show()
+        # plt.show()
         plt.close("all")
 dse.close()
+east_coast_tracks = sorted(east_coast_tracks)
+print(east_coast_tracks)
