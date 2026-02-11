@@ -41,65 +41,66 @@ for f in files:
         std = sla_track.std(dim="time")
         track_data.append((track_number, lons_track, lats_track, lonm, latm, a1_d, std))
 
-if track_data:
-    fig = plt.figure(figsize=(12, 8))
-    ax1 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
-    ax2 = fig.add_subplot(2, 1, 2)
+# We need to know the number of tracks that matched the filter criteria
+# i.e east coast region and ascending tracks beforehand so that we can
+# set colormap
 
-    dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(*NIO[2:])).plot(
-        ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap
-    )
-    decorate_axis(ax1, "", *NIO, step=8)
-    ax1.text(
-        0.40,
-        0.90,
-        f"MISSION: {sat}",
-        transform=ax1.transAxes,
-        fontsize=10,
-        fontweight="bold",
-        color="b",
-    )
+fig = plt.figure(figsize=(10, 6))
+ax1 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
+ax2 = fig.add_subplot(2, 1, 2)
 
-    colors = colormaps["tab20"](np.linspace(0, 1, len(track_data)))
+dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(*NIO[2:])).plot(
+    ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap
+)
+decorate_axis(ax1, "", *NIO, step=8)
+ax1.text(
+    0.40,
+    0.90,
+    f"MISSION: {sat}",
+    transform=ax1.transAxes,
+    fontsize=10,
+    fontweight="bold",
+    color="b",
+)
 
-    for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, std) in enumerate(track_data):
-        color = colors[i]
-        print(f"{sat} {track_number} -------------------")
+colors = colormaps["tab20"](np.linspace(0, 1, len(track_data)))
 
-        ax1.scatter(lons_track, lats_track, s=2, color=color)
-        if is_within_region(lonm, latm, *NIO):
-            ax1.text(
-                lonm,
-                latm,
-                s=str(track_number),
-                fontsize=7,
-                rotation=a1_d,
-                color=color,
-            )
+for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, std) in enumerate(track_data):
+    color = colors[i]
+    print(f"{sat} {track_number} -------------------")
 
-        ax2.plot(std.x.values, std.values, color=color, linewidth=1, label=str(track_number))
+    ax1.scatter(lons_track, lats_track, s=2, color=color)
+    if is_within_region(lonm, latm, *NIO):
+        ax1.text(
+            lonm,
+            latm,
+            s=str(track_number),
+            fontsize=7,
+            rotation=a1_d,
+            color=color,
+        )
 
-    ax2.set_xlabel("Distance (km)")
-    ax2.set_ylabel("STD (m)")
-    ax2.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
-    ax2.text(
-        0.02,
-        0.5,
-        "coast",
-        transform=ax2.transAxes,
-        fontsize=10,
-        fontweight="bold",
-        color="r",
-        rotation=90,
-    )
-    ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
-    ax2.grid(alpha=0.3, linestyle="--", linewidth=0.5)
-    ax2.legend(title="Track", ncol=4, fontsize=7, title_fontsize=8)
+    ax2.plot(std.x.values, std.values, color=color, linewidth=1, label=str(track_number))
 
-    plt.tight_layout()
-    plt.show()
-    plt.close("all")
-else:
-    print("No tracks matched the east-coast filter criteria.")
+ax2.set_xlabel("Distance (km)")
+ax2.set_ylabel("STD (m)")
+ax2.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
+ax2.text(
+    0.02,
+    0.5,
+    "coast",
+    transform=ax2.transAxes,
+    fontsize=10,
+    fontweight="bold",
+    color="r",
+    rotation=90,
+)
+ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
+ax2.grid(alpha=0.3, linestyle="--", linewidth=0.5)
+ax2.legend(title="Track", ncol=4, fontsize=7, title_fontsize=8)
+
+plt.tight_layout()
+plt.show()
+plt.close("all")
 
 dse.close()

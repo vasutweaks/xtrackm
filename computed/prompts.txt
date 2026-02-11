@@ -1,0 +1,2 @@
+modify p.std.S3A.east_coast.all_tracks.with_mean.py so that bottom subplot
+now includes the mean of all std plots with thick gray line.
