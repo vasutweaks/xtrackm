@@ -1,10 +1,10 @@
-[] standard deviation of aviso and track near the coast
+[] decadal eicc strength using TPS6A mission at intersection points
 [] open ocean comparisons; atleast a scatter plot with few comparisons
 although timeseries plots are not feasible.
+[✔] standard deviation of aviso and track near the coast
 
 ------ can wait -------
 [] drifter comparison only withing 200km or 50km
-[] decadal eicc strength using TPS6A mission at intersection points
 
 [✔] Derive the formula for velocity components from the cross track geostrophic currents by thoroughly reading the papers
 parke_1987_orbits_current_components.pdf and 
