@@ -27,6 +27,33 @@ from namesm import *
 import math
 
 
+def mad_filter_1d_xr(da, thresh):
+    x = da.values
+    x_dim_vals = da.x
+    if len(x) < 3 or np.all(np.isnan(x)):
+        return xr.DataArray(np.full_like(x, np.nan, dtype=float), coords={"x": x_dim_vals}, dims=["x"])
+    valid_mask = ~np.isnan(x)
+    if np.sum(valid_mask) < 3:
+        return xr.DataArray(np.full_like(x, np.nan, dtype=float), coords={"x": x_dim_vals}, dims=["x"])
+    # size of valid data might be less than x depending on the
+    # number of NaNs
+    valid_data = x[valid_mask]
+    median = np.median(valid_data)
+    mad = median_abs_deviation(valid_data, scale='normal')
+    if mad == 0:
+        mad = np.median(np.abs(valid_data - median)) * 1.4826
+        if mad == 0:
+            return xr.DataArray(np.full_like(x, np.nan, dtype=float), coords={"x": x_dim_vals}, dims=["x"])
+    modified_z_scores = 0.6745 * (x - median) / mad
+    # size of outliers is same as the size of x
+    outliers = np.abs(modified_z_scores) > thresh
+    x_filtered = np.zeros_like(x)
+    x_filtered[valid_mask] = x[valid_mask]
+    x_filtered[outliers] = np.nan
+    da_out = xr.DataArray(x_filtered, coords={"x": x_dim_vals}, dims=["x"])
+    return da_out
+
+
 def haversine_distance(lon1, lat1, lon2, lat2):
     """Calculate great-circle distance between (lon1, lat1)
     and arrays (lon2, lat2) in kilometers."""
@@ -71,33 +98,6 @@ def local_angle(lons, lats, ii, ioff=3, degrees=False):
         a1 = math.degrees(a1)
     return a1
     
-
-def mad_filter_1d_xr(da, thresh):
-    x = da.values
-    time = da.time
-    if len(x) < 3 or np.all(np.isnan(x)):
-        return np.zeros_like(x, dtype=bool)
-    valid_mask = ~np.isnan(x)
-    if np.sum(valid_mask) < 3:
-        return np.zeros_like(x, dtype=bool)
-    # size of valid data might be less than x depending on the
-    # number of NaNs
-    valid_data = x[valid_mask]
-    median = np.median(valid_data)
-    mad = median_abs_deviation(valid_data, scale='normal')
-    if mad == 0:
-        mad = np.median(np.abs(valid_data - median)) * 1.4826
-        if mad == 0:
-            return np.zeros_like(x, dtype=bool)
-    modified_z_scores = 0.6745 * (x - median) / mad
-    # size of outliers is same as the size of x
-    outliers = np.abs(modified_z_scores) > thresh
-    x_filtered = np.zeros_like(x)
-    x_filtered[valid_mask] = x[valid_mask]
-    x_filtered[outliers] = np.nan
-    da_out = xr.DataArray(x_filtered, coords={"time": time}, dims=["time"])
-    return da_out
-
 
 def mad_outlier_detection_fixed(data, threshold=3.5, dim="cycles_numbers"):
     """

@@ -8,79 +8,6 @@ from matplotlib import pyplot as plt
 from scipy.stats import median_abs_deviation
 
 
-def mad_filter_1d_xr(da, thresh):
-    x = da.values
-    time = da.time
-    if len(x) < 3 or np.all(np.isnan(x)):
-        return np.zeros_like(x, dtype=bool)
-    valid_mask = ~np.isnan(x)
-    if np.sum(valid_mask) < 3:
-        return np.zeros_like(x, dtype=bool)
-    # size of valid data might be less than x depending on the
-    # number of NaNs
-    valid_data = x[valid_mask]
-    median = np.median(valid_data)
-    mad = median_abs_deviation(valid_data, scale='normal')
-    if mad == 0:
-        mad = np.median(np.abs(valid_data - median)) * 1.4826
-        if mad == 0:
-            return np.zeros_like(x, dtype=bool)
-    modified_z_scores = 0.6745 * (x - median) / mad
-    # size of outliers is same as the size of x
-    outliers = np.abs(modified_z_scores) > thresh
-    x_filtered = np.zeros_like(x)
-    x_filtered[valid_mask] = x[valid_mask]
-    x_filtered[outliers] = np.nan
-    da_out = xr.DataArray(x_filtered, coords={"time": time}, dims=["time"])
-    return da_out
-
-
-def geostrophic_components_from_a(gc1, gc2, a1, a2):
-    """
-    Compute zonal and meridional geostrophic current components from
-    cross-track velocities and track slopes of two intersecting satellite tracks.
-    Parameters:
-    -----------
-    gc1 : float or array-like
-        Cross-track geostrophic velocity from track 1 (m/s)
-    gc2 : float or array-like
-        Cross-track geostrophic velocity from track 2 (m/s)
-    slope1 : float
-        Slope of track 1 (dy/dx = rise/run)
-    slope2 : float
-        Slope of track 2 (dy/dx = rise/run)
-    Returns:
-    --------
-    u : float or array-like
-        Zonal (eastward) velocity component (m/s)
-    v : float or array-like
-        Meridional (northward) velocity component (m/s)
-    Raises:
-    -------
-    ValueError: If tracks are parallel (same slope)
-    """
-    # Calculate intersection angle
-    theta = a2 - a1
-    sin_theta = math.sin(theta)
-    # Additional check using sine of intersection angle
-    if abs(sin_theta) < 1e-6:
-        raise ValueError(
-            f"Tracks are nearly parallel (intersection angle = {math.degrees(theta):.2f}°). "
-            "Cannot resolve both velocity components.")
-    # Calculate trigonometric values
-    cos_a1 = math.cos(a1)
-    cos_a2 = math.cos(a2)
-    sin_a1 = math.sin(a1)
-    sin_a2 = math.sin(a2)
-    # Solve for velocity components using the derived formulas:
-    # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
-    # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
-    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
-    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
-    u = -1 * u
-    return u, v
-
-
 out_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections/"
 for sat in sats_new:
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
@@ -157,7 +84,7 @@ for sat in sats_new:
         a1 = math.atan2(lat_coast_self - lat_equat_self,
                         lon_coast_self - lon_equat_self)
         print(f"azimuths {a1:.2f} {a2:.2f}")
-        gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
+        gu, gv = geostrophic_components(gc_self_at, gc_other_at, a1, a2)
         # filter xarray dataarray gu if greater than 3.5 or less than -3.5
         gu_filt = gu.where((gu <= 3.5) & (gu >= -3.5))
         gu_filtered = mad_filter_1d_xr(gu_filt, 3.5)
