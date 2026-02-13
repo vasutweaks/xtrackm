@@ -1,5 +1,5 @@
-[] decadal eicc strength using TPS6A mission at intersection points
-[] open ocean comparisons; atleast a scatter plot with few comparisons
+[✔] decadal eicc strength using TPS6A mission at intersection points
+[✔] open ocean comparisons; atleast a scatter plot with few comparisons
 although timeseries plots are not feasible.
 [✔] standard deviation of aviso and track near the coast
 
