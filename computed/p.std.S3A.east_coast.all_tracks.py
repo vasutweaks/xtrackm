@@ -6,6 +6,7 @@ import xarray as xr
 from matplotlib import colormaps
 from matplotlib.ticker import FuncFormatter
 from tools_xtrackm import *
+import pickle
 
 sat = "S3A"
 cmap = "twilight_shifted"
@@ -65,6 +66,10 @@ ax1.text(
 
 colors = colormaps["tab20"](np.linspace(0, 1, len(track_data)))
 
+east_coast_tracks = [track_number for (track_number, _, _, _, _, _, _) in track_data]
+# save it as pickle file
+with open("east_coast_tracks_xtrack.pkl", "wb") as f:
+    pickle.dump(east_coast_tracks, f)
 for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, std) in enumerate(track_data):
     color = colors[i]
     print(f"{sat} {track_number} -------------------")
@@ -77,7 +82,7 @@ for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, std) in enumerat
             s=str(track_number),
             fontsize=7,
             rotation=a1_d,
-            color=color,
+            color='k',
         )
 
     ax2.plot(std.x.values, std.values, color=color, linewidth=1, label=str(track_number))
