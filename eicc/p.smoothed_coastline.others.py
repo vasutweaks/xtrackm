@@ -2,9 +2,10 @@ import geopandas as gpd
 import cartopy.io.shapereader as shpreader
 import matplotlib.pyplot as plt
 import numpy as np
-from shapely.geometry import LineString, MultiLineString, box
+from shapely.geometry import LineString, MultiLineString, Point, box
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import savgol_filter
+from shapely_smooth_funcs import *
 
 lon_min, lon_max = 70, 95
 lat_min, lat_max = 5, 30
@@ -12,7 +13,7 @@ region_bbox = box(lon_min, lat_min, lon_max, lat_max)
 
 # Load Natural Earth 110m coastline
 shpfilename = shpreader.natural_earth(
-    resolution='110m',
+    resolution='50m',
     category='physical',
     name='coastline'
 )
@@ -24,69 +25,110 @@ coast_clip = gpd.clip(coast, region_bbox)
 coast_proj = coast_clip.to_crs("EPSG:3857")
 
 
-def apply_to_geom(geom, func):
+def tangent_slope_on_line_near_point(line, point_xy, neighborhood=2):
+    """
+    Compute local tangent slope dy/dx on a LineString near a query point.
+    Parameters
+    ----------
+    line : shapely.geometry.LineString
+        Smoothed coastline line.
+    point_xy : tuple(float, float)
+        Query point (x, y) in the same CRS as `line`.
+    neighborhood : int
+        Number of points on each side used for a local finite-difference tangent.
+    Returns
+    -------
+    dict with keys:
+      slope : float (np.inf for vertical tangent)
+      tangent_vector : tuple(float, float)
+      nearest_point : tuple(float, float)
+      distance : float
+    """
+    coords = np.asarray(line.coords, dtype=float)
+    if coords.shape[0] < 2:
+        raise ValueError("LineString must have at least 2 coordinates.")
+    px, py = point_xy
+    p = np.array([px, py], dtype=float)
+    best = {
+        "dist2": np.inf,
+        "seg_idx": 0,
+        "proj": coords[0].copy(),
+        "t": 0.0,
+    }
+    for i in range(len(coords) - 1):
+        a = coords[i]
+        b = coords[i + 1]
+        ab = b - a
+        denom = np.dot(ab, ab)
+        if denom == 0:
+            t = 0.0
+            q = a
+        else:
+            t = np.dot(p - a, ab) / denom
+            t = np.clip(t, 0.0, 1.0)
+            q = a + t * ab
+        d2 = np.dot(p - q, p - q)
+        if d2 < best["dist2"]:
+            best.update({"dist2": d2, "seg_idx": i, "proj": q, "t": t})
+    i_center = best["seg_idx"] + (1 if best["t"] >= 0.5 else 0)
+    i0 = max(0, i_center - neighborhood)
+    i1 = min(len(coords) - 1, i_center + neighborhood)
+    tangent = coords[i1] - coords[i0]
+    if np.allclose(tangent, 0.0):
+        tangent = coords[best["seg_idx"] + 1] - coords[best["seg_idx"]]
+    dx, dy = tangent[0], tangent[1]
+    slope = np.inf if np.isclose(dx, 0.0) else dy / dx
+    return {
+        "slope": slope,
+        "tangent_vector": (float(dx), float(dy)),
+        "nearest_point": (float(best["proj"][0]), float(best["proj"][1])),
+        "distance": float(np.sqrt(best["dist2"])),
+    }
+
+
+def tangent_slope_near_point(geom, point_xy, neighborhood=2):
+    """
+    Compute tangent slope near a point for LineString or MultiLineString geometry.
+    """
     if isinstance(geom, LineString):
-        return func(geom)
-    elif isinstance(geom, MultiLineString):
-        return MultiLineString([func(g) for g in geom.geoms])
-    else:
-        return geom
+        return tangent_slope_on_line_near_point(geom, point_xy, neighborhood=neighborhood)
+    if isinstance(geom, MultiLineString):
+        pt = Point(point_xy)
+        line = min(geom.geoms, key=lambda g: g.distance(pt))
+        return tangent_slope_on_line_near_point(line, point_xy, neighborhood=neighborhood)
+    raise TypeError("Geometry must be LineString or MultiLineString.")
 
 
-def gaussian_smooth(line, sigma=10):
-    coords = np.array(line.coords)
-    if len(coords) < 7:
-        return line
-    x = gaussian_filter1d(coords[:, 0], sigma=sigma, mode="nearest")
-    y = gaussian_filter1d(coords[:, 1], sigma=sigma, mode="nearest")
-    return LineString(np.column_stack([x, y]))
+def tangent_slope_near_point_in_geoseries(geoms, point_xy, neighborhood=2):
+    """
+    Find nearest geometry in a GeoSeries and compute tangent slope near point.
+    """
+    pt = Point(point_xy)
+    best_geom = min(geoms, key=lambda g: g.distance(pt))
+    return tangent_slope_near_point(best_geom, point_xy, neighborhood=neighborhood)
 
 
-def moving_average_smooth(line, window=15):
-    coords = np.array(line.coords)
-    if len(coords) < window:
-        return line
-    kernel = np.ones(window) / window
-    x = np.convolve(coords[:, 0], kernel, mode="same")
-    y = np.convolve(coords[:, 1], kernel, mode="same")
-    return LineString(np.column_stack([x, y]))
+def along_across_shore_components(gu, gv, coast_heading_deg):
+    """
+    Resolve vector (gu, gv) into along-shore and across-shore components.
 
+    Sign convention:
+    - coast_heading_deg is measured CCW from +x (East).
+    - along_shore is positive in the heading direction.
+    - across_shore is positive 90 deg CCW from heading (left-hand side of coast).
+      If you need right-hand positive, negate across_shore.
+    """
+    theta = np.deg2rad(coast_heading_deg)
 
-def savgol_smooth(line, window=21, poly=2):
-    coords = np.array(line.coords)
-    if len(coords) < window:
-        return line
-    x = savgol_filter(coords[:, 0], window, poly)
-    y = savgol_filter(coords[:, 1], window, poly)
-    return LineString(np.column_stack([x, y]))
+    # Unit vectors
+    along_hat = np.array([np.cos(theta), np.sin(theta)])
+    across_hat = np.array([-np.sin(theta), np.cos(theta)])  # +90 deg CCW
 
+    v = np.array([gu, gv], dtype=float)
+    along_shore = float(np.dot(v, along_hat))
+    across_shore = float(np.dot(v, across_hat))
 
-def polyfit_smooth(line, window_km=200, degree=2):
-    coords = np.array(line.coords)
-    if len(coords) < 10:
-        return line
-    x = coords[:, 0]
-    y = coords[:, 1]
-    # cumulative arclength (meters)
-    dx = np.diff(x)
-    dy = np.diff(y)
-    ds = np.sqrt(dx**2 + dy**2)
-    s = np.concatenate([[0], np.cumsum(ds)])
-    x_new = np.zeros_like(x)
-    y_new = np.zeros_like(y)
-    half_window = window_km * 1000 / 2
-    for i in range(len(s)):
-        mask = np.abs(s - s[i]) <= half_window
-        if np.sum(mask) < degree + 2:
-            x_new[i] = x[i]
-            y_new[i] = y[i]
-            continue
-        # Fit polynomial y(s), x(s)
-        px = np.polyfit(s[mask], x[mask], degree)
-        py = np.polyfit(s[mask], y[mask], degree)
-        x_new[i] = np.polyval(px, s[i])
-        y_new[i] = np.polyval(py, s[i])
-    return LineString(np.column_stack([x_new, y_new]))
+    return along_shore, across_shore
 
 
 coast_gauss = coast_proj.copy()
@@ -123,6 +165,41 @@ coast_movavg = coast_movavg.to_crs("EPSG:4326")
 coast_savgol = coast_savgol.to_crs("EPSG:4326")
 coast_poly = coast_poly.to_crs("EPSG:4326")
 
+# Query point in lon/lat for tangent visualization
+query_point = (83.62, 17.17)
+
+tangent_info = tangent_slope_near_point_in_geoseries(
+    coast_gauss.geometry, query_point, neighborhood=2
+)
+nearest_point = tangent_info["nearest_point"]
+tx, ty = tangent_info["tangent_vector"]
+tangent_norm = np.hypot(tx, ty)
+if tangent_norm > 0:
+    ux, uy = tx / tangent_norm, ty / tangent_norm
+else:
+    ux, uy = 1.0, 0.0
+
+# Tangent segment length in degree units (lon/lat plot)
+tangent_half_len = 0.35
+tangent_x = [
+    nearest_point[0] - ux * tangent_half_len,
+    nearest_point[0] + ux * tangent_half_len,
+]
+tangent_y = [
+    nearest_point[1] - uy * tangent_half_len,
+    nearest_point[1] + uy * tangent_half_len,
+]
+
+def angle_in_degrees(tangent_info):
+    tx, ty = tangent_info["tangent_vector"]
+    if tx < 0:
+        tx, ty = -tx, -ty
+    theta_east = (np.degrees(np.arctan2(ty, tx)) + 360) % 360
+    print(theta_east, "---------------------------------------------------")
+    return theta_east
+
+theta_east = angle_in_degrees(tangent_info)
+
 # Plot
 
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -133,6 +210,9 @@ coast_gauss.plot(ax=ax, linewidth=2, color="red", label="Gaussian")
 # coast_movavg.plot(ax=ax, linewidth=2, color="green", label="Moving Avg")
 # coast_savgol.plot(ax=ax, linewidth=2, color="purple", label="Savitzky-Golay")
 # coast_poly.plot(ax=ax, linewidth=2, color="purple", label="Polynomial")
+ax.scatter(*query_point, color="dodgerblue", s=60, zorder=6, label="Input point")
+ax.scatter(*nearest_point, color="orange", s=60, zorder=7, label="Nearest point")
+ax.plot(tangent_x, tangent_y, color="green", linewidth=5, zorder=8, label="Tangent segment")
 
 ax.set_xlim(lon_min, lon_max)
 ax.set_ylim(lat_min, lat_max)

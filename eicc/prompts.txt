@@ -1,0 +1,20 @@
+Write an all-encompassing function that take only the following arguments:
+query points
+smoothing sigma for guassion
+following default box for cliping
+lon_min, lon_max = 70, 95
+lat_min, lat_max = 5, 30
+region_bbox = box(lon_min, lat_min, lon_max, lat_max)
+ability to add box cordinates in a tuple
+outputs required are
+heading angle in degrees
+tangent_vector
+nearest_point
+distance
+
+Ideally It should be used by a person not familiar with shapely library and coardinate systems. @p.smoothed_coastline.gaussian.tangent.py @shapely_smooth_funcs.py
+
+If we give gu, gv components and the heading angle (an acute positve angle in degrees) of the coast at a point, write a funtion to find the along-shore and across-shore components.
+
+In the script p.smoothed_coastline.others.py,
+given gaussian smoothed coastline and a point near the coastline, write a function to find the slope of tangent of the gaussian curve near to the point.
