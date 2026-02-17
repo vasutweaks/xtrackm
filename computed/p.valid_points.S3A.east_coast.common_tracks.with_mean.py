@@ -47,7 +47,8 @@ for pass1 in common:
         lonm = lons_track.mean()
         latm = lats_track.mean()
 
-        sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
+        # sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
+        sla_track = track_dist_time_asn_gshhg(ds, var_str="sla", units_in="m")
         sla_track = sla_track.interp(x=x_common)
         count1 = sla_track.count(dim="time")
         count1 = 100 * count1 / ln
@@ -90,7 +91,8 @@ for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, count1) in enume
             rotation=a1_d,
             color='k',
         )
-    ax2.plot(count1.x.values, count1.values, color=color, linewidth=1, label=str(track_number))
+    # ax2.plot(count1.x.values, count1.values, color=color, linewidth=1, label=str(track_number))
+    ax2.scatter(count1.x.values, count1.values, color=color, linewidth=1, label=str(track_number))
 
 count1_arrays = [count1 for (_, _, _, _, _, _, count1) in track_data]
 count1_mean = xr.concat(count1_arrays, dim="track").mean(dim="track", skipna=True)
@@ -118,6 +120,7 @@ ax2.text(
     rotation=90,
 )
 ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
+ax2.set_xlim(0, 500e3)
 ax2.grid(alpha=0.3, linestyle="--", linewidth=0.5)
 ax2.legend(title="Track", ncol=4, fontsize=7, title_fontsize=8)
 
