@@ -2,6 +2,8 @@
 [✔] open ocean comparisons; atleast a scatter plot with few comparisons
 although timeseries plots are not feasible.
 [✔] standard deviation of aviso and track near the coast
+[✔] we need to gain as much clarity on ekman currents as we did on guv
+components
 
 ------ can wait -------
 [] drifter comparison only withing 200km or 50km

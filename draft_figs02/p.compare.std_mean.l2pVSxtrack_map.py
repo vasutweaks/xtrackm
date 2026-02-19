@@ -113,6 +113,8 @@ ax2.text(
 
 plt.legend()
 plt.tight_layout()
+plt.savefig(f"compare_std_mean_l2pVSxtrack_map_{sat}.png", dpi=300)
+ln_sf(f"compare_std_mean_l2pVSxtrack_map_{sat}.png", "fig01a.png")
 plt.show()
 plt.close("all")
 

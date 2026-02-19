@@ -216,5 +216,7 @@ if is_within_region(lonm, latm, *TRACKS_REG):
 plt.savefig(
     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
 )
+ln_sf(
+    f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png", "fig09.png")
 plt.show()
 plt.close("all")
