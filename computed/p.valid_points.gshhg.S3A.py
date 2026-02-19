@@ -22,6 +22,7 @@ x_common = xr.DataArray(np.arange(0, 1_300_001, 6_000), dims=["x"],
 # open common pickle
 with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
     common = pickle.load(f)
+
 for pass1 in common:
     pass2 = pass1[1:]
     f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
@@ -29,7 +30,6 @@ for pass1 in common:
         lon_eq = ds.lon.values[0]
         if lon_eq < EAST_COAST_REG[0] or lon_eq > EAST_COAST_REG[1]:
             continue
-
         lons_track = ds.lon.values
         lats_track = ds.lat.values
         ln = len(lons_track)
@@ -37,21 +37,19 @@ for pass1 in common:
         lon_coast = lons_track[-1]
         lat_equat = lats_track[0]
         lat_coast = lats_track[-1]
-
         a1 = math.atan2(lat_coast - lat_equat, lon_coast - lon_equat)
         a1_d = math.degrees(a1)
         if a1_d <= 90:
             continue
-
         track_number = int(ds.Pass.values if hasattr(ds.Pass, "values") else ds.Pass)
         lonm = lons_track.mean()
         latm = lats_track.mean()
-
         # sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
         sla_track = track_dist_time_asn_gshhg(ds, var_str="sla", units_in="m")
-        sla_track = sla_track.interp(x=x_common)
-        count1 = sla_track.count(dim="time")
-        count1 = 100 * count1 / ln
+        # sla_track = sla_track.interp(x=x_common)
+        count3 = sla_track.count(dim="time")
+        count2 = count3.interp(x=x_common)
+        count1 = 100 * count2 / ln
         track_data.append((track_number, lons_track, lats_track, lonm, latm, a1_d, count1))
 
 # We need to know the number of tracks that matched the filter criteria
@@ -79,6 +77,14 @@ ax1.text(
 colors = colormaps["tab20"](np.linspace(0, 1, len(track_data)))
 
 for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, count1) in enumerate(track_data):
+    pass2 = str(track_number).zfill(3)
+    ln1 = len(count1)
+    f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
+    ds = xr.open_dataset(f, decode_times=False)
+    sla_track = track_dist_time_asn_gshhg(ds, var_str="sla", units_in="m")
+    count4 = sla_track.count(dim="time")
+    count4 = 100 * count4 / sla_track.sizes["x"]
+    gshhg = ds.dist_to_coast_gshhg.values
     color = colors[i]
     print(f"{sat} {track_number} -------------------")
     ax1.scatter(lons_track, lats_track, s=2, color=color)
@@ -90,9 +96,13 @@ for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, count1) in enume
             fontsize=7,
             rotation=a1_d,
             color='k',
+            ha="center",
+            va="center",
+            transform=ccrs.PlateCarree(),
         )
     # ax2.plot(count1.x.values, count1.values, color=color, linewidth=1, label=str(track_number))
-    ax2.scatter(count1.x.values, count1.values, color=color, linewidth=1, label=str(track_number))
+    # ax2.scatter(gshhg[:ln1], count1.values, color=color, linewidth=1, label=str(track_number))
+    ax2.scatter(gshhg, count4.values, color=color, s=1, label=str(track_number))
 
 count1_arrays = [count1 for (_, _, _, _, _, _, count1) in track_data]
 count1_mean = xr.concat(count1_arrays, dim="track").mean(dim="track", skipna=True)
@@ -120,7 +130,7 @@ ax2.text(
     rotation=90,
 )
 ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
-ax2.set_xlim(0, 500e3)
+ax2.set_xlim(-10e3, 500e3)
 ax2.grid(alpha=0.3, linestyle="--", linewidth=0.5)
 ax2.legend(title="Track", ncol=4, fontsize=7, title_fontsize=8)
 
