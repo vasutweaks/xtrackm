@@ -13,49 +13,6 @@ cmap = "twilight_shifted"
 EAST_COAST_REG = (78.0, 95, 0, 25.4)
 
 dse = xr.open_dataset("/home/srinivasu/allData/topo/etopo5.cdf")
-files = sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"))
-
-track_data = []
-x_common = xr.DataArray(np.arange(0, 1_300_001, 6_000), dims=["x"],
-  attrs={"units": "m"})  # 0..1300 km, 1 km step
-
-# open common pickle
-with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
-    common = pickle.load(f)
-
-for pass1 in common:
-    pass2 = pass1[1:]
-    f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
-    with xr.open_dataset(f, decode_times=False) as ds:
-        lon_eq = ds.lon.values[0]
-        if lon_eq < EAST_COAST_REG[0] or lon_eq > EAST_COAST_REG[1]:
-            continue
-        lons_track = ds.lon.values
-        lats_track = ds.lat.values
-        ln = len(lons_track)
-        lon_equat = lons_track[0]
-        lon_coast = lons_track[-1]
-        lat_equat = lats_track[0]
-        lat_coast = lats_track[-1]
-        a1 = math.atan2(lat_coast - lat_equat, lon_coast - lon_equat)
-        a1_d = math.degrees(a1)
-        if a1_d <= 90:
-            continue
-        track_number = int(ds.Pass.values if hasattr(ds.Pass, "values") else ds.Pass)
-        lonm = lons_track.mean()
-        latm = lats_track.mean()
-        # sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
-        sla_track = track_dist_time_asn_gshhg(ds, var_str="sla", units_in="m")
-        # sla_track = sla_track.interp(x=x_common)
-        count3 = sla_track.count(dim="time")
-        count2 = count3.interp(x=x_common)
-        count1 = 100 * count2 / ln
-        track_data.append((track_number, lons_track, lats_track, lonm, latm, a1_d, count1))
-
-# We need to know the number of tracks that matched the filter criteria
-# i.e east coast region and ascending tracks beforehand so that we can
-# set colormap
-
 fig = plt.figure(figsize=(10, 6))
 ax1 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
 ax2 = fig.add_subplot(2, 1, 2)
@@ -74,20 +31,35 @@ ax1.text(
     color="b",
 )
 
-colors = colormaps["tab20"](np.linspace(0, 1, len(track_data)))
+x_common = xr.DataArray(np.arange(0, 1_300_001, 6_675), dims=["x"],
+  attrs={"units": "m"})  # 0..1300 km, 1 km step
 
-for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, count1) in enumerate(track_data):
-    pass2 = str(track_number).zfill(3)
-    ln1 = len(count1)
+# open common pickle
+with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
+    common = pickle.load(f)
+
+colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
+counts_arrays = []
+i=0
+for pass1 in common:
+    pass2 = pass1[1:]
     f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
     ds = xr.open_dataset(f, decode_times=False)
-    sla_track = track_dist_time_asn_gshhg(ds, var_str="sla", units_in="m")
-    count4 = sla_track.count(dim="time")
-    count4 = 100 * count4 / sla_track.sizes["x"]
-    gshhg = ds.dist_to_coast_gshhg.values
+    lon_eq = ds.lon.values[0]
+    lons_track = ds.lon.values
+    lats_track = ds.lat.values
+    ln = len(lons_track)
+    lon_equat = lons_track[0]
+    lon_coast = lons_track[-1]
+    lat_equat = lats_track[0]
+    lat_coast = lats_track[-1]
+    a1 = math.atan2(lat_coast - lat_equat, lon_coast - lon_equat)
+    a1_d = math.degrees(a1)
+    track_number = ds.Pass
+    lonm = lons_track.mean()
+    latm = lats_track.mean()
     color = colors[i]
-    print(f"{sat} {track_number} -------------------")
-    ax1.scatter(lons_track, lats_track, s=2, color=color)
+    ax1.scatter(lons_track, lats_track, s=2, color=colors[i])
     if is_within_region(lonm, latm, *NIO):
         ax1.text(
             lonm,
@@ -100,24 +72,41 @@ for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, count1) in enume
             va="center",
             transform=ccrs.PlateCarree(),
         )
-    # ax2.plot(count1.x.values, count1.values, color=color, linewidth=1, label=str(track_number))
-    # ax2.scatter(gshhg[:ln1], count1.values, color=color, linewidth=1, label=str(track_number))
-    ax2.scatter(gshhg, count4.values, color=color, s=1, label=str(track_number))
+    # sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
+    sla_asn = track_dist_time_asn_gshhg(ds, var_str="sla", units_in="m")
+    # gshhg = ds.dist_to_coast_gshhg.values
+    gshhg_da = dist_asn_gshhg(ds, var_str="dist_to_coast_gshhg")
+    gshhg_da_interp = gshhg_da.interp(x=x_common)
+    counts = sla_asn.count(dim="time")
+    count_perc = 100 * counts / len(sla_asn.time)
+    count_perc1 = xr.where(count_perc == 0, np.nan, count_perc)
+    count_perc_interp = count_perc1.interp(x=x_common)
+    count_da = xr.DataArray(count_perc_interp.values, coords={"x": gshhg_da_interp.x.values}, dims=["x"])
+    ax2.scatter(gshhg_da_interp.values, count_perc_interp.values, s=1, label=pass2, color=color)
+    print(f"{sat} {track_number} -------------------")
+    # ax2.scatter(gshhg, count2.values, color=color, s=1, label=str(track_number))
+    # ax2.scatter(
+    #     count_perc_interp.x.values,
+    #     count_perc_interp.values,
+    #     marker=".",
+    #     s=1.0,
+    # )
+    counts_arrays.append(count_perc_interp)
+    i+=1
 
-count1_arrays = [count1 for (_, _, _, _, _, _, count1) in track_data]
-count1_mean = xr.concat(count1_arrays, dim="track").mean(dim="track", skipna=True)
-ds_out = xr.Dataset({"count1": count1_mean})
-ds_out.to_netcdf(f"count1_mean_S3A_xtrack.nc")
+counts_mean = xr.concat(counts_arrays, dim="track").mean(dim="track", skipna=True)
+ds_out = xr.Dataset({"counts": counts_mean})
+ds_out.to_netcdf(f"counts_mean_S3A_xtrack.nc")
 ax2.plot(
-    count1_mean.x.values,
-    count1_mean.values,
+    counts_mean.x.values,
+    counts_mean.values,
     color="dimgray",
     linewidth=3,
     label="Mean",
 )
 
 ax2.set_xlabel("Distance (km)")
-ax2.set_ylabel("count1 (m)")
+ax2.set_ylabel("counts (m)")
 ax2.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
 ax2.text(
     0.02,
@@ -130,7 +119,7 @@ ax2.text(
     rotation=90,
 )
 ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
-ax2.set_xlim(-10e3, 500e3)
+ax2.set_xlim(-10e3, 300e3)
 ax2.grid(alpha=0.3, linestyle="--", linewidth=0.5)
 ax2.legend(title="Track", ncol=4, fontsize=7, title_fontsize=8)
 

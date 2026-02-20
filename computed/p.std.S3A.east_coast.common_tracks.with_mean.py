@@ -13,53 +13,12 @@ cmap = "twilight_shifted"
 EAST_COAST_REG = (78.0, 95, 0, 25.4)
 
 dse = xr.open_dataset("/home/srinivasu/allData/topo/etopo5.cdf")
-files = sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"))
-
-track_data = []
-x_common = xr.DataArray(np.arange(0, 1_300_001, 6_000), dims=["x"],
-  attrs={"units": "m"})  # 0..1300 km, 1 km step
-
-# open common pickle
-with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
-    common = pickle.load(f)
-for pass1 in common:
-    pass2 = pass1[1:]
-    f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
-    with xr.open_dataset(f, decode_times=False) as ds:
-        lon_eq = ds.lon.values[0]
-        if lon_eq < EAST_COAST_REG[0] or lon_eq > EAST_COAST_REG[1]:
-            continue
-
-        lons_track = ds.lon.values
-        lats_track = ds.lat.values
-        lon_equat = lons_track[0]
-        lon_coast = lons_track[-1]
-        lat_equat = lats_track[0]
-        lat_coast = lats_track[-1]
-
-        a1 = math.atan2(lat_coast - lat_equat, lon_coast - lon_equat)
-        a1_d = math.degrees(a1)
-        if a1_d <= 90:
-            continue
-
-        track_number = int(ds.Pass.values if hasattr(ds.Pass, "values") else ds.Pass)
-        lonm = lons_track.mean()
-        latm = lats_track.mean()
-
-        sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
-        sla_track = sla_track.interp(x=x_common)
-        std = sla_track.std(dim="time")
-        track_data.append((track_number, lons_track, lats_track, lonm, latm, a1_d, std))
-
-# We need to know the number of tracks that matched the filter criteria
-# i.e east coast region and ascending tracks beforehand so that we can
-# set colormap
-
 fig = plt.figure(figsize=(10, 6))
 ax1 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
 ax2 = fig.add_subplot(2, 1, 2)
 
-dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(*NIO[2:])).plot(
+rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(*NIO[2:]))
+rose_cut.plot(
     ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap
 )
 decorate_axis(ax1, "", *NIO, step=8)
@@ -73,9 +32,34 @@ ax1.text(
     color="b",
 )
 
-colors = colormaps["tab20"](np.linspace(0, 1, len(track_data)))
+x_common = xr.DataArray(np.arange(0, 1_300_001, 6_000), dims=["x"],
+  attrs={"units": "m"})  # 0..1300 km, 1 km step
 
-for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, std) in enumerate(track_data):
+with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
+    common = pickle.load(f)
+
+colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
+i = 0
+std_arrays = []
+for pass1 in common:
+    pass2 = pass1[1:]
+    f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
+    ds = xr.open_dataset(f, decode_times=False)
+    lon_eq = ds.lon.values[0]
+    lons_track = ds.lon.values
+    lats_track = ds.lat.values
+    lon_equat = lons_track[0]
+    lon_coast = lons_track[-1]
+    lat_equat = lats_track[0]
+    lat_coast = lats_track[-1]
+    a1 = math.atan2(lat_coast - lat_equat, lon_coast - lon_equat)
+    a1_d = math.degrees(a1)
+    track_number = int(ds.Pass.values if hasattr(ds.Pass, "values") else ds.Pass)
+    lonm = lons_track.mean()
+    latm = lats_track.mean()
+    sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
+    sla_track = sla_track.interp(x=x_common)
+    std = sla_track.std(dim="time")
     color = colors[i]
     print(f"{sat} {track_number} -------------------")
     ax1.scatter(lons_track, lats_track, s=2, color=color)
@@ -87,10 +71,14 @@ for i, (track_number, lons_track, lats_track, lonm, latm, a1_d, std) in enumerat
             fontsize=7,
             rotation=a1_d,
             color='k',
+            ha='center',
+            va='center',
+            transform=ccrs.PlateCarree(),
         )
     ax2.plot(std.x.values, std.values, color=color, linewidth=1, label=str(track_number))
+    std_arrays.append(std)
+    i += 1
 
-std_arrays = [std for (_, _, _, _, _, _, std) in track_data]
 std_mean = xr.concat(std_arrays, dim="track").mean(dim="track", skipna=True)
 ds_out = xr.Dataset({"std": std_mean})
 ds_out.to_netcdf(f"std_mean_S3A_xtrack.nc")

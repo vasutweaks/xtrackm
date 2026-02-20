@@ -1,0 +1,9 @@
+STD:
+There is no gshhg business in sla std scripts of l2p and xtrack
+valid count:
+There is definitely gshhg count business in the valid count script of l2p.
+But what about xtrack count script
+
+
+In both l2p and xtrack count variable, interpolation is done on the counter
+variable after percentage is calculated.
