@@ -28,6 +28,24 @@ import math
 from tools_shapely import *
 
 
+def dist_asn_gshhg(ds, var_str="gshhg", units_in="m"):
+    dists = compute_dist(ds, units=units_in)
+    dists_rev = dists[::-1]
+    # print(dists_rev)
+    var1 = ds[var_str]
+    var1_rev = var1.load().isel(points_numbers=slice(None, None, -1)).values
+    var2 = xr.DataArray(
+        var1_rev,
+        coords=[dists_rev],
+        dims=["x"],
+    )
+    if units_in == "m":
+        var2.coords["x"].attrs["units"] = "m"
+    elif units_in == "km":
+        var2.coords["x"].attrs["units"] = "km"
+    return var2
+
+
 def mad_filter_1d_xr(da, thresh):
     x = da.values
     x_dim_vals = da.x
@@ -1339,7 +1357,7 @@ def track_dist_time_asn_midx(ds, var_str="sla", units_in="m"):
     return var2
 
 
-def track_dist_time_asn_mssh(ds, var_str="mssh", units_in="m"):
+def track_dist_asn_mssh(ds, var_str="mssh", units_in="m"):
     dists = compute_dist(ds, units=units_in)  # to convert to meters
     dists_rev = dists[::-1]
     var1 = ds[var_str]  # .count(dim="cycles_numbers")
@@ -1356,7 +1374,7 @@ def track_dist_time_asn_mssh(ds, var_str="mssh", units_in="m"):
     return var2
 
 
-def track_dist_time_asn_mdt(ds, var_str="mdt_cnes_cls22", units_in="m"):
+def track_dist_asn_mdt(ds, var_str="mdt_cnes_cls22", units_in="m"):
     dists = compute_dist(ds, units=units_in)  # to convert to meters
     dists_rev = dists[::-1]
     var1 = ds[var_str]  # .count(dim="cycles_numbers")
