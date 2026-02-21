@@ -13,7 +13,7 @@ cmap = "twilight_shifted"
 EAST_COAST_REG = (78.0, 95, 0, 25.4)
 
 ds_xtr = xr.open_dataset("../computed/std_mean_S3A_xtrack.nc")
-ds_l2p = xr.open_dataset("/home/srinivasu/allData/aviso_l2p/s3a/std_mean_S3A_l2p.nc")
+ds_l2p = xr.open_dataset("/home/srinivasu/allData_ws/aviso_l2p/s3a/std_mean_S3A_l2p.nc")
 
 std_xtr = ds_xtr["std"]
 std_l2p = ds_l2p["std"]
