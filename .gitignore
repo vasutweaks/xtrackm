@@ -11,6 +11,7 @@ psmsl/rlr_monthly/slp64/
 *.zip
 *.m
 *.png
+!draft_figs02/f*.png
 *.jpg
 *.gif
 *.log
