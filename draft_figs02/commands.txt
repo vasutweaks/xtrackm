@@ -1,0 +1,1 @@
+cp fig01.png fig02.png fig03.png fig04.png fig05.png fig06.png fig07.png fig08.png ../../WriteUps/coastal_alt_docs/drafts/figures_v02/
