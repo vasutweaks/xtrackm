@@ -1,9 +1,17 @@
+[] extract oscar current along the the tracks and compare the stds
+for satellite s3a and for common tracks
+[] percentage valid points after smoothing near coast vs without smoothing
+for ERS
+[] guv latVStime plot
+
 [✔] decadal eicc strength using TPS6A mission at intersection points
 [✔] open ocean comparisons; atleast a scatter plot with few comparisons
 although timeseries plots are not feasible.
 [✔] standard deviation of aviso and track near the coast
 [✔] we need to gain as much clarity on ekman currents as we did on guv
 components
+
+possbile plots:
 
 ------ can wait -------
 [] drifter comparison only withing 200km or 50km

@@ -1,0 +1,7 @@
+Major:
+[] extract oscar current along the the tracks and compare the stds
+for satellite s3a and for common tracks
+[] code optimal interpolater operator again
+
+Minor:
+[] save speed also in guv nc files
