@@ -46,30 +46,52 @@ def dist_asn_gshhg(ds, var_str="gshhg", units_in="m"):
     return var2
 
 
-def mad_filter_1d_xr(da, thresh):
-    x = da.values
-    x_dim_vals = da.x
-    if len(x) < 3 or np.all(np.isnan(x)):
-        return xr.DataArray(np.full_like(x, np.nan, dtype=float), coords={"x": x_dim_vals}, dims=["x"])
-    valid_mask = ~np.isnan(x)
+def mad_filter_1d_xr(da, thresh, dim=None):
+    if dim is None:
+        if "time" in da.dims:
+            dim = "time"
+        elif "x" in da.dims:
+            dim = "x"
+        elif len(da.dims) == 1:
+            dim = da.dims[0]
+        else:
+            raise ValueError("Could not infer dimension. Pass dim='time' or dim='x'.")
+    elif dim not in da.dims:
+        raise ValueError(f"Dimension '{dim}' not found in input DataArray dims: {da.dims}")
+    da_vals = da.values
+    dim_vals = da[dim]
+    if len(da_vals) < 3 or np.all(np.isnan(da_vals)):
+        return xr.DataArray(
+            np.full_like(da_vals, np.nan, dtype=float),
+            coords={dim: dim_vals},
+            dims=[dim],
+        )
+    valid_mask = ~np.isnan(da_vals)
     if np.sum(valid_mask) < 3:
-        return xr.DataArray(np.full_like(x, np.nan, dtype=float), coords={"x": x_dim_vals}, dims=["x"])
-    # size of valid data might be less than x depending on the
-    # number of NaNs
-    valid_data = x[valid_mask]
+        return xr.DataArray(
+            np.full_like(da_vals, np.nan, dtype=float),
+            coords={dim: dim_vals},
+            dims=[dim],
+        )
+    # size of valid data might be less than input depending on NaNs
+    valid_data = da_vals[valid_mask]
     median = np.median(valid_data)
     mad = median_abs_deviation(valid_data, scale='normal')
     if mad == 0:
         mad = np.median(np.abs(valid_data - median)) * 1.4826
         if mad == 0:
-            return xr.DataArray(np.full_like(x, np.nan, dtype=float), coords={"x": x_dim_vals}, dims=["x"])
-    modified_z_scores = 0.6745 * (x - median) / mad
-    # size of outliers is same as the size of x
+            return xr.DataArray(
+                np.full_like(da_vals, np.nan, dtype=float),
+                coords={dim: dim_vals},
+                dims=[dim],
+            )
+    modified_z_scores = 0.6745 * (da_vals - median) / mad
+    # size of outliers is same as input size
     outliers = np.abs(modified_z_scores) > thresh
-    x_filtered = np.zeros_like(x)
-    x_filtered[valid_mask] = x[valid_mask]
-    x_filtered[outliers] = np.nan
-    da_out = xr.DataArray(x_filtered, coords={"x": x_dim_vals}, dims=["x"])
+    da_filtered = np.zeros_like(da_vals)
+    da_filtered[valid_mask] = da_vals[valid_mask]
+    da_filtered[outliers] = np.nan
+    da_out = xr.DataArray(da_filtered, coords={dim: dim_vals}, dims=[dim])
     return da_out
 
 

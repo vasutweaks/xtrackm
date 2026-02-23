@@ -79,8 +79,8 @@ for sat in sats_new[:]:
             x=x_from_coast_other1, method="nearest", drop=True
         )
         gc_other_at = gc_other_at.interp(time=gc_self_at.time)
-        gc_self_at_filt = mad_filter_1d_xr(gc_self_at, 3.5)
-        gc_other_at_filt = mad_filter_1d_xr(gc_other_at, 3.5)
+        gc_self_at_filt = mad_filter_1d_xr(gc_self_at, 3.5, dim="time")
+        gc_other_at_filt = mad_filter_1d_xr(gc_other_at, 3.5, dim="time")
         gu, gv = geostrophic_components(
             gc_self_at_filt, gc_other_at_filt, a1, a2
         )
@@ -101,8 +101,8 @@ for sat in sats_new[:]:
         print(f"saving to {filename}")
         ds_out.to_netcdf(filename)
         ds_out_self.to_netcdf(
-            f"{out_dir}/gc_self_at_{sat1}_{track_number_self}_{frac1}.nc"
+            f"{out_dir}/gc_at_{sat1}_{track_number_self}_{frac1}.nc"
         )
         ds_out_other.to_netcdf(
-            f"{out_dir}/gc_other_at_{sat1}_{track_number_other}_{frac1}.nc"
+            f"{out_dir}/gc_at_{sat1}_{track_number_other}_{frac1}.nc"
         )

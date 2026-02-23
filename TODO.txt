@@ -1,5 +1,4 @@
-[] extract oscar current along the the tracks and compare the stds
-for satellite s3a and for common tracks
+[] at intersections points, the oscar std vs track std
 [] percentage valid points after smoothing near coast vs without smoothing
 for ERS
 [] guv latVStime plot
