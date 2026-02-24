@@ -1,3 +1,13 @@
+c.close.drifters_at_intersection_point*.py
+
+The purpose of above scripts is to find for each intersection point of
+satellite tracks, we find a list of drifter ids that are passing through
+a small box around the intersection point. So for every intersection point we
+will have a list of drifters going closeby to the intersection points.
+
+also have a look at /home/srinivasu/allData/drifter1 folder for text files
+and python files for addtional context.
+
 I need apply is_within_coast function on the lons_inter, lats_inter columns of df1 and retain only those rows which are within the threshold distance.
 
 probe the time dimensions/variables of attached drifter and satellite

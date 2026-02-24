@@ -127,9 +127,9 @@ for i, r in df_all.iterrows():
     ])
     f_self = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_self.zfill(3)}.nc"
     f_other = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_other.zfill(3)}.nc"
-    ds_self = xr.open_dataset(f_self, engine="h5netcdf", decode_times=False)
+    ds_self = xr.open_dataset(f_self, engine="netcdf4", decode_times=False)
     sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
-    ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
+    ds_other = xr.open_dataset(f_other, engine="netcdf4", decode_times=False)
     sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
     lons_track_self = ds_self.lon.values
     lats_track_self = ds_self.lat.values

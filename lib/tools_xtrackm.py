@@ -1662,6 +1662,41 @@ def create_topo_map(dse,
     return fig, ax1
 
 
+def create_topo_map_etopo(dse,
+                    xsta=30,
+                    xend=120,
+                    ysta=-30,
+                    yend=30,
+                    title1="",
+                    step=5):
+    lon_range = xend - xsta
+    lat_range = yend - ysta
+    aspect_ratio = lon_range / lat_range if lat_range != 0 else 1
+    base_height = 8
+    fig_width = round(aspect_ratio * base_height)
+    fig_height = round(base_height)
+    fig, ax1 = plt.subplots(
+        1,
+        1,
+        subplot_kw={"projection": ccrs.PlateCarree()},
+        figsize=(fig_width, fig_height),
+    )
+    fig.tight_layout(pad=1.7, h_pad=1.7, w_pad=1.2)
+    dse.ROSE.sel(ETOPO05_X=slice(xsta, xend)).sel(ETOPO05_Y=slice(ysta, yend)).plot(
+        ax=ax1, add_colorbar=False, add_labels=False)
+    ax1.set_extent([xsta, xend, ysta, yend], crs=ccrs.PlateCarree())
+    ax1.add_feature(cfeature.COASTLINE)
+    xticks = list(range(int(xsta), int(xend), step))
+    yticks = list(range(int(ysta), int(yend), step))
+    ax1.axhline(y=0.0, linestyle="--", color="k")
+    ax1.set_xticks(xticks, crs=ccrs.PlateCarree())
+    ax1.set_yticks(yticks, crs=ccrs.PlateCarree())
+    ax1.set_title(title1)
+    ax1.xaxis.set_major_formatter(LongitudeFormatter())
+    ax1.yaxis.set_major_formatter(LatitudeFormatter())
+    return fig, ax1
+
+
 def plot_etopo_subplot(fig, position, tracks_reg, cmap, title="", step=2,
                        data_path="~/allData/topo/etopo5.cdf"):
     """

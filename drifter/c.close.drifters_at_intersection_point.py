@@ -276,7 +276,7 @@ for i, r in df_all.iterrows():
                     color="k",
                 )
                 plt.savefig(f"close_drifters/close_drifters_at_intersection_point_{drifter_id}.png")
-                # plt.show()
+                plt.show()
                 plt.close("all")
                 found = True
     close_drifters_column.append(close_ones)

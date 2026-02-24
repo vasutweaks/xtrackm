@@ -1,0 +1,10 @@
+c.close.drifters_at_intersection_point*.py
+
+The purpose of above scripts is to find for each intersection point of
+satellite tracks, we find a list of drifter ids that are passing through
+a small box around the intersection point. So for every intersection point we
+will have a list of drifters going closeby to the intersection points.
+
+also have a look at /home/srinivasu/allData/drifter1 folder for text files
+and python files for addtional context.
+execute any of the scripts in this dir to gain addtional context.
