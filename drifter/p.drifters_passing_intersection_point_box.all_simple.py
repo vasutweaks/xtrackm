@@ -75,7 +75,7 @@ chunk_time_dict = {
 sat_here = "TP+J1+J2+J3+S6A"
 df_all = pd.read_csv(f"close_drifters_at_intersection_point_{sat_here}.csv")
 d = 1.5
-data_loc = f"/home/srinivasu/allData/drifter1/"
+data_loc = f"/home/srinivasu/allData/drifter_track_reg/"
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 rose = dse.ROSE
 cmap1 = "Greys_r"
@@ -152,7 +152,7 @@ for i, r in df_all.iterrows():
     print(f"{angle_self} {angle_other} -------------------")
     for id_drifter in close_ones:
         print(id_drifter)
-        fd = f"{data_loc}/netcdf_all/track_reg/drifter_6h_{id_drifter}.nc"
+        fd = f"{data_loc}/netcdf_all/drifter_6h_{id_drifter}.nc"
         print(fd)
         basename1 = os.path.basename(fd)
         ds_d = xr.open_dataset(fd, drop_variables=["WMO"])

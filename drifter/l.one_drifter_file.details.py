@@ -10,8 +10,8 @@ dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 rose = dse.ROSE
 cmap1 = "Greys_r"
 dist_threshold = 2
-data_loc = f"/home/srinivasu/allData/drifter1/"
-fd = f"{data_loc}/netcdf_15001_current/track_reg/drifter_6h_133666.nc"
+data_loc = f"/home/srinivasu/allData/drifter_track_reg/"
+fd = f"{data_loc}/netcdf_15001_current/drifter_6h_133666.nc"
 
 basename1 = os.path.basename(fd)
 ds_d = xr.open_dataset(fd, drop_variables=["WMO"])
@@ -46,11 +46,9 @@ lats_drift = lats_da3.values
 
 fig = plt.figure(figsize=(12, 10), layout="constrained")
 ax2 = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-rose.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
-    *TRACKS_REG[2:])).plot(ax=ax2,
-                           add_colorbar=False,
-                           add_labels=False,
-                           cmap=cmap1)
+rose_cut = rose.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
+    ETOPO05_Y=slice(*TRACKS_REG[2:]))
+rose_cut.plot(ax=ax2, add_colorbar=False, add_labels=False, cmap=cmap1)
 decorate_axis(ax2, "", *TRACKS_REG, step=5)
 ax2.grid()
 ax2.scatter(

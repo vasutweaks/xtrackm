@@ -3,7 +3,7 @@ import glob
 import xarray as xr
 import numpy as np
 
-data_loc = f"/home/srinivasu/allData/drifter1/"
+data_loc = f"/home/srinivasu/allData/drifter_track_reg/"
 chunks = ["1_5000", "5001_10000", "10001_15000", "15001_current"]
 
 chunk_time_dict = {}
@@ -12,7 +12,7 @@ for chunk in chunks:
     end_times = []
     for fd in sorted(
             glob.glob(f"{data_loc}/netcdf_{chunk}/"
-                      f"track_reg/drifter_6h_*.nc")):
+                      f"drifter_6h_*.nc")):
         basename1 = os.path.basename(fd)
         ds_d = xr.open_dataset(fd, drop_variables=["WMO"])
         drift_tsta_o1, drift_tend_o1 = (
