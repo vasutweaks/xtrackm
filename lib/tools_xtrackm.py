@@ -746,6 +746,25 @@ def overlap_dates(t1_start, t1_end, t2_start, t2_end):
     return overlap_start, overlap_end
 
 
+def overlap_dates_np64(t1_start, t1_end, t2_start, t2_end):
+    """
+    Return overlapping interval for numpy datetime64 endpoints.
+    Returns (np.datetime64("NaT"), np.datetime64("NaT")) if no overlap.
+    """
+    if (
+        np.isnat(t1_start)
+        or np.isnat(t1_end)
+        or np.isnat(t2_start)
+        or np.isnat(t2_end)
+    ):
+        return np.datetime64("NaT"), np.datetime64("NaT")
+    if t1_end < t2_start or t1_start > t2_end:
+        return np.datetime64("NaT"), np.datetime64("NaT")
+    overlap_start = max(t1_start, t2_start)
+    overlap_end = min(t1_end, t2_end)
+    return overlap_start, overlap_end
+
+
 # GEOSTROPHIC FUNCTIONS
 def earth_radius(lat):
     # https://en.wikipedia.org/wiki/Earth_radius
@@ -1468,6 +1487,19 @@ def get_time_limits_o(sat):
     # print(type(first_time_str), type(last_time_str))
     track_tsta_o = datetime.strptime(first_time_str, "%Y-%m-%d")
     track_tend_o = datetime.strptime(last_time_str, "%Y-%m-%d")
+    return track_tsta_o, track_tend_o
+
+
+def get_time_limits_o_np64(sat):
+    f = get_first_file(sat)
+    ds = xr.open_dataset(f, engine="netcdf4")
+    time = ds.time.isel(points_numbers=0).values
+    first_time = time[0]
+    last_time = time[-1]
+    first_time_str = first_time.strftime("%Y-%m-%d")
+    last_time_str = last_time.strftime("%Y-%m-%d")
+    track_tsta_o = np.datetime64(first_time_str, "D")
+    track_tend_o = np.datetime64(last_time_str, "D")
     return track_tsta_o, track_tend_o
 
 
