@@ -5,3 +5,7 @@ Before any processing (including gc computation) the original all data is realin
 prompts:
 write a python program to cycle through all files in xtrackm/data/TPN+J1N+J2N+J3N
 1. plot 2-D sla shade plots (cycles_numbers as x-axis and points_numbers as y-axis) for each file and save them a directory. Use xarray for reading files.
+I am trying to find the intersection points of satellite tracks for each 
+satellite mission with the script c.intersection_points.all.py
+Is the logic correct? Don't worry about efficiency.
+Don't edit any scripts. Just give opinions.
