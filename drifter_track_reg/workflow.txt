@@ -8,7 +8,6 @@ It will give a dictionary of start and end time for each chunk
 l.check_chunk_sat_time_overlap.py checks overlap between satellite and drifter
 time coverage.
 
-
 # codex resume 019c953f-1e0b-7a90-90e5-fcb95cd18004
 steps:
 # We now don't have to check within region any, since we have only downloaded
@@ -33,5 +32,3 @@ will have a list of drifters going closeby to the intersection points.
 also have a look at /home/srinivasu/allData/drifter_track_reg folder for text
 files and python files for addtional context.
 execute any of the scripts in this dir to gain addtional context.
-
-

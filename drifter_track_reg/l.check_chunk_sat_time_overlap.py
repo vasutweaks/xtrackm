@@ -25,7 +25,7 @@ for chunk in chunks:
     drift_tsta_o1, drift_tend_o1 = chunk_time_dict[chunk]
     # print(type(track_tsta_o), type(track_tend_o))
     for sat in sats_new:
-        track_tsta_o, track_tend_o = get_time_limits_o_np64(sat)
+        track_tsta_o, track_tend_o = get_time_limits_np64(sat)
         # print(type(drift_tsta_o), type(drift_tend_o))
         overlap_tsta_o, overlap_tend_o = overlap_dates_np64(
             track_tsta_o, track_tend_o, drift_tsta_o1, drift_tend_o1

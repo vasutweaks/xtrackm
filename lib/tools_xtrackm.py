@@ -251,14 +251,26 @@ def read_drifter_data_simple(fname):
     )
 
 
-def drifter_time_asn(ds_d, var_str="ve"):
+def var_asn(ds, var_str="ve", daily=False):
+    lon = ds.longitude.values
+    lat = ds.latitude.values
+    time1= ds.time.isel(traj=0).values
+    var1 = ds[var_str].values
+    var_asn = xr.DataArray(var1,coords=[[1],time1],dims=["traj" ,"time"])
+    if daily:
+        var_asn = var_asn.resample(time="1D").mean()
+    return var_asn
+
+
+def drifter_time_asn(ds_d, var_str="ve", daily=False):
     time1 = ds_d.time.isel(traj=0).values
     var1 = ds_d[var_str].isel(traj=0).values
     var_asn = xr.DataArray(var1,
                            coords=[time1],
                            dims=["time"],
                            attrs=ds_d[var_str].attrs)
-    var_asn = var_asn.resample(time="1D").mean()
+    if daily:
+        var_asn = var_asn.resample(time="1D").mean()
     var_asn.name = var_str
     return var_asn
 
@@ -1490,7 +1502,7 @@ def get_time_limits_o(sat):
     return track_tsta_o, track_tend_o
 
 
-def get_time_limits_o_np64(sat):
+def get_time_limits_np64(sat):
     f = get_first_file(sat)
     ds = xr.open_dataset(f, engine="netcdf4")
     time = ds.time.isel(points_numbers=0).values
@@ -1498,9 +1510,20 @@ def get_time_limits_o_np64(sat):
     last_time = time[-1]
     first_time_str = first_time.strftime("%Y-%m-%d")
     last_time_str = last_time.strftime("%Y-%m-%d")
-    track_tsta_o = np.datetime64(first_time_str, "D")
-    track_tend_o = np.datetime64(last_time_str, "D")
+    track_tsta_o = np.datetime64(first_time_str, "s")
+    track_tend_o = np.datetime64(last_time_str, "s")
     return track_tsta_o, track_tend_o
+
+
+def get_drifter_time_limits_np64(fd):
+    ds_d = xr.open_dataset(fd, drop_variables=["WMO"])
+    drift_tsta_o1, drift_tend_o1 = (
+        ds_d.start_date.values[0],
+        ds_d.end_date.values[0],
+    )
+    drifter_tsta_o = np.datetime64(drift_tsta_o1, "s")
+    drifter_tend_o = np.datetime64(drift_tend_o1, "s")
+    return drifter_tsta_o, drifter_tend_o
 
 
 def change_time(ds1, time_str):

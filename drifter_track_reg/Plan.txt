@@ -1,0 +1,8 @@
+1. For each satellite and for each intersection point
+for each drifter in the track region
+a. Check if there is any time overlap between satellite time limits and drifter
+time limits. If there is not time overlap skip.
+b. If there is some time overalap, make a small region around the intersection
+point with a threshold distance, and check if any point of the drifter is 
+passing through the box. If so it is a candidate drifter for further analysis.
+save the list of all close passing drifters to pickle file.
