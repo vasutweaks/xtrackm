@@ -1,3 +1,43 @@
+I am trying to do the following with c.candidate_buoys.for.intersection_points_copy.py
+1. For each satellite and for each intersection point
+for each drifter in the track region
+a. Check if there is any time overlap between satellite time limits and drifter
+time limits. If there is not time overlap skip.
+b. If there is some time overalap, make a small region around the intersection
+point with a threshold distance, and check if any point of the drifter is 
+passing through the box. If so it is a candidate drifter for further analysis.
+save the list of all close passing drifters to pickle file.
+
+Any general recommendations on how to do it better? Speed it up?
+Don't edit any files.
+
+In continuation
+Write a script that plots for each intersection point
+1. Plot a track region cartopy plot
+2. Intersection point with the little box around it
+3. Check candidate pickle file (if it exists there are close drifters)
+4. For each close by drifter bouy plot the drifter track
+5. Also mark the closest point of the drifter track to the intersection point
+with x
+TRACK_REG is a fixed variable in ../lib/namesm.py
+For each intersection point, on closeby drifter track point is enough.
+plot it as a scatter plot.
+
+No need to compute it.
+
+Refactor the code c.extract.drifter_veANDgu_at_intersections.py
+to do the following:
+for each intersection point
+1. Read the corresponding satellite altimetry computed geostrophic currents
+at /home/srinivasu/xtrackm/guv/guv_at_intersections
+Now for each closeby drifter
+2. Using the close index, extract the time stamp of time variable of driter
+data
+3. Extract zonal velocity from timeseries of guv data and driter data at
+that time stamp
+4. Save unique str, drifter_id, float values of  extracted guv,
+  extracted drifter velocity to a global csv for future scatter plot.
+
 Write a python script to plot horizontal bars of temporal extent of
 I seem to have used several data types for timesteps in these scripts. Suggest
 simplifying the datatypes of timesteps. (general suggestions)
