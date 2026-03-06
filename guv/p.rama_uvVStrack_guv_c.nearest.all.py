@@ -8,51 +8,6 @@ import xarray as xr
 from tools_xtrackm import *
 
 
-def geostrophic_components_from_a(gc1, gc2, a1, a2):
-    """
-    Compute zonal and meridional geostrophic current components from
-    cross-track velocities and track slopes of two intersecting satellite tracks.
-    Parameters:
-    -----------
-    gc1 : float or array-like
-        Cross-track geostrophic velocity from track 1 (m/s)
-    gc2 : float or array-like
-        Cross-track geostrophic velocity from track 2 (m/s)
-    slope1 : float
-        Slope of track 1 (dy/dx = rise/run)
-    slope2 : float
-        Slope of track 2 (dy/dx = rise/run)
-    Returns:
-    --------
-    u : float or array-like
-        Zonal (eastward) velocity component (m/s)
-    v : float or array-like
-        Meridional (northward) velocity component (m/s)
-    Raises:
-    -------
-    ValueError: If tracks are parallel (same slope)
-    """
-    # Calculate intersection angle
-    theta = a2 - a1
-    sin_theta = math.sin(theta)
-    # Additional check using sine of intersection angle
-    if abs(sin_theta) < 1e-6:
-        raise ValueError(
-            f"Tracks are nearly parallel (intersection angle = {math.degrees(theta):.2f}°). "
-            "Cannot resolve both velocity components.")
-    # Calculate trigonometric values
-    cos_a1 = math.cos(a1)
-    cos_a2 = math.cos(a2)
-    sin_a1 = math.sin(a1)
-    sin_a2 = math.sin(a2)
-    # Solve for velocity components using the derived formulas:
-    # u = (gc1 * cos(a2) - gc2 * cos(a1)) / sin(a2 - a1)
-    # v = (gc2 * sin(a1) - gc1 * sin(a2)) / sin(a2 - a1)
-    u = (gc1 * cos_a2 - gc2 * cos_a1) / sin_theta
-    v = (gc2 * sin_a1 - gc1 * sin_a2) / sin_theta
-    return u, v
-
-
 def haversine_distance(lon1, lat1, lon2, lat2):
     """Calculate great-circle distance between (lon1, lat1)
     and arrays (lon2, lat2) in kilometers."""
@@ -160,16 +115,6 @@ for rama_id in rama_d.keys():
                                                          lon_equat_other)
     angle_other = np.rad2deg(np.arctan(slope_other))
     track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
-    # u_oscar_at = u_oscar.sel(lon=lon1, lat=lat1, method="nearest")
-    # v_oscar_at = v_oscar.sel(lon=lon1, lat=lat1, method="nearest")
-    gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
-    gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-    # if track_path_self.intersects(track_path_other):
-    gc_self_at = gc_self.sel(x=x_from_coast_self1, method="nearest", drop=True)
-    gc_other_at = gc_other.sel(x=x_from_coast_other1,
-                               method="nearest",
-                               drop=True)
-    gc_other_at = gc_other_at.interp(time=gc_self_at.time)
     # Better approach:
     a2 = math.atan2(lat_coast_other - lat_equat_other,
                     lon_coast_other - lon_equat_other)

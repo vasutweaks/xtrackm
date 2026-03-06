@@ -1,3 +1,24 @@
+1. c.candidate_buoys.for.intersection_points.py
+Find candidate closeby drifter tracks for each intersection point
+excluding drifters with no overlapping time periods
+save the list of close drifter ids to pickle files
+
+2. Check visually d.plot_candidate_drifters.for.intersections.py
+closeby drifter for each intersection point, box of close region,
+closest point on drifter track
+
+3. 
+c.extract.drifter_veANDgu_at_intersections.py
+Read the corresponding satellite altimetry computed geostrophic currents
+Using the close index, extract zonal velocity from timeseries of guv data and driter data at time stamp
+Save unique str, drifter_id, float values of  extracted guv,
+extracted drifter velocity to a global csv for future scatter plot.
+
+4. p.scatter_drifter_ve_vs_gu_S3A.py
+To plot scatter plot
+
+
+
 My broader objective is to find nearby buoy trajectory points (in space and
     time) at satellite intersection points to compare satellite derived
 currents with buoy currents at (see ~/xtrackm/drifter)

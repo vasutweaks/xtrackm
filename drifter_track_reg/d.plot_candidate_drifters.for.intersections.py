@@ -19,7 +19,7 @@ if PROJECT_ROOT not in sys.path:
 
 from lib.namesm import TRACKS_REG
 
-SAT = "S3A"
+SAT = "TP+J1+J2+J3+S6A"
 DRIFTER_DIR = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 CANDIDATE_PICKLE_DIR = "candidate_pickles"
 OUTPUT_DIR = "candidate_plots"

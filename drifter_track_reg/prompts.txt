@@ -1,3 +1,19 @@
+make following small changes to c.extract.drifter_veANDgu_at_intersections.py
+1. While saving .csv files, instead of unique_str, save, sat, track_self, track_other as individual columns
+2. Also add lon_inter, lat_inter as seperate columns
+
+Also gu_time that is saved should always be nearest one. Then we will able to see how far way temporally the interpreted gu from drifter_time
+
+We can now add following functionality to p.scatter_drifter_ve_vs_gu.py
+1. We should be able to filter the data points based on their proximity
+coast using ~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc
+We should be able to set PROXIMITY_DIST=50m, then we get scatter points only from points within the distance.
+We can use lon_inter, lat_inter in .csv file to get coastdist
+
+2. First extract the tracks numbers of tracks from unique_str
+3. Next We can extract lon, lat of intersection points from tracks_intersections_S3A_1.csv by selecting respective points
+
+load drifter_ve_vs_gu_{SAT}.csv and for given unique string
 I am trying to do the following with c.candidate_buoys.for.intersection_points_copy.py
 1. For each satellite and for each intersection point
 for each drifter in the track region

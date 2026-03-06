@@ -1,21 +1,9 @@
 import os
-
+# codex resume 019cc341-b33b-7b01-98bf-259b7a400a25
 import numpy as np
 import xarray as xr
 from tools_xtrackm import *
 import pickle
-
-
-def get_drifter_time_limits_np64(fd):
-    ds_d = xr.open_dataset(fd, drop_variables=["WMO"])
-    drift_tsta_o1, drift_tend_o1 = (
-        ds_d.start_date.values[0],
-        ds_d.end_date.values[0],
-    )
-    drifter_tsta_o = np.datetime64(drift_tsta_o1, "s")
-    drifter_tend_o = np.datetime64(drift_tend_o1, "s")
-    ds_d.close()
-    return drifter_tsta_o, drifter_tend_o
 
 
 def is_around(lons, lats, lon1, lat1, dist_threshold=0.30):
@@ -31,23 +19,58 @@ def is_around(lons, lats, lon1, lat1, dist_threshold=0.30):
     lats = np.asarray(lats, dtype=float)
     if lons.shape != lats.shape:
         raise ValueError("lons and lats must have the same shape")
-    lons_in = (lons > lon_min) & (lons < lon_max)
-    lats_in = (lats > lat_min) & (lats < lat_max)
+    lons_in = (lons >= lon_min) & (lons <= lon_max)
+    lats_in = (lats >= lat_min) & (lats <= lat_max)
     inside_mask = lons_in & lats_in
-    hit = np.any(inside_mask)
-    if hit:
-        print("At least one drifter point is around intersection point.")
-    else:
-        print("No points are inside the region.")
-    return bool(hit)
+    return bool(np.any(inside_mask))
+
+
+def build_drifter_meta(drifter_files, sat_tsta_o, sat_tend_o):
+    drifter_meta = []
+    """
+    non time overlapping drifter_files are excluded here
+    """
+    for fd in drifter_files:
+        with xr.open_dataset(fd, drop_variables=["WMO"]) as ds_d:
+            drift_tsta_o1, drift_tend_o1 = (
+                ds_d.start_date.values[0],
+                ds_d.end_date.values[0],
+            )
+            drifter_tsta_o = np.datetime64(drift_tsta_o1, "s")
+            drifter_tend_o = np.datetime64(drift_tend_o1, "s")
+
+            overlap_tsta_o, overlap_tend_o = overlap_dates_np64(
+                sat_tsta_o, sat_tend_o, drifter_tsta_o, drifter_tend_o
+            )
+            if np.isnat(overlap_tsta_o) or np.isnat(overlap_tend_o):
+                continue
+
+            lons_drift = np.asarray(ds_d.longitude.values, dtype=float)
+            lats_drift = np.asarray(ds_d.latitude.values, dtype=float)
+
+            byte_id = ds_d.ID.values[0]
+            drifter_id = byte_id.decode("utf-8").strip()
+
+            drifter_meta.append(
+                {
+                    "fd": fd,
+                    "id": drifter_id,
+                    "lon_min": np.nanmin(lons_drift),
+                    "lon_max": np.nanmax(lons_drift),
+                    "lat_min": np.nanmin(lats_drift),
+                    "lat_max": np.nanmax(lats_drift),
+                }
+            )
+    return drifter_meta
 
 
 data_loc = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 drifter_files = sorted(glob.glob(f"{data_loc}/drifter_6h_*.nc"))
-sat = "S3A"
+sat = "TP+J1+J2+J3+S6A"
 inter_df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
 sat_tsta_o, sat_tend_o = get_time_limits_np64(sat)
 dist_threshold = 0.30
+drifter_meta = build_drifter_meta(drifter_files, sat_tsta_o, sat_tend_o)
 
 for i, r in inter_df.iterrows():
     close_ones = []
@@ -56,30 +79,34 @@ for i, r in inter_df.iterrows():
     lons_inter1 = r["lons_inter"]
     lats_inter1 = r["lats_inter"]
     unique_str = f"{sat}_{track_number_self}_{track_number_other}"
-    for fd in drifter_files:
-        # print(fd)
-        drifter_tsta_o, drifter_tend_o = get_drifter_time_limits_np64(fd)
-        overlap_tsta_o, overlap_tend_o = overlap_dates_np64(
-            sat_tsta_o, sat_tend_o, drifter_tsta_o, drifter_tend_o
-        )
-        if np.isnat(overlap_tsta_o) or np.isnat(overlap_tend_o):
-            print(f"No overlap for {fd}")
+    print(unique_str)
+
+    lon_min = lons_inter1 - dist_threshold
+    lon_max = lons_inter1 + dist_threshold
+    lat_min = lats_inter1 - dist_threshold
+    lat_max = lats_inter1 + dist_threshold
+
+    for dmeta in drifter_meta:
+        print(dmeta)
+        if (
+            dmeta["lon_max"] < lon_min
+            or dmeta["lon_min"] > lon_max
+            or dmeta["lat_max"] < lat_min
+            or dmeta["lat_min"] > lat_max
+        ):
             continue
-        print(f"{sat}, {overlap_tsta_o}, {overlap_tend_o}")
-        basename1 = os.path.basename(fd)
-        ds_d = xr.open_dataset(fd, drop_variables=["WMO"])
 
-        byte_id = ds_d.ID.values[0]
-        str_id = byte_id.decode("utf-8").strip()
-        drifter_id = str_id
+        with xr.open_dataset(dmeta["fd"], drop_variables=["WMO"]) as ds_d:
+            lons_drift = ds_d.longitude.values
+            lats_drift = ds_d.latitude.values
 
-        lons_drift = ds_d.longitude.values
-        lats_drift = ds_d.latitude.values
-
-        if is_around(lons_drift, lats_drift, lons_inter1, lats_inter1, dist_threshold):
-            close_ones.append(drifter_id)
+        if is_around(
+            lons_drift, lats_drift, lons_inter1, lats_inter1, dist_threshold
+        ):
+            close_ones.append(dmeta["id"])
 
     if close_ones:
         # dump to pickle
+        print(f"{unique_str}, {len(close_ones)}")
         with open(f"candidate_pickles/{unique_str}.pkl", "wb") as f:
             pickle.dump(close_ones, f)

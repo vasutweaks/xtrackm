@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-SAT = "S3A"
+SAT = "TP+J1+J2+J3+S6A"
 DRIFTER_DIR = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 INTERSECTION_CSV = f"tracks_intersections_{SAT}_1.csv"
 CANDIDATE_PICKLE_DIR = "candidate_pickles"
@@ -72,6 +72,8 @@ def load_guv_series(unique_str):
 def main():
     inter_df = pd.read_csv(INTERSECTION_CSV)
     drifter_files = sorted(glob(os.path.join(DRIFTER_DIR, "drifter_6h_*.nc")))
+    if len(drifter_files) == 0:
+        raise("No glob files")
     drifter_index = build_drifter_index(drifter_files)
     drifter_cache = {}
 
@@ -114,19 +116,26 @@ def main():
 
             gu_interp = ds_guv["gu"].interp(time=drifter_time)
             gu_at_time = gu_interp.values
+
+            # Always retain the nearest native GUV timestamp for temporal offset checks.
+            gu_nearest = ds_guv["gu"].sel(time=drifter_time, method="nearest")
+            gu_time = gu_nearest["time"].values
+
+            # Keep interpolated gu when valid; otherwise fall back to nearest-sample gu.
+            # np.isfinite(gu_at_time) is true if interpolation is successful
             if not np.isfinite(gu_at_time):
-                gu_nearest = ds_guv["gu"].sel(time=drifter_time, method="nearest")
                 gu_at_time = gu_nearest.values
-                gu_time = gu_nearest["time"].values
-            else:
-                gu_time = drifter_time
 
             if not np.isfinite(gu_at_time):
                 continue
 
             rows_out.append(
                 {
-                    "unique_str": unique_str,
+                    "sat": SAT,
+                    "track_self": track_to_str(row["track_self"]),
+                    "track_other": track_to_str(row["track_other"]),
+                    "lon_inter": lon_inter,
+                    "lat_inter": lat_inter,
                     "drifter_id": drifter_id,
                     "gu": float(gu_at_time),
                     "drifter_ve": float(drifter_ve),
