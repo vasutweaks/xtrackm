@@ -1,3 +1,7 @@
+refactor the code p.rama_uvVStrack_guv_c.nearest.selected.py to plot only for a selected combination of ERS1+ERS2+ENV+SRL sat 15n90e rama_id 810 track_self 423 track_other
+
+ERS1+ERS2+ENV+SRL 15n90e 352 967
+
 lots of difference between track gv and aviso gv at points very close to coast
 track meridional velocities are usually poorly correlated with other products
 

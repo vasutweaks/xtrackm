@@ -1,218 +1,284 @@
-import math
+import os
+from functools import lru_cache
 
 import cmocean as cmo
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+import xskillscore as xs
+from geopy import distance
 from tools_xtrackm import *
 
 
-def haversine_distance(lon1, lat1, lon2, lat2):
-    """Calculate great-circle distance between (lon1, lat1)
-    and arrays (lon2, lat2) in kilometers."""
-    R = 6371  # Radius of Earth in km
-    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = (np.sin(dlat / 2)**2 +
-         np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2)
-    return 2 * R * np.arcsin(np.sqrt(a))
-
-
 def find_n_closest_points(df, lon0, lat0, n=4):
-    """Return the n rows in df closest to (lon0, lat0) based on
-    lons_inter/lats_inter."""
-    distances = haversine_distance(lon0, lat0, df["lons_inter"].values,
-                                   df["lats_inter"].values)
-    df = df.copy()
-    df["distance_km"] = distances
-    return df.nsmallest(n, "distance_km")
+    """Return n rows closest to (lon0, lat0) using intersection lon/lat."""
+    lons_inter = df["lons_inter"].tolist()
+    lats_inter = df["lats_inter"].tolist()
+    distances = [
+        distance.distance((y, x), (lat0, lon0)).km
+        for x, y in zip(lons_inter, lats_inter)
+    ]
+    out = df.copy()
+    out["distance_km"] = distances
+    return out.nsmallest(n, "distance_km")
+
+
+@lru_cache(maxsize=None)
+def get_track_geometry(sat, track_number):
+    f_track = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{str(track_number).zfill(3)}.nc"
+    with xr.open_dataset(
+        f_track, engine="netcdf4", decode_times=False
+    ) as ds_track:
+        lons = ds_track.lon.values
+        lats = ds_track.lat.values
+    lon_equat = lons[0]
+    lat_equat = lats[0]
+    lon_coast = lons[-1]
+    lat_coast = lats[-1]
+    slope = (lat_coast - lat_equat) / (lon_coast - lon_equat)
+    angle_deg = np.rad2deg(np.arctan(slope))
+    return lons, lats, lon_equat, lat_equat, lon_coast, lat_coast, angle_deg
 
 
 cmap1 = cmo.cm.diff
 d = 1.5
-dpth = 15.0
 height, width = 9, 9
-oscar_dir = "/home/srinivasu/allData/oscar_0.25/"
-dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
+frac1 = "0.05"
+
+
+dse = xr.open_dataset("~/allData/topo/etopo5.cdf")
+rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
+    ETOPO05_Y=slice(*TRACKS_REG[2:])
+)
 rama_data_dir = "/home/srinivasu/allData/rama/cur/"
-nth = 0
+guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+out_match_csv = "rama_guv_c_nearest_global_matches.csv"
+matched_rows_all = []
+
 
 df_all_list = []
 for sat in sats_new:
-    df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
-    df_all_list.append(df)
+    df_all_list.append(pd.read_csv(f"tracks_intersections_{sat}_1.csv"))
 df_all = pd.concat(df_all_list, ignore_index=True)
 
-for rama_id in rama_d.keys():
-    lon_rama, lat_rama = rama_d[rama_id]
+
+for rama_id, (lon_rama, lat_rama) in rama_d.items():
     if abs(lat_rama) < 2:
         continue
-    ds_rama = xr.open_dataset(f"{rama_data_dir}/cur{rama_id}_dy.cdf")
-    print(ds_rama)
-    rama_u = 0.01 * ds_rama.U_320.isel(depth=0, drop=True)
-    rama_v = 0.01 * ds_rama.V_321.isel(depth=0, drop=True)
-    N = rama_v.count().item()
-    print(N)
-    df_4 = find_n_closest_points(df_all, lon_rama, lat_rama, n=4)
-    # print(rama_id, lon_rama, lat_rama, "\n", df_4.head(1))
-    sat = df_4["sat"].values[nth]
-    track_number_self = df_4["track_self"].apply(lambda x: str(x)).values[nth]
-    track_number_other = df_4["track_other"].apply(lambda x: str(x)).values[nth]
-    lons_inter1 = df_4["lons_inter"].values[nth]
-    lats_inter1 = df_4["lats_inter"].values[nth]
-    distance_km = df_4["distance_km"].values[nth]
-    lon1 = lons_inter1
-    lat1 = lats_inter1
-    if abs(lat1) < 2:
-        continue
-    x_from_coast_self1 = df_4["x_from_coast_self"].values[nth]
-    x_from_coast_other1 = df_4["x_from_coast_other"].values[nth]
-    angle_acute = df_4["angle_acute"].values[nth]
-    angle_obtuse = df_4["angle_obtuse"].values[nth]
-    print(
-        sat,
-        rama_id,
-        track_number_self,
-        track_number_other,
-        lons_inter1,
-        lats_inter1,
-        x_from_coast_self1,
-        x_from_coast_other1,
-        angle_acute,
-        angle_obtuse,
-    )
-    f_self = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
-    f_other = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_other.zfill(3)}.nc"
-    f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_self}_loess_0.2.nc"
-    f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_other}_loess_0.2.nc"
-    ds_self = xr.open_dataset(f_self, decode_times=False)
-    ds_self_smooth = xr.open_dataset(f_self_smooth)
-    sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
-    sla_self_smooth = ds_self_smooth.sla_smooth
-    ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
-    ds_other_smooth = xr.open_dataset(f_other_smooth)
-    sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
-    sla_other_smooth = ds_other_smooth.sla_smooth
-    lons_track_self = ds_self.lon.values
-    lats_track_self = ds_self.lat.values
-    lon_coast_self = lons_track_self[-1]  # this on coast
-    lat_coast_self = lats_track_self[-1]  # this on coast
-    lon_equat_self = lons_track_self[0]  # this on equator
-    lat_equat_self = lats_track_self[0]  # this on equator
-    slope_self = (lats_track_self[-1] - lats_track_self[0]) / (
-        lons_track_self[-1] - lons_track_self[0])
-    angle_self = np.rad2deg(np.arctan(slope_self))
-    track_path_self = sg.LineString(zip(lons_track_self, lats_track_self))
-    lons_track_other = ds_other.lon.values
-    lats_track_other = ds_other.lat.values
-    lon_equat_other = lons_track_other[0]
-    lat_equat_other = lats_track_other[0]
-    lon_coast_other = lons_track_other[-1]
-    lat_coast_other = lats_track_other[-1]
-    slope_other = (lat_coast_other - lat_equat_other) / (lon_coast_other -
-                                                         lon_equat_other)
-    angle_other = np.rad2deg(np.arctan(slope_other))
-    track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
-    # Better approach:
-    a2 = math.atan2(lat_coast_other - lat_equat_other,
-                    lon_coast_other - lon_equat_other)
-    a1 = math.atan2(lat_coast_self - lat_equat_self,
-                    lon_coast_self - lon_equat_self)
 
-    gu, gv = geostrophic_components_from_a(gc_self_at, gc_other_at, a1, a2)
-    # other_times.append((track_number_other, abs(dist_time)))
-    fig1, ax1 = plt.subplots(1, 1, figsize=(10, 6), layout="constrained")
-    gu_cut = -1 * gu.interp(time=rama_u.time)
-    gv_cut = gv.interp(time=rama_v.time)
-    # gu_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
-    # rama_u.plot(ax=ax1, color="b", linewidth=2, label="rama")
-    # u_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar u")
-    # corr = xs.pearson_r(gu_cut, rama_u, dim="time", skipna=True)
-    gv_cut.plot(ax=ax1, label=f"track zonal", color="r", linewidth=2)
-    tfreq = sats_tfreq[sat]
-    rama_v = rama_v.resample(time=f"{tfreq}D").mean()
-    rama_v = rama_v.interp(time=gv_cut.time)
-    rama_v.plot(ax=ax1, color="b", linewidth=2, label="rama")
-    # v_oscar_at.plot(ax=ax1, color="b", linewidth=2, label="oscar v")
-    corr = xs.pearson_r(gv_cut, rama_v, dim="time", skipna=True)
-    corr1 = corr.item()
-    # print(f"Correlation between gu and u_oscar_at: {corr1}")
-    info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km}",
-    print(f"Correlation between gv and v_oscar_at: {corr1}")
-    plt.text(
-        0.15,
-        0.95,
-        f"{info}",
-        transform=ax1.transAxes,
-        fontsize=14,
-        fontweight="bold",
-    )
-    plt.legend()
-    fig2, ax2 = plt.subplots(
-        1,
-        1,
-        subplot_kw={"projection": ccrs.PlateCarree()},
-        figsize=(width, height),
-        layout="constrained",
-    )
-    dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(
-        *TRACKS_REG[2:])).plot(ax=ax2,
-                               add_colorbar=False,
-                               add_labels=False,
-                               cmap=cmap1)
-    decorate_axis(ax2, "", *TRACKS_REG)
-    ax2.grid()
-    ax2.plot(
-        lon_rama,
-        lat_rama,
-        c="r",
-        marker="o",
-        markersize=6,
-        markerfacecolor="red",
-        markeredgecolor="black",
-        markeredgewidth=2,
-    )
-    # plot plat form code of rama at lon_rama, lat_rama
-    plt.text(lon_rama, lat_rama, f"{rama_id}", fontsize=10, color="k")
-    ax2.scatter(
-        lons_track_self,
-        lats_track_self,
-        marker=".",
-        color="c",
-        s=4,
-    )
-    ax2.scatter(
-        lons_track_other,
-        lats_track_other,
-        marker=".",
-        color="c",
-        s=4,
-    )
-    lonm, latm = get_point_at_distance(lon_equat_self, lat_equat_self,
-                                       lon_coast_self, lat_coast_self, d)
-    if is_within_region(lonm, latm, *TRACKS_REG):
-        plt.text(
-            lonm,
-            latm,
-            s=track_number_self,
-            fontsize=14,
-            rotation=angle_self,
-            color="w",
+    rama_file = f"{rama_data_dir}/cur{rama_id}_dy.cdf"
+    if not os.path.exists(rama_file):
+        continue
+    print(rama_id, lon_rama, lat_rama)
+
+    with xr.open_dataset(f"{rama_data_dir}/cur{rama_id}_dy.cdf") as ds_rama:
+        # print(ds_rama)
+        rama_u = 0.01 * ds_rama.U_320.isel(depth=0, drop=True)
+        rama_v = 0.01 * ds_rama.V_321.isel(depth=0, drop=True)
+
+    # print(rama_v.count().item())
+    df_4 = find_n_closest_points(df_all, lon_rama, lat_rama, n=4)
+    for nth in range(4):
+        row = df_4.iloc[nth]
+
+        sat = row["sat"]
+        track_number_self = str(row["track_self"])
+        track_number_other = str(row["track_other"])
+        lon1 = row["lons_inter"]
+        lat1 = row["lats_inter"]
+        distance_km = row["distance_km"]
+        angle_acute = row["angle_acute"]
+        angle_obtuse = row["angle_obtuse"]
+
+        if abs(lat1) < 2:
+            continue
+
+        print(
+            sat,
+            rama_id,
+            track_number_self,
+            track_number_other,
+            lon1,
+            lat1,
+            angle_acute,
+            angle_obtuse,
         )
-    lonm, latm = get_point_at_distance(lon_equat_other, lat_equat_other,
-                                       lon_coast_other, lat_coast_other, d)
-    if is_within_region(lonm, latm, *TRACKS_REG):
-        plt.text(
-            lonm,
-            latm,
-            s=track_number_other,
-            fontsize=14,
-            rotation=angle_other,
-            color="w",
+
+        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+        if not os.path.exists(f_guv):
+            print(f"missing file: {f_guv}")
+            continue
+
+        with xr.open_dataset(f_guv) as ds_guv:
+            gu = ds_guv.gu
+            gv = ds_guv.gv
+
+        (
+            lons_track_self,
+            lats_track_self,
+            lon_equat_self,
+            lat_equat_self,
+            lon_coast_self,
+            lat_coast_self,
+            angle_self,
+        ) = get_track_geometry(sat, track_number_self)
+        (
+            lons_track_other,
+            lats_track_other,
+            lon_equat_other,
+            lat_equat_other,
+            lon_coast_other,
+            lat_coast_other,
+            angle_other,
+        ) = get_track_geometry(sat, track_number_other)
+
+        gu_cut = gu
+        gv_cut = gv
+
+        # Collocate RAMA at track-gu timestamps; avoid sat-dependent smoothing.
+        rama_u_match = rama_u.reindex(
+            time=gu_cut.time,
+            method="nearest",
+            tolerance=np.timedelta64(24, "h"),
         )
-    plt.show()
-    plt.close("all")
+        valid = np.isfinite(gu_cut) & np.isfinite(rama_u_match)
+        gu_pair = gu_cut.where(valid)
+        rama_u_pair = rama_u_match.where(valid)
+
+        df_pairs = xr.Dataset({"gu": gu_pair, "rama_u": rama_u_pair}).to_dataframe().reset_index()
+        df_pairs = df_pairs.dropna(subset=["gu", "rama_u"])
+        matched_pairs = len(df_pairs)
+        if matched_pairs > 0:
+            df_pairs["sat"] = sat
+            df_pairs["rama_id"] = rama_id
+            df_pairs["distance_km"] = distance_km
+            df_pairs["track_self"] = track_number_self
+            df_pairs["track_other"] = track_number_other
+            df_pairs["matched_pairs"] = matched_pairs
+            df_pairs["timestamp"] = pd.to_datetime(df_pairs["time"]).astype(str)
+            matched_rows_all.append(
+                df_pairs[
+                    [
+                        "sat",
+                        "rama_id",
+                        "distance_km",
+                        "track_self",
+                        "track_other",
+                        "matched_pairs",
+                        "timestamp",
+                        "gu",
+                        "rama_u",
+                    ]
+                ]
+            )
+
+        # check valid points
+        ngp = np.sum(valid)
+        if ngp < 2:
+            continue
+        fig = plt.figure(figsize=(12, 8))
+        ax2 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
+        ax1 = fig.add_subplot(2, 1, 2)
+        rama_u_pair.plot(ax=ax1, color="r", linewidth=2, label="rama")
+        gu_pair.plot(ax=ax1, color="k", linewidth=2, label="track")
+
+        corr = xs.pearson_r(gu_pair, rama_u_pair, dim="time", skipna=True)
+        corr1 = corr.item()
+
+        info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km:.2f} km"
+        print(f"Correlation between gu and rama u: {corr1}")
+        plt.text(
+            0.25,
+            0.90,
+            info,
+            transform=ax1.transAxes,
+            fontsize=12,
+            fontweight="bold",
+        )
+        plt.legend()
+
+        rose_cut.plot(ax=ax2, add_colorbar=False, add_labels=False, cmap=cmap1)
+        decorate_axis(ax2, "", *TRACKS_REG, step=10)
+        ax2.grid()
+        ax2.plot(
+            lon_rama,
+            lat_rama,
+            c="r",
+            marker="o",
+            markersize=4,
+            markerfacecolor="red",
+            markeredgecolor="red",
+            markeredgewidth=2,
+        )
+
+        ax2.plot(
+            lon1,
+            lat1,
+            c="k",
+            marker=".",
+            markersize=8,
+            markerfacecolor="black",
+            markeredgecolor="black",
+            markeredgewidth=2,
+        )
+        plt.text(lon_rama, lat_rama, f"{rama_id}", fontsize=10, color="k")
+        ax2.scatter(
+            lons_track_self, lats_track_self, marker=".", color="c", s=4
+        )
+        ax2.scatter(
+            lons_track_other, lats_track_other, marker=".", color="c", s=4
+        )
+
+        lonm, latm = get_point_at_distance(
+            lon_equat_self,
+            lat_equat_self,
+            lon_coast_self,
+            lat_coast_self,
+            d,
+        )
+        info = f"{sat} {track_number_self} {track_number_other} {distance_km:.2f} km"
+        plt.text(
+            0.55,
+            0.90,
+            info,
+            transform=ax2.transAxes,
+            fontsize=10,
+            fontweight="bold",
+        )
+        if is_within_region(lonm, latm, *TRACKS_REG):
+            plt.text(
+                lonm,
+                latm,
+                s=track_number_self,
+                fontsize=14,
+                rotation=angle_self,
+                color="w",
+            )
+
+        lonm, latm = get_point_at_distance(
+            lon_equat_other,
+            lat_equat_other,
+            lon_coast_other,
+            lat_coast_other,
+            d,
+        )
+        if is_within_region(lonm, latm, *TRACKS_REG):
+            plt.text(
+                lonm,
+                latm,
+                s=track_number_other,
+                fontsize=14,
+                rotation=angle_other,
+                color="w",
+            )
+
+        plt.show()
+        plt.close("all")
+
+if len(matched_rows_all) > 0:
+    df_matched_all = pd.concat(matched_rows_all, ignore_index=True)
+    df_matched_all.to_csv(out_match_csv, index=False)
+    print(f"saved global match csv: {out_match_csv}, rows={len(df_matched_all)}")
 
 dse.close()

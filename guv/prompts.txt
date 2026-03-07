@@ -1,3 +1,24 @@
+Refactor the code c.guv_c.sat_wise.stats.py to use pre computed guv fields
+at /home/srinivasu/xtrackm/guv/guv_at_intersections 
+
+Refactor the code p.rama_uvVStrack_guv_c.nearest.all.py to use pre computed guv fields
+at /home/srinivasu/xtrackm/guv/guv_at_intersections 
+use functions in p.aviso_only_uvVStrack_guv_c.at.intersections.py to find
+track angle etc.
+
+Write a python script to plot the scatter of rama_guv_c_nearest_global_matches.csv very much similar to p.scatter_drifter_ve_vs_gu.py
+We should able to filter rows based on the distance_km
+Time based filtering is not needed.
+
+In the original code p.rama_uvVStrack_guv_c.nearest.all.py
+add a global csv file that stores, sat, rama_id, distance_km, track_self, track_other, matched pairs of rama_u and gu along with time stamps
+This will be used for future scatter plot.
+
+Any major issues you found? Better ways of doing it. Please state. Don't edit any code yet.
+rama data is usually daily. Satellite periodicity varies sat to sat which is given by tfreq key. Bringing both to same time axis properly is where I think I have issues.
+
+Refactor the code p.aviso_only_uvVStrack_guv_c.at.intersections.py to use pre computed guv fields at /home/srinivasu/xtrackm/guv/guv_at_intersections
+
 make use of the script c.guv_at_intersection_points_0.05.py and make a new
 script that compares local_angle and angle from end points are reasonably
 equal.
@@ -52,8 +73,8 @@ variables:
 }
 
 
-I am trying to compare zonal component of current computed from two cross track geostrophic currents at the intersection point of the tracks with loess smoothed sla with oscar ocean currents. The meridional
-component of oscar compare well with computed geostrophic zonal component but zonal component does not compare well at all. What could be fundamental reason? Some studies claim that two tracks' cross track geostrophic currents are needed to compute components, but studies are doing with one track alone.
+I am trying to compare zonal component of current computed from two cross track geostrophic currents at the intersection point of the tracks with loess smoothed sla with oscar ocean currents. The zonal
+component of oscar compare well with computed geostrophic zonal component but meridional component does not compare well at all. What could be fundamental reason? Some studies claim that two tracks' cross track geostrophic currents are needed to compute components, but studies are doing with one track alone.
 
 I expected correlations of above 0.9 with aviso guv, because they are purely geostrophic, but it was not the case. correlations are similar to
 that of with oscar.

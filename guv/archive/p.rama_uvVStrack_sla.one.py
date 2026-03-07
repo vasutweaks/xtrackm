@@ -6,25 +6,55 @@ from tools_xtrackm import *
 import sys
 
 cmap1 = cmo.cm.diff
+sat = "S3A"
+sat = "ERS1+ERS2+ENV+SRL"
 sat = "TP+J1+J2+J3+S6A"
+rama_id = "0n90e"
+rama_id = "4n90e"
+rama_id = "15n90e"
+lon_rama, lat_rama = rama_d[rama_id]
 d = 1.5
 height, width = 9, 9
 
 
+def haversine_distance(lon1, lat1, lon2, lat2):
+    """Calculate great-circle distance between (lon1, lat1)
+    and arrays (lon2, lat2) in kilometers."""
+    R = 6371  # Radius of Earth in km
+    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = (np.sin(dlat / 2)**2 +
+         np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2)
+    return 2 * R * np.arcsin(np.sqrt(a))
+
+
+def find_n_closest_points(df, lon0, lat0, n=4):
+    """Return the n rows in df closest to (lon0, lat0) based on
+    lons_inter/lats_inter."""
+    distances = haversine_distance(lon0, lat0, df["lons_inter"].values,
+                                   df["lats_inter"].values)
+    df = df.copy()
+    df["distance_km"] = distances
+    return df.nsmallest(n, "distance_km")
+
+
 df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
+df_4 = find_n_closest_points(df, lon_rama, lat_rama, n=4)
+print(df_4)
 
 # sys.exit()
-track_self = df["track_self"].apply(lambda x: str(x)).values
-track_other = df["track_other"].apply(lambda x: str(x)).values
-lons_inter = df["lons_inter"].values
-lats_inter = df["lats_inter"].values
-x_from_coast_self = df["x_from_coast_self"].values
-x_from_coast_other = df["x_from_coast_other"].values
-angle_acute = df["angle_acute"].values
-angle_obtuse = df["angle_obtuse"].values
+track_self = df_4["track_self"].apply(lambda x: str(x)).values
+track_other = df_4["track_other"].apply(lambda x: str(x)).values
+lons_inter = df_4["lons_inter"].values
+lats_inter = df_4["lats_inter"].values
+x_from_coast_self = df_4["x_from_coast_self"].values
+x_from_coast_other = df_4["x_from_coast_other"].values
+angle_acute = df_4["angle_acute"].values
+angle_obtuse = df_4["angle_obtuse"].values
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 
-for i in range(len(df)):
+for i in range(len(df_4)):
     track_number_self = track_self[i]
     track_number_other = track_other[i]
     f_self = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
@@ -37,10 +67,8 @@ for i in range(len(df)):
     angle_obtuse1 = angle_obtuse[i]
     ds_self = xr.open_dataset(f_self, decode_times=False)
     sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
-    x_self = sla_self.x.values
-    ds_other = xr.open_dataset(f_other, engine="h5netcdf", decode_times=False)
+    ds_other = xr.open_dataset(f_other, engine="netcdf4", decode_times=False)
     sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
-    x_other = sla_other.x.values
     lons_track_self = ds_self.lon.values
     lats_track_self = ds_self.lat.values
     lon_coast_self = lons_track_self[-1]  # this on coast
@@ -61,22 +89,15 @@ for i in range(len(df)):
     angle_other = np.rad2deg(np.arctan(slope_other))
     track_path_other = sg.LineString(zip(lons_track_other, lats_track_other))
     # if track_path_self.intersects(track_path_other):
-    lon_inter_self, lat_inter_self = lonlat_at_x(ds_self, x_self, x_from_coast_self1)
-    lon_inter_other, lat_inter_other = lonlat_at_x(ds_other, x_other, x_from_coast_other1)
-    # print(f"{lon_inter_self:.2f} {lon_inter_other:.2f} {lon1:.2f}")
-    if is_land(lon1, lat1):
-        print(f"{lon1:.2f} {lat1:.2f} is on land")
-        continue
-    print(f"{lat_inter_self:.2f} {lat_inter_other:.2f} {lat1:.2f}")
-    sla_self_at = sla_self.sel(x=x_from_coast_self1,
+    sla_self_at = sla_self.sel(x=1000*x_from_coast_self1,
                                method="nearest",
                                drop=True)
-    sla_other_at = sla_other.sel(x=x_from_coast_other1,
+    sla_other_at = sla_other.sel(x=1000*x_from_coast_other1,
                                  method="nearest",
                                  drop=True)
     sla_other_at = sla_other_at.interp(time=sla_self_at.time)
-    # check if lon1, lat1 is on land
-    fig1, ax1 = plt.subplots(1,
+    # other_times.append((track_number_other, abs(dist_time)))
+    fig, ax1 = plt.subplots(1,
                             1,
                             figsize=(width, height),
                             layout="constrained")
@@ -106,6 +127,18 @@ for i in range(len(df)):
                                cmap=cmap1)
     decorate_axis(ax2, "", *TRACKS_REG)
     ax2.grid()
+    ax2.plot(
+        lon_rama,
+        lat_rama,
+        c="r",
+        marker="o",
+        markersize=6,
+        markerfacecolor='red',
+        markeredgecolor='black',
+        markeredgewidth=2
+    )
+    # plot plat form code of rama at lon_rama, lat_rama
+    plt.text(lon_rama, lat_rama, f"{rama_id}", fontsize=10, color="k") 
     ax2.scatter(
         lons_track_self,
         lats_track_self,
@@ -141,13 +174,8 @@ for i in range(len(df)):
             rotation=angle_other,
             color="w",
         )
-    fig1.savefig(
-        f"sla_at_intersection_points/sla_timeseries_{sat}_{track_number_self}_{track_number_other}.png",
-    )
-    fig2.savefig(
-        f"sla_at_intersection_points/sla_map_{sat}_{track_number_self}_{track_number_other}.png",
-    )
     plt.show()
     plt.close("all")
+    break
 
 dse.close()

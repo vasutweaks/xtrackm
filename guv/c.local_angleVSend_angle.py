@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import xarray as xr
-from tools_xtrackm import index_at_lat
+from tools_xtrackm import index_at_lat, local_angle
 
 import math
 from namesm import sats_new

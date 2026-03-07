@@ -8,6 +8,7 @@ import xarray as xr
 from tools_xtrackm import *
 
 
+frac1 = "0.05"
 for sat in sats_new:
     gu_all = []
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
@@ -37,8 +38,8 @@ for sat in sats_new:
         )
         f_self = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_self.zfill(3)}.nc"
         f_other = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{track_number_other.zfill(3)}.nc"
-        f_self_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_self}_loess_0.2.nc"
-        f_other_smooth = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{track_number_other}_loess_0.2.nc"
+        f_self_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_self}_loess_{frac1}.nc"
+        f_other_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{track_number_other}_loess_{frac1}.nc"
         ds_self = xr.open_dataset(f_self, decode_times=False)
         ds_self_smooth = xr.open_dataset(f_self_smooth)
         sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
@@ -88,5 +89,5 @@ for sat in sats_new:
         # break
     # plot histogram of gu_all
     plt.hist(gu_all, bins=100, label=f"{sat}")
-    np.savez(f"guv_at_intersections_{sat}_0.2.npz", gu_all=gu_all)
+    np.savez(f"guv_at_intersections_{sat}_{frac1}.npz", gu_all=gu_all)
     # plt.show()

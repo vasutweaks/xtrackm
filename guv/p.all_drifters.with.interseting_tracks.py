@@ -2,9 +2,9 @@ import glob
 import os
 
 import xarray as xr
-from tools_xtrackd import *
+from tools_xtrackm import *
 
-from drifter_tools import *
+from tools_drifter import *
 
 REG = (43.0, 99, 0, 25.4)
 chunk = "15001_current"
@@ -18,7 +18,7 @@ print(dse)
 
 for fd in sorted(
     glob.glob(
-        f"/home/srinivasu/allData/drifter1/netcdf_{chunk}/track_reg/drifter_6h_*.nc"
+        f"/home/srinivasu/allData/drifter_track_reg/netcdf_{chunk}/drifter_6h_*.nc"
     )
 ):
     print(fd)
@@ -65,12 +65,12 @@ for fd in sorted(
     )
     for ft in sorted(
         glob.glob(
-            f"/home/srinivasu/slnew/xtrackd/data/ctoh.sla.ref.{sat}.nindian.*.nc"
+            f"../data/ctoh.sla.ref.{sat}.nindian.*.nc"
         )
     ):
         basename_t = os.path.basename(ft)
         trackn = basename_t.split(".")[5]
-        ds_t = xr.open_dataset(ft, decode_times=False, engine="h5netcdf")
+        ds_t = xr.open_dataset(ft, decode_times=False, engine="netcdf4")
         track_number = ds_t.pass_number
         lons_track = ds_t.lon.values
         lats_track = ds_t.lat.values
