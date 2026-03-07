@@ -9,6 +9,7 @@ frac1 = "0.05"
 out_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections/"
 print(sats_new)
 sat = "TP+J1+J2+J3+S6A"
+sat = "S3A"
 sats_new = [sat]
 for sat in sats_new[:]:
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")

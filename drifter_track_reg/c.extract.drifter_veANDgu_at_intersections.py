@@ -7,6 +7,7 @@ import pandas as pd
 import xarray as xr
 
 SAT = "TP+J1+J2+J3+S6A"
+SAT = "S3A"
 DRIFTER_DIR = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 INTERSECTION_CSV = f"tracks_intersections_{SAT}_1.csv"
 CANDIDATE_PICKLE_DIR = "candidate_pickles"
@@ -148,7 +149,7 @@ def main():
     out_df = pd.DataFrame(rows_out)
     out_df.to_csv(OUTPUT_CSV, index=False)
     print(f"Saved {len(out_df)} rows to {OUTPUT_CSV}")
-
+    globals().update(locals())
 
 if __name__ == "__main__":
     main()

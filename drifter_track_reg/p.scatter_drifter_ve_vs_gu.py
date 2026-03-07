@@ -7,14 +7,15 @@ import os
 # codex resume 019cc485-7aec-7e61-95d4-af803cd14133
 
 SAT = "TP+J1+J2+J3+S6A"
+SAT = "S3A"
 CSV_PATH = f"drifter_ve_vs_gu_{SAT}.csv"
 OUT_PNG = f"scatter_drifter_ve_vs_gu_{SAT}.png"
 COAST_DIST_PATH = "~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc"
-PROXIMITY_DIST_M = 100000.0 # in meters
+PROXIMITY_DIST_M = 1000000.0 # in meters
 MAX_ABS_TIME_DIFF_DAYS = None  # e.g., 2.0 to keep rows with |drifter_time - gu_time| <= 2 days
-MAX_ABS_TIME_DIFF_DAYS = 3  # e.g., 2.0 to keep rows with |drifter_time - gu_time| <= 2 days
 
-# MAX_ABS_TIME_DIFF_DAYS = 10  # e.g., 2.0 to keep rows with |drifter_time - gu_time| <= 2 days
+MAX_ABS_TIME_DIFF_DAYS = 6  # e.g., 2.0 to keep rows with |drifter_time - gu_time| <= 2 days
+
 
 def get_coast_distance_km(lons, lats):
     with xr.open_dataset(os.path.expanduser(COAST_DIST_PATH)) as ds_coast:
@@ -128,6 +129,7 @@ def main():
     plt.close(fig)
     print(f"Rows after filters: {len(df)}")
     print(f"Saved {OUT_PNG}")
+    globals().update(locals())
 
 
 if __name__ == "__main__":
