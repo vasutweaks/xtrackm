@@ -1,0 +1,7 @@
+Refactor the code p.radar_uvVStrack_guv_c.at.intersections.py to use pre computed guv fields at /home/srinivasu/xtrackm/guv/guv_at_intersections 
+like p.rama_uvVStrack_guv_c.nearest.all.py
+
+Refactor the code p.rama_uvVStrack_guv_c.nearest.all.py to use pre computed guv fields
+at /home/srinivasu/xtrackm/guv/guv_at_intersections 
+use functions in p.aviso_only_uvVStrack_guv_c.at.intersections.py to find
+track angle etc.
