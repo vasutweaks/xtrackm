@@ -1,0 +1,3 @@
+[ ] We need write whole radar .csv file for scatter plot like the way it
+is done for drifter comparison instead of per point timeseries.
+[ ] We still need to fix the time alignment of radar and gu 

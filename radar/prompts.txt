@@ -1,5 +1,6 @@
-Refactor the code p.radar_uvVStrack_guv_c.at.intersections.py to use pre computed guv fields at /home/srinivasu/xtrackm/guv/guv_at_intersections 
-like p.rama_uvVStrack_guv_c.nearest.all.py
+fix the time axis alignment of radar and gu in
+p.radar_uvVStrack_guv_c.at.intersections.py similar to
+p.rama_uvVStrack_guv_c.nearest.all.py
 
 Refactor the code p.rama_uvVStrack_guv_c.nearest.all.py to use pre computed guv fields
 at /home/srinivasu/xtrackm/guv/guv_at_intersections 

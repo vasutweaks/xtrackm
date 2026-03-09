@@ -161,22 +161,32 @@ for idx, row in df_all.iterrows():
     ax0 = fig.add_subplot(3, 1, 2)
     ax1 = fig.add_subplot(3, 1, 3)
 
-    gu_cut = -1 * gu
+    gu_cut = gu
     gv_cut = gv
-    tfreq = sats_tfreq[sat1]
 
-    oscar_u = oscar_u.resample(time=f"{tfreq}D").mean()
-    ru_at = ru_at.resample(time=f"{tfreq}D").mean()
-    oscar_u = oscar_u.interp(time=gu_cut.time)
-    ru_at = ru_at.interp(time=gu_cut.time)
+    # Collocate radar at track-gu timestamps (same approach as RAMA workflow).
+    ru_match = ru_at.reindex(
+        time=gu_cut.time,
+        method="nearest",
+        tolerance=np.timedelta64(24, "h"),
+    )
+    valid_u = np.isfinite(gu_cut) & np.isfinite(ru_match)
+    gu_cut = gu_cut.where(valid_u)
+    ru_at = ru_match.where(valid_u)
+    oscar_u = oscar_u.reindex(time=gu_cut.time)
     oscar_max = oscar_u.max().item()
     gu_cut = gu_cut.where(gu_cut < oscar_max, np.nan)
     gu_cut = gu_cut.where(gu_cut > -oscar_max, np.nan)
 
-    oscar_v = oscar_v.resample(time=f"{tfreq}D").mean()
-    rv_at = rv_at.resample(time=f"{tfreq}D").mean()
-    oscar_v = oscar_v.interp(time=gv_cut.time)
-    rv_at = rv_at.interp(time=gu_cut.time)
+    rv_match = rv_at.reindex(
+        time=gv_cut.time,
+        method="nearest",
+        tolerance=np.timedelta64(24, "h"),
+    )
+    valid_v = np.isfinite(gv_cut) & np.isfinite(rv_match)
+    gv_cut = gv_cut.where(valid_v)
+    rv_at = rv_match.where(valid_v)
+    oscar_v = oscar_v.reindex(time=gv_cut.time)
     oscar_max = oscar_v.max().item()
     gv_cut = gv_cut.where(gv_cut < oscar_max, np.nan)
     gv_cut = gv_cut.where(gv_cut > -oscar_max, np.nan)
@@ -300,11 +310,11 @@ for idx, row in df_all.iterrows():
 # df_out["rmses"] = rmses_u
 # df_out["biass"] = biass_u
 
-# df_out.to_csv(f"tracks_corrs_rmses_biass_{sat1}_u.csv", index=False)
+# df_out.to_csv(f"radar_metrics_{radar_str}_u.csv", index=False)
 
 # df_out["corrs"] = corrs_v
 # df_out["rmses"] = rmses_v
 # df_out["biass"] = biass_v
 
-# df_out.to_csv(f"tracks_corrs_rmses_biass_{sat1}_v.csv", index=False)
+# df_out.to_csv(f"radar_metrics_{radar_str}_v.csv", index=False)
 dse.close()
