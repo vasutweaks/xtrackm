@@ -1,6 +1,7 @@
 Major:
-[] extract oscar current along the the tracks and compare the stds
-for satellite s3a and for common tracks
+[] We might have to use .reindex between gc_self and gc_other
+[] Compare stds of along track gc of l2p and xtrack s3a and for common tracks
+
 [] code optimal interpolater operator again
 
 Minor:

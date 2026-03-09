@@ -66,16 +66,19 @@ df_all = pd.concat(df_all_list, ignore_index=True)
 corrs_u = []
 biass_u = []
 rmses_u = []
+unique_strs = []
 
 corrs_v = []
 biass_v = []
 rmses_v = []
+df_out = pd.DataFrame()
 
 ln = len(df)
 for idx, row in df_all.iterrows():
     sat1 = row["sat"]
     track_number_self = str(row["track_self"])
     track_number_other = str(row["track_other"])
+    unique_str = f"{sat1}_{track_number_self}_{track_number_other}"
     lon1 = row["lons_inter"]
     lat1 = row["lats_inter"]
     lons_inter1 = row["lons_inter"]
@@ -84,20 +87,8 @@ for idx, row in df_all.iterrows():
     angle_obtuse = row["angle_obtuse"]
     # check if radar region contains intersection
     if not polygon.contains(Point(lon1, lat1)):
-        corrs_u.append(np.nan)
-        rmses_u.append(np.nan)
-        biass_u.append(np.nan)
-        corrs_v.append(np.nan)
-        rmses_v.append(np.nan)
-        biass_v.append(np.nan)
         continue
     if abs(lat1) < 2:
-        corrs_u.append(np.nan)
-        rmses_u.append(np.nan)
-        biass_u.append(np.nan)
-        corrs_v.append(np.nan)
-        rmses_v.append(np.nan)
-        biass_v.append(np.nan)
         continue
     # print(
     #     sat1,
@@ -114,12 +105,6 @@ for idx, row in df_all.iterrows():
     rv_at = v_radar.sel(longitude=lon1, latitude=lat1, method="nearest", drop=True)
     f_oscar = f"{oscar_extracted_dir}/oscar_at_intersection_{sat1}_{track_number_self}_{track_number_other}.nc"
     if not os.path.exists(f_oscar):
-        corrs_u.append(np.nan)
-        rmses_u.append(np.nan)
-        biass_u.append(np.nan)
-        corrs_v.append(np.nan)
-        rmses_v.append(np.nan)
-        biass_v.append(np.nan)
         continue
     with xr.open_dataset(f_oscar) as ds_oscar:
         oscar_u = ds_oscar.u
@@ -128,12 +113,6 @@ for idx, row in df_all.iterrows():
     f_guv = f"{guv_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{frac1}.nc"
     if not os.path.exists(f_guv):
         print(f"missing file: {f_guv}")
-        corrs_u.append(np.nan)
-        rmses_u.append(np.nan)
-        biass_u.append(np.nan)
-        corrs_v.append(np.nan)
-        rmses_v.append(np.nan)
-        biass_v.append(np.nan)
         continue
     with xr.open_dataset(f_guv) as ds_guv:
         gu = ds_guv.gu.load()
@@ -209,7 +188,6 @@ for idx, row in df_all.iterrows():
     rmse_u = xs.rmse(gu_cut, ru_at, dim="time", skipna=True)
     bias_var_u = ru_at - gu_cut
     bias_u = bias_var_u.mean(dim="time")
-
     # corr_v = xs.pearson_r(gv_cut, oscar_v, dim="time", skipna=True)
     # rmse_v = xs.rmse(gv_cut, oscar_v, dim="time", skipna=True)
     # bias_var_v = oscar_v - gv_cut
@@ -221,6 +199,7 @@ for idx, row in df_all.iterrows():
     corrs_u.append(corr_u.item())
     rmses_u.append(rmse_u.item())
     biass_u.append(bias_u.item())
+    unique_strs.append(unique_str)
 
     corrs_v.append(corr_v.item())
     rmses_v.append(rmse_v.item())
@@ -306,15 +285,16 @@ for idx, row in df_all.iterrows():
     plt.close("all")
 
 # add corrs, rmses, biass to dataframe df_out
-# df_out["corrs"] = corrs_u
-# df_out["rmses"] = rmses_u
-# df_out["biass"] = biass_u
-
-# df_out.to_csv(f"radar_metrics_{radar_str}_u.csv", index=False)
+df_out["corrs"] = corrs_u
+df_out["rmses"] = rmses_u
+df_out["biass"] = biass_u
+df_out["unique_str"] = unique_strs
+df_out.to_csv(f"radar_metrics_{radar_str}_u.csv", index=False)
 
 # df_out["corrs"] = corrs_v
 # df_out["rmses"] = rmses_v
 # df_out["biass"] = biass_v
+# df_out["unique_str"] = unique_strs
 
 # df_out.to_csv(f"radar_metrics_{radar_str}_v.csv", index=False)
 dse.close()

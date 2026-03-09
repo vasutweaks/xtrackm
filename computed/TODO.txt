@@ -1,0 +1,7 @@
+Major:
+[] Compare stds of along track gc of l2p and xtrack s3a and for common tracks
+
+[] code optimal interpolater operator again
+
+Minor:
+[] save speed also in guv nc files

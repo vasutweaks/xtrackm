@@ -1,0 +1,13 @@
+We can write per intersection metrics version (for 2x2 bar plot) and/or
+variable pool version for scatter plot.
+
+These p radar scripts p.radar_uvVStrack_guv* are saving on correlation, rmse
+etc to one timeseries(defined by an intersection and sat)
+this is not saving extracted values of radar, gu to be latter plotted to
+a global scatter plot
+This is saving computed metrics per interseciton
+We can make another version to global extracted ru and gu
+
+
+One of the reason there is not much radar timeseries gu comparison scripts
+in the plots is that is has huge temporal gaps in the radar timeseries

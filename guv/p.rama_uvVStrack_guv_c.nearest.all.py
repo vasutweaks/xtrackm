@@ -11,19 +11,6 @@ from geopy import distance
 from tools_xtrackm import *
 
 
-def find_n_closest_points(df, lon0, lat0, n=4):
-    """Return n rows closest to (lon0, lat0) using intersection lon/lat."""
-    lons_inter = df["lons_inter"].tolist()
-    lats_inter = df["lats_inter"].tolist()
-    distances = [
-        distance.distance((y, x), (lat0, lon0)).km
-        for x, y in zip(lons_inter, lats_inter)
-    ]
-    out = df.copy()
-    out["distance_km"] = distances
-    return out.nsmallest(n, "distance_km")
-
-
 @lru_cache(maxsize=None)
 def get_track_geometry(sat, track_number):
     f_track = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{str(track_number).zfill(3)}.nc"
@@ -148,8 +135,10 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
 
         df_pairs = xr.Dataset({"gu": gu_pair, "rama_u": rama_u_pair}).to_dataframe().reset_index()
         df_pairs = df_pairs.dropna(subset=["gu", "rama_u"])
+        print(df_pairs.columns)
         matched_pairs = len(df_pairs)
         if matched_pairs > 0:
+            """All these will broadcasted along length of gu, rama_u"""
             df_pairs["sat"] = sat
             df_pairs["rama_id"] = rama_id
             df_pairs["distance_km"] = distance_km
@@ -157,6 +146,7 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
             df_pairs["track_other"] = track_number_other
             df_pairs["matched_pairs"] = matched_pairs
             df_pairs["timestamp"] = pd.to_datetime(df_pairs["time"]).astype(str)
+            print(df_pairs.columns)
             matched_rows_all.append(
                 df_pairs[
                     [
@@ -275,10 +265,12 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
 
         plt.show()
         plt.close("all")
+        break
+    break
 
-if len(matched_rows_all) > 0:
-    df_matched_all = pd.concat(matched_rows_all, ignore_index=True)
-    df_matched_all.to_csv(out_match_csv, index=False)
-    print(f"saved global match csv: {out_match_csv}, rows={len(df_matched_all)}")
-
+# if len(matched_rows_all) > 0:
+#     df_matched_all = pd.concat(matched_rows_all, ignore_index=True)
+#     df_matched_all.to_csv(out_match_csv, index=False)
+#     print(f"saved global match csv: {out_match_csv}, rows={len(df_matched_all)}")
+#
 dse.close()
