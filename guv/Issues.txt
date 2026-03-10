@@ -1,0 +1,1 @@
+OMNI selected location has distance 8000km which is an issue
