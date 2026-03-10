@@ -7,13 +7,19 @@ from matplotlib import colormaps
 from matplotlib.ticker import FuncFormatter
 from tools_xtrackm import *
 import pickle
+import os
+import sys
+from pathlib import Path
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 sat = "S3A"
 cmap = "twilight_shifted"
 EAST_COAST_REG = (78.0, 95, 0, 25.4)
 
 ds_xtr = xr.open_dataset("../computed/std_mean_S3A_xtrack.nc")
-ds_l2p = xr.open_dataset("/home/srinivasu/allData_ws/aviso_l2p/s3a/std_mean_S3A_l2p.nc")
+ds_l2p = xr.open_dataset("/home/srinivasu/allData/aviso_l2p/s3a/std_mean_S3A_l2p.nc")
 
 std_xtr = ds_xtr["std"]
 std_l2p = ds_l2p["std"]
@@ -98,7 +104,7 @@ ax2.text(
 plt.legend()
 plt.tight_layout()
 plt.savefig(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png")
-ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", "fig01a.png")
+ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", png_file)
 plt.show()
 plt.close("all")
 

@@ -9,7 +9,13 @@ import xarray as xr
 import xskillscore as xs
 from geopy import distance
 from tools_xtrackm import *
+from pathlib import Path
+import sys
+
 # codex resume 019cc947-b006-7d82-8941-d68e330c388a
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 @lru_cache(maxsize=None)
 def get_track_geometry(sat, track_number):
@@ -291,6 +297,7 @@ if is_within_region(lonm, latm, *TRACKS_REG):
     )
 
 plt.show()
+ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", png_file)
 plt.close("all")
 
 dse.close()

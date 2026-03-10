@@ -4,6 +4,11 @@ from namesm import sats_new
 import glob
 import os
 from matplotlib.collections import LineCollection
+from pathlib import Path
+import sys
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 sat = "ERS1+ERS2+ENV+SRL"
 
@@ -185,6 +190,6 @@ for f_sla in sorted(
         ax2.add_collection(lc)
 plt.savefig(f"cross_structure_x_arrows_map_{sat}_1by2.png",
             bbox_inches='tight', dpi=300)
-ln_sf(f"cross_structure_x_arrows_map_{sat}_1by2.png", "fig07.png")
+ln_sf(f"cross_structure_x_arrows_map_{sat}_1by2.png", png_file)
 plt.show()
 plt.close("all")

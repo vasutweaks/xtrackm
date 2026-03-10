@@ -9,7 +9,10 @@ import xarray as xr
 from tools_xtrackm import *
 import xskillscore as xs
 from matplotlib.colors import ListedColormap
+from pathlib import Path
 
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 radar_str = "TN"
 track_self_here = 608
@@ -29,6 +32,8 @@ REG = radar_extents[radar_str + "_BLOCK"]
 gdf = gpd.read_file(f"polygon_shapefile_around_{radar_str}.shp")
 polygon = gdf.geometry.iloc[0]
 radar_tsta_o, radar_tend_o = radar_times[radar_str]
+
+OUT_PNG = f"guv_timeseries_{sat_here}_{track_self_here}_{track_other_here}_{radar_str}.png"
 
 dsr = xr.open_dataset(
     f"/home/srinivasu/allData/radar/{radar_str}Codar_daily.nc")
@@ -244,6 +249,9 @@ for idx, row in df_filter.iterrows():
     ln_sf(
         f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}_{radar_str}.png", "fig06.png"
     )
+    if os.path.exists(png_file):
+        os.remove(png_file)
+    png_file.symlink_to(OUT_PNG)
     plt.show()
     plt.close("all")
 

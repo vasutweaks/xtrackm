@@ -4,6 +4,11 @@ import glob
 import os
 
 import matplotlib.cm as cm
+from pathlib import Path
+import sys
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 # sats = ["S3A"]
 REG = (80.0, 89.0, 11.0, 21.0)
@@ -109,7 +114,7 @@ for sat in sats[:]:
     )
     ln_sf(
         f"p.gc.clim.lat_wise.along_xwidth_{sat}a_fig09.png",
-        "fig08.png",
+        png_file,
     )
     plt.show()
     plt.close("all")

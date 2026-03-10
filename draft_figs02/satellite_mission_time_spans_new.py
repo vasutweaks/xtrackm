@@ -6,7 +6,12 @@ import matplotlib.patches as mpatches
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 import os
+import sys
+from pathlib import Path
 from tools_xtrackm import ln_sf
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 missions = pd.read_csv("data_coverage_df.csv")
 print(missions)
@@ -79,6 +84,6 @@ xfreq = mpatches.Patch(color="purple", label="spatial resolution")
 plt.legend(handles=[satellite, tracks, tfreq, xfreq])
 
 plt.savefig(f"satellite_mission_time_spans_new_fig01.png")
-ln_sf("satellite_mission_time_spans_new_fig01.png", "fig01.png")
+ln_sf("satellite_mission_time_spans_new_fig01.png", png_file)
 # plt.tight_layout()
 plt.show()

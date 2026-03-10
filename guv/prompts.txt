@@ -1,3 +1,12 @@
+Club following script in to p.scatter_omniVSrama_uVSgu_ww_ek.py to plot a 2x2
+subplots with first row containing scatter plots (with and without ekman) of
+rama_uVSgu and second two containing scatter plots (with and without ekman) of
+omni_uVSgu
+p.scatter_rama_u_vs_gu_ek.py
+p.scatter_rama_u_vs_gu.py
+p.scatter_omni_u_vs_gu_ek.py
+p.scatter_omni_u_vs_gu.py
+
 Refactor the code c.guv_c.sat_wise.stats.py to use pre computed guv fields
 at /home/srinivasu/xtrackm/guv/guv_at_intersections 
 

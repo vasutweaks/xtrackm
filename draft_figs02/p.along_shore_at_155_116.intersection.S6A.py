@@ -8,6 +8,11 @@ import xarray as xr
 from tools_xtrackm import *
 from tools_shapely import *
 import sys
+from pathlib import Path
+import sys
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 
 def along_across_shore_components(gu, gv, coast_heading_deg):
@@ -217,6 +222,6 @@ plt.savefig(
     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
 )
 ln_sf(
-    f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png", "fig09.png")
+    f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png", png_file)
 plt.show()
 plt.close("all")
