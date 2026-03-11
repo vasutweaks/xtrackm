@@ -284,17 +284,22 @@ for idx, row in df_all.iterrows():
     plt.show()
     plt.close("all")
 
+dse.close()
 # add corrs, rmses, biass to dataframe df_out
+df_out = pd.DataFrame()
 df_out["corrs"] = corrs_u
 df_out["rmses"] = rmses_u
 df_out["biass"] = biass_u
 df_out["unique_str"] = unique_strs
+# drop nans
+df_out = df_out.dropna(subset=["corrs", "rmses", "biass"])
 df_out.to_csv(f"radar_metrics_{radar_str}_u.csv", index=False)
 
-# df_out["corrs"] = corrs_v
-# df_out["rmses"] = rmses_v
-# df_out["biass"] = biass_v
-# df_out["unique_str"] = unique_strs
+df_out = pd.DataFrame()
+df_out["corrs"] = corrs_v
+df_out["rmses"] = rmses_v
+df_out["biass"] = biass_v
+df_out["unique_str"] = unique_strs
 
-# df_out.to_csv(f"radar_metrics_{radar_str}_v.csv", index=False)
-dse.close()
+df_out = df_out.dropna(subset=["corrs", "rmses", "biass"])
+df_out.to_csv(f"radar_metrics_{radar_str}_v.csv", index=False)
