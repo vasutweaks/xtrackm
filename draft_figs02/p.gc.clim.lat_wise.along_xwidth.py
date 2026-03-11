@@ -116,5 +116,5 @@ for sat in sats[:]:
         f"p.gc.clim.lat_wise.along_xwidth_{sat}a_fig09.png",
         png_file,
     )
-    plt.show()
+    # plt.show()
     plt.close("all")

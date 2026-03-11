@@ -82,4 +82,4 @@ ax_sum.annotate(
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.savefig(f"track_guvVSoscar_ww_ekman_u.png")
 ln_sf("track_guvVSoscar_ww_ekman_u.png", "fig04.png")
-plt.show()
+# plt.show()

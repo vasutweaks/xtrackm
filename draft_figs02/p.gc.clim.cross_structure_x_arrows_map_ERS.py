@@ -191,5 +191,5 @@ for f_sla in sorted(
 plt.savefig(f"cross_structure_x_arrows_map_{sat}_1by2.png",
             bbox_inches='tight', dpi=300)
 ln_sf(f"cross_structure_x_arrows_map_{sat}_1by2.png", png_file)
-plt.show()
+# plt.show()
 plt.close("all")

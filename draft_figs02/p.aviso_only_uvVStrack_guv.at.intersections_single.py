@@ -256,7 +256,7 @@ for i in range(ln):
         f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
         "fig03.png",
     )
-    plt.show()
+    # plt.show()
     plt.close("all")
     # ds_aviso_u.close()
 dse.close()

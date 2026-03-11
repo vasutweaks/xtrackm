@@ -200,7 +200,7 @@ def main():
     cbar = fig.colorbar(hb1, cax=cax)
     cbar.set_label("Count")
     fig.savefig(OUT_PNG, dpi=180)
-    plt.show()
+    # plt.show()
     plt.close(fig)
 
     print(f"Rows after filters (without_ek): {len(df_no_ek)}")

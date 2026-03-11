@@ -105,7 +105,7 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png")
 ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", png_file)
-plt.show()
+# plt.show()
 plt.close("all")
 
 dse.close()

@@ -252,7 +252,7 @@ for idx, row in df_filter.iterrows():
     if os.path.exists(png_file):
         os.remove(png_file)
     png_file.symlink_to(OUT_PNG)
-    plt.show()
+    # plt.show()
     plt.close("all")
 
 dse.close()

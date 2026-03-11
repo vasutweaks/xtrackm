@@ -296,7 +296,7 @@ if is_within_region(lonm, latm, *TRACKS_REG):
         color="w",
     )
 
-plt.show()
+# plt.show()
 ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", png_file)
 plt.close("all")
 

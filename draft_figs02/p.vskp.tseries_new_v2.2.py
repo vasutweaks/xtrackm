@@ -273,5 +273,5 @@ for sat, trackn, x1, y1, mindist, id in filtered_list:
     )
     ln_sf(
         f"tseries_loess_adj_allsat_map_box_separate_{sat}_{trackn}.png", "fig02.png")
-    plt.show()
+    # plt.show()
     plt.close("all")

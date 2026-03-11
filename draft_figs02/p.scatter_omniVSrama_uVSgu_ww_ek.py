@@ -189,7 +189,7 @@ def main():
         cbar_bottom.set_label("Count")
 
     fig.savefig(OUT_PNG, dpi=180)
-    plt.show()
+    # plt.show()
     plt.close(fig)
 
     print(f"Rows after distance filter | RAMA no-ek: {n_rama_no}, RAMA ek: {n_rama_ek}")
