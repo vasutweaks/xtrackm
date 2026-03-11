@@ -122,4 +122,4 @@ scatter_with_fit(
 plt.tight_layout()
 plt.savefig(f"scatter_{sat}_gu_vs_ve_and_guEk_vs_ve.png", dpi=300)
 ln_sf(f"scatter_{sat}_gu_vs_ve_and_guEk_vs_ve.png", "fig05.png")
-# plt.show()
+plt.show()

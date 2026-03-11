@@ -296,8 +296,9 @@ if is_within_region(lonm, latm, *TRACKS_REG):
         color="w",
     )
 
-# plt.show()
-ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", png_file)
+plt.savefig("p.omni_uvVStrack_guv_c.ek.nearest.selected.png")
+plt.show()
+ln_sf(f"p.omni_uvVStrack_guv_c.ek.nearest.selected.png", png_file)
 plt.close("all")
 
 dse.close()

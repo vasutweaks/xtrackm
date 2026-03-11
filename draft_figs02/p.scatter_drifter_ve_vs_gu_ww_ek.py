@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from pathlib import Path
+from tools_xtrackm import ln_sf
 
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
@@ -200,16 +201,14 @@ def main():
     cbar = fig.colorbar(hb1, cax=cax)
     cbar.set_label("Count")
     fig.savefig(OUT_PNG, dpi=180)
-    # plt.show()
+    plt.show()
     plt.close(fig)
 
     print(f"Rows after filters (without_ek): {len(df_no_ek)}")
     print(f"Rows after filters (with_ek): {len(df_w_ek)}")
     print(f"Saved {OUT_PNG}")
 
-    if os.path.exists(png_file):
-        os.remove(png_file)
-    png_file.symlink_to(OUT_PNG)
+    ln_sf(OUT_PNG, png_file)
 
 if __name__ == "__main__":
     main()

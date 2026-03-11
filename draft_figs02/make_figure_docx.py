@@ -2,6 +2,11 @@ from docx import Document
 from docx.shared import Inches
 from pathlib import Path
 import glob
+import os
+
+doc_name = "figures_v2.1.docx"
+if os.path.exists(doc_name):
+    os.remove(doc_name)
 
 images = sorted(glob.glob("fig??.png"))
 doc = Document()

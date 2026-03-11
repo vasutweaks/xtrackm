@@ -13,6 +13,7 @@ from pathlib import Path
 
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
+print(png_file)
 
 sat = "S3A"
 cmap = "twilight_shifted"

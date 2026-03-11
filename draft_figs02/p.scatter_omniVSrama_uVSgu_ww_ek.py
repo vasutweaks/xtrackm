@@ -4,6 +4,7 @@ import pandas as pd
 from pathlib import Path
 import sys
 import os
+from tools_xtrackm import ln_sf
 
 # codex resume 019cd8ab-eee9-72e0-9952-b9e4a8bf1b11
 
@@ -189,16 +190,14 @@ def main():
         cbar_bottom.set_label("Count")
 
     fig.savefig(OUT_PNG, dpi=180)
-    # plt.show()
+    plt.show()
     plt.close(fig)
 
     print(f"Rows after distance filter | RAMA no-ek: {n_rama_no}, RAMA ek: {n_rama_ek}")
     print(f"Rows after distance filter | OMNI no-ek: {n_omni_no}, OMNI ek: {n_omni_ek}")
     print(f"Saved {OUT_PNG}")
     # link OUT_PNG to png_file
-    if os.path.exists(png_file):
-        os.remove(png_file)
-    png_file.symlink_to(OUT_PNG)
+    ln_sf(OUT_PNG, png_file)
 
 
 if __name__ == "__main__":

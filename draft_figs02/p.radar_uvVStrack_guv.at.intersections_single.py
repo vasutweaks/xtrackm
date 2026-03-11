@@ -249,10 +249,8 @@ for idx, row in df_filter.iterrows():
     ln_sf(
         f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}_{radar_str}.png", "fig06.png"
     )
-    if os.path.exists(png_file):
-        os.remove(png_file)
-    png_file.symlink_to(OUT_PNG)
-    # plt.show()
+    ln_sf(OUT_PNG, png_file)
+    plt.show()
     plt.close("all")
 
 dse.close()
