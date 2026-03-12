@@ -1,0 +1,112 @@
+import glob
+import math
+
+import numpy as np
+import xarray as xr
+from matplotlib import colormaps
+from matplotlib.ticker import FuncFormatter
+from tools_xtrackm import *
+import pickle
+import os
+import sys
+from pathlib import Path
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
+print(png_file)
+
+sat = "S3A"
+cmap = "twilight_shifted"
+EAST_COAST_REG = (78.0, 95, 0, 25.4)
+
+ds_xtr = xr.open_dataset("../computed/std_mean_S3A_xtrack.nc")
+ds_l2p = xr.open_dataset("/home/srinivasu/allData/aviso_l2p/s3a/std_mean_S3A_l2p.nc")
+
+std_xtr = ds_xtr["std"]
+std_l2p = ds_l2p["std"]
+
+with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
+    common = pickle.load(f)
+
+dse = xr.open_dataset("/home/srinivasu/allData/topo/etopo5.cdf")
+fig = plt.figure(figsize=(10, 6))
+ax1 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
+ax2 = fig.add_subplot(2, 1, 2)
+
+dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(*NIO[2:])).plot(
+    ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap
+)
+decorate_axis(ax1, "", *NIO, step=8)
+ax1.text(
+    0.45,
+    0.80,
+    f"MISSION: {sat}",
+    transform=ax1.transAxes,
+    fontsize=10,
+    fontweight="bold",
+    color="b",
+)
+
+colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
+i = 0
+for pass1 in common:
+    pass2 = pass1[1:]
+    f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
+    with xr.open_dataset(f, decode_times=False) as ds:
+        lon_eq = ds.lon.values[0]
+        lons_track = ds.lon.values
+        lats_track = ds.lat.values
+        lon_equat = lons_track[0]
+        lon_coast = lons_track[-1]
+        lat_equat = lats_track[0]
+        lat_coast = lats_track[-1]
+        a1 = math.atan2(lat_coast - lat_equat, lon_coast - lon_equat)
+        a1_d = math.degrees(a1)
+        track_number = ds.Pass
+        lonm = lons_track.mean()
+        latm = lats_track.mean()
+        color = colors[i]
+        print(f"{sat} {track_number} -------------------")
+        ax1.scatter(lons_track, lats_track, s=2, color=color)
+        if is_within_region(lonm, latm, *NIO):
+            ax1.text(
+                lonm,
+                latm,
+                s=str(track_number),
+                fontsize=7,
+                rotation=a1_d,
+                color='k',
+                ha="center",
+                va="center",
+                transform=ccrs.PlateCarree(),
+            )
+        i += 1
+
+# ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
+
+ax2.plot(std_xtr, label="xtrack std", color="red")
+ax2.plot(std_l2p, label="l2p std", color="blue")
+ax2.grid(alpha=0.3, linestyle="--", linewidth=0.5)
+ax2.set_xlabel("distance along track (km)")
+ax2.set_ylabel("std")
+ax2.set_title("std_mean_xtrack vs std_mean_l2p")
+ax2.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
+ax2.text(
+    0.02,
+    0.5,
+    "coast",
+    transform=ax2.transAxes,
+    fontsize=10,
+    fontweight="bold",
+    color="k",
+    rotation=90,
+)
+
+plt.legend()
+plt.tight_layout()
+plt.savefig(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png")
+ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", png_file)
+# plt.show()
+plt.close("all")
+
+dse.close()

@@ -1,2 +1,21 @@
+Smoothing validation:
+We need to test different methods of smoothing (guassian, box smooth, loess, optim) with different parameters.
+Objective is to test which smoothing method and what parameters is best
+for reproduing components of geostrophic currents.
+1. First we take a smoothing method like guassian
+At each intersection point, we take track_self and track_other
+2. track_dist_time_asn to x as coordinate
+3. smooth them
+4. compute gc_self and gc_other and then compute gu, gv components
+save them at temp location
+The above four steps will make one function
+see ../guv/c.guv_at_intersection_points_0.05.py
+5. compare them with extracted msla_uv at intersection points 
+6. save metrics like corr, rmse, bias etc to a .csv file with smoothin method, paramters used etc.
+7. We do this exercise for all smoothing methods and various paramters
+The above four steps make one function
+8. In the we bar plot and see combination is doing best.
+Last plot is another function
+
 modify p.std.S3A.east_coast.all_tracks.with_mean.py so that bottom subplot
 now includes the mean of all std plots with thick gray line.
