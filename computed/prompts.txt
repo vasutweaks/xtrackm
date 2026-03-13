@@ -1,3 +1,9 @@
+Based on the attached documents, code optimal difference operator in python
+as a function. p, q parameters should be function inputs.
+It should smooth the data along the points_numbers dimensions of xtrack
+coastal altimetry data.
+see meta_data
+
 Smoothing validation:
 We need to test different methods of smoothing (guassian, box smooth, loess, optim) with different parameters.
 Objective is to test which smoothing method and what parameters is best
@@ -10,7 +16,10 @@ At each intersection point, we take track_self and track_other
 save them at temp location
 The above four steps will make one function
 see ../guv/c.guv_at_intersection_points_0.05.py
+smoothing functions are in
+../lib/tools_xtrackm.py
 5. compare them with extracted msla_uv at intersection points 
+see the dir msla_uv_at_intersections
 6. save metrics like corr, rmse, bias etc to a .csv file with smoothin method, paramters used etc.
 7. We do this exercise for all smoothing methods and various paramters
 The above four steps make one function

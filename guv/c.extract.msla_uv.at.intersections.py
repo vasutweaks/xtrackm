@@ -5,7 +5,7 @@ from namesm import sats_new
 import matplotlib.pyplot as plt
 
 msla_uv_dir = "/home/srinivasu/allData/aviso/msla_uv/"
-out_dir = Path("/home/srinivasu/guv/msla_uv_at_intersections/")
+out_dir = Path("/home/srinivasu/xtrackm/guv/msla_uv_at_intersections/")
 out_dir.mkdir(parents=True, exist_ok=True)
 
 ds_msla_u = xr.open_dataset(
