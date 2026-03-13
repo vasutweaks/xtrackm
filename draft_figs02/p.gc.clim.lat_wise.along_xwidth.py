@@ -108,12 +108,12 @@ for sat in sats[:]:
     cbar.set_ticks(list(range(int(minlat), int(maxlat)+1, 2)))
 
     plt.savefig(
-        f"p.gc.clim.lat_wise.along_xwidth_{sat}a_fig09.png",
+        f"p.gc.clim.lat_wise.along_xwidth_{sat}a.png",
         bbox_inches="tight",
         dpi=300,
     )
     ln_sf(
-        f"p.gc.clim.lat_wise.along_xwidth_{sat}a_fig09.png",
+        f"p.gc.clim.lat_wise.along_xwidth_{sat}a.png",
         png_file,
     )
     # plt.show()

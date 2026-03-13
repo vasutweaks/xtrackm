@@ -12,7 +12,7 @@ images_list = [
     "scatter_drifter_ve_vs_gu_ww_ek_TP+J1+J2+J3+S6A.png",
     "guv_timeseries_S3A_608_137_TN.png",
     "cross_structure_x_arrows_map_ERS1+ERS2+ENV+SRL_1by2.png",
-    "p.gc.clim.lat_wise.along_xwidth_ERS1+ERS2+ENV+SRLa_fig09.png",
+    "p.gc.clim.lat_wise.along_xwidth_ERS1+ERS2+ENV+SRLa.png",
     "along_shore_timeseries_TP+J1+J2+J3+S6A_155_116.png",
 ]
 

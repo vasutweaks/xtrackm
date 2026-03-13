@@ -9,3 +9,8 @@ shpfilename = shpreader.natural_earth(
     category='physical',
     name='coastline'
 )
+
+"""What is this"""
+merged: pd.DataFrame | None = None
+df[[key_col, metric]].rename(columns={metric: label})
+merged = merged.merge(frame, on=key_col, how=join_mode)

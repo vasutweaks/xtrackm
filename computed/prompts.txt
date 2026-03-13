@@ -1,3 +1,16 @@
+Extend c.msla_uvVSguv_TP+J1+J2+J3+S6A.py script to find metrics like corr,
+rmse, bias, number of good point(matching points) for msla_uv and guv at
+each unique_str and save them to csv file.
+Write a seperate function to do a 2x2 bar plot of metrics for all unique_str.
+Following modifications are needed
+1. Stick to only u metrics in the bar plot for all subplots
+2. For rmse plot, plot std of msla_uv as adjacent bar
+3. Don't put those monstrous unique_str as xtick labels, just index numbers good
+
+I am comparing the performance of several combination of smoothing and
+parameters. Write a dedicated bar plot script that can take any number of dfs
+and plot adjacent bars of a metric from different dfs.
+
 Based on the attached documents, code optimal difference operator in python
 as a function. p, q parameters should be function inputs.
 It should smooth the data along the points_numbers dimensions of xtrack
