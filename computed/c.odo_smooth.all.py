@@ -1,7 +1,10 @@
 import xarray as xr
 from tools_xtrackm import *
+import os
 
-def apply_optimal_operator(ds, p, q, dt=1.0):
+method = "odo"
+
+def apply_optimal_operator(ds, p=-6, q=5, dt=1.0):
     """
     Applies the Powell & Leben (2004) optimal difference operator to an 
     X-TRACK dataset along the 'points_numbers' dimension.
@@ -56,6 +59,10 @@ def apply_optimal_operator(ds, p, q, dt=1.0):
     )
 
 
+str1 = f"{abs(p)}{abs(q)}"
+para = str1
+
+os.makedirs(f"sla_{method}_{para}", exist_ok=True)
 for sat in sats_new[:]:
     for f in sorted(
         glob.glob(
@@ -69,13 +76,10 @@ for sat in sats_new[:]:
         if len(lons_track) < 12:
             continue
         print(f"{sat} {track_number} -------------------")
-        sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
-        dac_track = track_dist_time_asn_midx(ds, var_str="dac", units_in="m")
-        sla_smooth = track_smooth_box_x(sla_track, smooth=12, min_periods=6)
-        dac_smooth = track_smooth_box_x(dac_track, smooth=12, min_periods=6)
-        # sla_smooth = track_smooth_loess_statsmodels_x_parallel(sla_track, frac=0.2)
-        # dac_smooth = track_smooth_loess_statsmodels_x_parallel(dac_track, frac=0.2)
-        ds_out = xr.Dataset({"sla_smooth": sla_smooth, "dac_smooth": dac_smooth})
-        ds_out.to_netcdf(
-        f"sla_box_12/track_sla_along_{sat}_{track_number}_box_12.nc"
-        )
+        # sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
+        # dac_track = track_dist_time_asn_midx(ds, var_str="dac", units_in="m")
+        # sla_slope = track_smooth_box_x(sla_track, smooth=12, min_periods=6)
+        # ds_out = xr.Dataset({"sla_slope": sla_slope})
+        # ds_out.to_netcdf(
+        # f"sla_{method}_{para}/track_sla_along_{sat}_{track_number}_{method}_{para}.nc"
+        # )

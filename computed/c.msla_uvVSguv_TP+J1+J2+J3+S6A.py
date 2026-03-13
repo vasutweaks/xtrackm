@@ -8,8 +8,8 @@ import xarray as xr
 # codex resume 019ce71b-c364-7f20-9c6b-6e2a7108c17c
 
 SAT = "TP+J1+J2+J3+S6A"
-METHOD = "box"
-PARA = "12"
+METHOD = "loess"
+PARA = "0.05"
 GUV_ROOT = Path("/home/srinivasu/xtrackm/guv")
 MSLA_DIR = GUV_ROOT / "msla_uv_at_intersections"
 GUV_DIR = GUV_ROOT / f"guv_at_intersections_{METHOD}"

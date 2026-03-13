@@ -25,6 +25,8 @@ inter_df = pd.concat(df_all_list, ignore_index=True)
 
 for i, r in inter_df.iterrows():
     sat = r["sat"]
+    if sat != "TP+J1+J2+J3+S6A":
+        continue
     track_number_self = str(r["track_self"])
     track_number_other = str(r["track_other"])
     lons_inter1 = r["lons_inter"]
