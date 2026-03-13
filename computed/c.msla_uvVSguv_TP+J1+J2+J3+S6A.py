@@ -7,14 +7,12 @@ import xarray as xr
 
 # codex resume 019ce71b-c364-7f20-9c6b-6e2a7108c17c
 
+SAT = "TP+J1+J2+J3+S6A"
+METHOD = "box"
+PARA = "12"
 GUV_ROOT = Path("/home/srinivasu/xtrackm/guv")
 MSLA_DIR = GUV_ROOT / "msla_uv_at_intersections"
-GUV_DIR = GUV_ROOT / "guv_at_intersections"
-SAT = "TP+J1+J2+J3+S6A"
-METHOD = "loess"
-METHOD = "gauss"
-PARA = "0.05"
-PARA = "6"
+GUV_DIR = GUV_ROOT / f"guv_at_intersections_{METHOD}"
 MONTHLY_RULE = "1ME"
 
 
@@ -99,7 +97,7 @@ def main() -> None:
         print(f"Processing {unique_str}")
 
         msla_path = MSLA_DIR / f"{unique_str}_msla_uv_at_intersections.nc"
-        guv_path = GUV_DIR / f"guv_at_intersection_{sat}_{track_self}_{track_other}_{PARA}.nc"
+        guv_path = GUV_DIR / f"guv_at_intersection_{sat}_{track_self}_{track_other}_{METHOD}_{PARA}.nc"
 
         if not msla_path.exists() or not guv_path.exists():
             print(f"Skipping {unique_str}: missing file(s)")

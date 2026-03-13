@@ -1,4 +1,5 @@
 import math
+import os
 
 import pandas as pd
 import xarray as xr
@@ -7,7 +8,8 @@ from tools_xtrackm import *
 ioff = 3
 frac1 = "6"
 method = "gauss"
-out_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections/"
+out_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}/"
+os.makedirs(out_dir, exist_ok=True)
 print(sats_new)
 sat = "TP+J1+J2+J3+S6A"
 sats_new = [sat]
@@ -100,12 +102,12 @@ for sat in sats_new[:]:
         ds_out = xr.Dataset({"gu": gu_filtered, "gv": gv_filtered})
         ds_out_self = xr.Dataset({"gc_self": gc_self_at_filt})
         ds_out_other = xr.Dataset({"gc_other": gc_other_at_filt})
-        filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{frac1}.nc"
+        filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
         print(f"saving to {filename}")
         ds_out.to_netcdf(filename)
         ds_out_self.to_netcdf(
-            f"{out_dir}/gc_at_{sat1}_{track_number_self}_{frac1}.nc"
+            f"{out_dir}/gc_at_{sat1}_{track_number_self}_{method}_{frac1}.nc"
         )
         ds_out_other.to_netcdf(
-            f"{out_dir}/gc_at_{sat1}_{track_number_other}_{frac1}.nc"
+            f"{out_dir}/gc_at_{sat1}_{track_number_other}_{method}_{frac1}.nc"
         )
