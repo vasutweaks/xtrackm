@@ -1,3 +1,20 @@
+Optimum difference operator:
+1. The window shape (weights) are fixed for given p and q.
+It is computed only once.
+let n = abs(p) + abs(q)
+a. if p, q are roughly equal the window shape is symmetric.
+b. if p is say 7 and q is 1, then the window shape is very asymmetric.
+c. In current implementation, the window config (-p, q) is fixed for the
+whole track.
+In a more sophisticated implementation, the window config has to change as we approach the coast.
+2. Now we loop over all points of the track. At each point i, we find n  number of slopes, some on -p side and some on q side. 
+3. The weighted (previously computed weights) sum of these slopes becomes
+the optimum slope at the point i.
+
+Can odo filter be implemented using xarray methods like convolve, map, reduce etc instead of relying numpy math? Once the weights are calculated
+use xarray methods to implement the filter.
+@c.odo_smooth.one.py
+
 STD:
 There is no gshhg business in sla std scripts of l2p and xtrack
 valid count:

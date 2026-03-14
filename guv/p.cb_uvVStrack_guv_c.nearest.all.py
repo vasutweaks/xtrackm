@@ -61,11 +61,11 @@ for cb_id in cb_d.keys():
 
     with xr.open_dataset(cb_file) as ds_cb:
         # print(ds_cb)
-        cb_u = ds_cb.U
-        cb_v = ds_cb.V
-        cb_s = ds_cb.speed
+        # Coastal buoy currents are stored in cm/s; convert to m/s to match gu/gv.
+        cb_u = 0.01 * ds_cb.U
+        cb_v = 0.01 * ds_cb.V
+        cb_s = 0.01 * ds_cb.speed
         cb_dir = ds_cb.direction
-    break
 
     # print(cb_v.count().item())
     df_4 = find_n_closest_points(df_all, lon_cb, lat_cb, n=4)
@@ -123,8 +123,10 @@ for cb_id in cb_d.keys():
             angle_other,
         ) = get_track_geometry(sat, track_number_other)
 
-        gu_cut = gu
-        gv_cut = gv
+        # In precomputed guv files, exact zeros often represent filtered/missing
+        # points from upstream processing; exclude them before collocation.
+        gu_cut = gu.where(np.abs(gu) > 1e-12)
+        gv_cut = gv.where(np.abs(gv) > 1e-12)
 
         # Collocate cb at track-gu timestamps; avoid sat-dependent smoothing.
         cb_u_match = cb_u.reindex(
@@ -269,9 +271,9 @@ for cb_id in cb_d.keys():
         plt.show()
         plt.close("all")
 
-# if len(matched_rows_all) > 0:
-#     df_matched_all = pd.concat(matched_rows_all, ignore_index=True)
-#     df_matched_all.to_csv(out_match_csv, index=False)
-#     print(f"saved global match csv: {out_match_csv}, rows={len(df_matched_all)}")
+if len(matched_rows_all) > 0:
+    df_matched_all = pd.concat(matched_rows_all, ignore_index=True)
+    df_matched_all.to_csv(out_match_csv, index=False)
+    print(f"saved global match csv: {out_match_csv}, rows={len(df_matched_all)}")
 #
 dse.close()

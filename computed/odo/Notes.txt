@@ -1,0 +1,5 @@
+Optimum difference operator:
+1. The window shape (weights) are fixed for given p and q.
+It is computed only once.
+2. if p, q are roughly equal the window shape is symmetric.
+3. if p is say 7 and q is 1, then the window shape is very asymmetric.

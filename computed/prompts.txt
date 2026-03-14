@@ -1,3 +1,11 @@
+I am trying to code optimal difference operator discussed in 
+ Powell_Leben_2004_optimal_difference_operator.pdf and
+'Liu et al.-2012-Comparison of the X-TRACK altimetry estimated currents with moored ADCP and HF radar observations on the West Florida Shelf.pdf'
+in the script c.odo_smooth.one.py
+This returns smoothed slopes of sla from which we can compute geostrophic
+currents.
+What issues do you find the script c.odo_smooth.one.py?
+
 Extend c.msla_uvVSguv_TP+J1+J2+J3+S6A.py script to find metrics like corr,
 rmse, bias, number of good point(matching points) for msla_uv and guv at
 each unique_str and save them to csv file.

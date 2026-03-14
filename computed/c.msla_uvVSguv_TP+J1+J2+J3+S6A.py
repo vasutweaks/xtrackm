@@ -9,7 +9,7 @@ import xarray as xr
 
 SAT = "TP+J1+J2+J3+S6A"
 METHOD = "loess"
-PARA = "0.05"
+PARA = "0.2"
 GUV_ROOT = Path("/home/srinivasu/xtrackm/guv")
 MSLA_DIR = GUV_ROOT / "msla_uv_at_intersections"
 GUV_DIR = GUV_ROOT / f"guv_at_intersections_{METHOD}"
@@ -93,22 +93,33 @@ def main() -> None:
         track_self = str(row["track_self"])
         track_other = str(row["track_other"])
         lats_inter = float(row["lats_inter"])
+        print(lats_inter)
         unique_str = f"{sat}_{track_self}_{track_other}"
         print(f"Processing {unique_str}")
+        if lats_inter < 2:
+            continue
 
         msla_path = MSLA_DIR / f"{unique_str}_msla_uv_at_intersections.nc"
         guv_path = GUV_DIR / f"guv_at_intersection_{sat}_{track_self}_{track_other}_{METHOD}_{PARA}.nc"
 
-        if not msla_path.exists() or not guv_path.exists():
-            print(f"Skipping {unique_str}: missing file(s)")
+        if not guv_path.exists():
+            print(f"Skipping guv {unique_str}: missing file(s)")
+            continue
+
+        if not msla_path.exists():
+            print(f"Skipping msla uv {unique_str}: missing file(s)")
             continue
 
         with xr.open_dataset(msla_path) as ds_msla, xr.open_dataset(guv_path) as ds_guv:
-            gu_monthly = ds_guv["gu"].resample(time=MONTHLY_RULE).mean()
-            gv_monthly = ds_guv["gv"].resample(time=MONTHLY_RULE).mean()
+            gu_monthly =  ds_guv["gu"].resample(time=MONTHLY_RULE).mean()
+            gv_monthly =  ds_guv["gv"].resample(time=MONTHLY_RULE).mean()
 
             u_ref = ds_msla["u_at"].interp(time=gu_monthly.time)
             v_ref = ds_msla["v_at"].interp(time=gv_monthly.time)
+            gu_monthly.plot(color="b", label="gu odo")
+            u_ref.plot(color="r", label="msla u_ref")
+            plt.legend()
+            # plt.show()
 
             u_metrics = compute_metrics(gu_monthly, u_ref)
             v_metrics = compute_metrics(gv_monthly, v_ref)

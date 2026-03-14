@@ -88,7 +88,7 @@ def mad_filter_1d_xr(da, thresh, dim=None):
     modified_z_scores = 0.6745 * (da_vals - median) / mad
     # size of outliers is same as input size
     outliers = np.abs(modified_z_scores) > thresh
-    da_filtered = np.zeros_like(da_vals)
+    da_filtered = np.full_like(da_vals, np.nan, dtype=float)
     da_filtered[valid_mask] = da_vals[valid_mask]
     da_filtered[outliers] = np.nan
     da_out = xr.DataArray(da_filtered, coords={dim: dim_vals}, dims=[dim])

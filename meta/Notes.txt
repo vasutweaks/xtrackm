@@ -1,3 +1,8 @@
+the fraction of points is around 0.01 to 0.02 for most track and sats
+that corresponds to a fixed distnce of 40km
+l.fraction_of_distance_loess.py
+if we take rossby radius of deformation as 75km, the fraction of points should be around 0.03 to 0.05 for most tracks and sats
+
 Are the time units along points_numbers and cycles_numbers different?
 
 How to say whether a track is descending or ascending?

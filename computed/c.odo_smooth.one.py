@@ -2,6 +2,8 @@ import xarray as xr
 import os
 from tools_xtrackm import *
 import numpy as np
+import matplotlib.pyplot as plt
+import sys
 
 method = "odo"
 
@@ -17,14 +19,13 @@ def compute_geostrophy_gc_from_slope(ds, slope_smooth):
         return None
     f1 = cor_p(lats_track_rev)
     f2 = f1.values
-    f3 = np.where(lats_track_rev > 2, f2, np.nan)
+    f3 = np.where(np.abs(lats_track_rev) > 2, f2, np.nan)
     # 2s-2n band equatorial band is masked according to Sudre 2013
     g = grav(lats_track_rev)  # ms-1
     g1 = g.values
     ratio = g1 / f3
     ratio1 = ratio[:, np.newaxis]
-    dhbydx = slope_smooth
-    gc = ratio1 * dhbydx
+    gc = ratio1 * slope_smooth
     # Add metadata
     gc.attrs["units"] = "m/s"
     gc.attrs["long_name"] = "Cross-track geostrophic current"
@@ -63,7 +64,7 @@ def track_dist_time_asn_midx_da(ds, da_smooth, units_in="m"):
     return var2
 
 
-def apply_optimal_operator(ds, p=-6, q=5, dt=1.0):
+def apply_optimal_operator(ds, p=-5, q=6, dt=1.0):
     """
     Applies the Powell & Leben (2004) optimal difference operator to an 
     X-TRACK dataset along the 'points_numbers' dimension.
@@ -80,7 +81,9 @@ def apply_optimal_operator(ds, p=-6, q=5, dt=1.0):
         A[N, :N] = 1.0  # Constraint: sum(cn) = 1 [cite: 58, 693]
         for i in range(N):
             # c_n derivation from the Lagrange function [cite: 85, 477]
-            A[i, :N] = 1.0 / (n * (-n[i] / 2.0))
+            # Match Powell/Leben MATLAB form:
+            # A(i, 1:N) = (1./n) .* (-n(i)/2)
+            A[i, :N] = (1.0 / n) * (-n[i] / 2.0)
             A[i, N] = (n[i]**2 * dt**2) / 4.0
             A[i, i] = -1.0
         B = np.zeros(T)
@@ -104,11 +107,18 @@ def apply_optimal_operator(ds, p=-6, q=5, dt=1.0):
         # Calculate derivative: sum( (cn / (n*dt)) * (h_{i+n} - h_i) ) [cite: 55, 690]
         # This computes the across-track geostrophic velocity anomaly [cite: 700]
         h_i = sla[i, :]
-        h_rel = sla[i + n_indices, :] # Shape: (N, cycles_numbers)
+        h_rel = sla[i + n_indices, :]  # Shape: (N, cycles_numbers)
         # Element-wise slope calculation for all cycles at once
         # Slope = sum_{n} [ cn * (h_{i+n} - h_i) / (n * dt) ]
         window_slopes = (h_rel - h_i) / (n_indices[:, np.newaxis] * dt)
-        slopes[i, :] = np.sum(cn[:, np.newaxis] * window_slopes, axis=0)
+        # Use nansum so that NaN in part of the window doesn't kill the whole estimate;
+        # renormalize weights to account for missing points.
+        valid = ~np.isnan(window_slopes)
+        w = cn[:, np.newaxis] * valid  # zero out weights for NaN slots
+        w_sum = np.sum(np.abs(w), axis=0)
+        w_sum[w_sum == 0] = np.nan  # avoid division by zero
+        cn_sum = np.sum(np.abs(cn))
+        slopes[i, :] = np.nansum(cn[:, np.newaxis] * window_slopes, axis=0) * (cn_sum / w_sum)
     # Return as a new xarray DataArray to maintain metadata
     return xr.DataArray(
         slopes, 
@@ -118,10 +128,9 @@ def apply_optimal_operator(ds, p=-6, q=5, dt=1.0):
     )
 
 
-p = -6
-q = 5
-str1 = f"{abs(p)}{abs(q)}"
-para = str1
+p = -5
+q = 6
+para = f"{abs(p)}{abs(q)}"
 
 os.makedirs(f"sla_{method}_{para}", exist_ok=True)
 
@@ -131,36 +140,31 @@ f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass1}.nc"
 ds = xr.open_dataset(f, decode_times=False)
 track_number = ds.Pass
 print(f"{sat} {track_number} -------------------")
-slope = ds.sla.differentiate("points_numbers")
-slope_smooth = apply_optimal_operator(ds, p=-6, q=5, dt=1.0)
+# Use physical along-track spacing (meters) so ODO slope has SI-consistent units.
+dists_m = np.asarray(compute_dist(ds, units="m"), dtype=float)
+dx_m = float(np.nanmedian(np.abs(np.diff(dists_m))))
+slope_odo = apply_optimal_operator(ds, p=p, q=q, dt=dx_m)
 
-slope1 = slope.isel(cycles_numbers=0)
-slope_smooth1 = slope_smooth.isel(cycles_numbers=0)
-
-slope1.plot(label="slope regular sla")
-slope_smooth1.plot(label="odo slope")
-plt.legend()
-plt.show()
-plt.close("all")
-
+# making sla as a function of distance
 sla_asn = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
+# Regular slope using physical distance (same units as ODO)
 slope_asn = sla_asn.differentiate("x")
 slope_asn1 = slope_asn.isel(time=0)
 
-slope_smooth_asn = track_dist_time_asn_midx_da(ds, slope_smooth, units_in="m")
-slope_smooth_asn1 = slope_asn.isel(time=0)# + 0.05
+slope_odo_asn = track_dist_time_asn_midx_da(ds, slope_odo, units_in="m")
+slope_odo_asn1 = slope_odo_asn.isel(time=0)# + 0.05
 
 slope_asn1.plot(label="slope regular sla")
-slope_smooth_asn1.plot(label="odo slope")
+slope_odo_asn1.plot(label="odo slope")
 plt.legend()
 plt.show()
 plt.close("all")
 
 gc1 = compute_geostrophy_gc(ds, sla_asn)
-gc11 = gc1.isel(time=0)
+gc11 = gc1.isel(time=10)
 
-gc2 = compute_geostrophy_gc_from_slope(ds, slope_smooth_asn)
-gc21 = gc1.isel(time=0)
+gc2 = compute_geostrophy_gc_from_slope(ds, slope_odo_asn)
+gc21 = gc2.isel(time=10)
 
 gc11.plot(label="regular gc")
 gc21.plot(label="odo gc")
@@ -168,3 +172,4 @@ gc21.plot(label="odo gc")
 plt.legend()
 plt.show()
 plt.close("all")
+sys.exit()

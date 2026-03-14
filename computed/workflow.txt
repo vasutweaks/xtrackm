@@ -1,0 +1,16 @@
+----------------------------
+Comparing with msla uv extracted at TP+J1+J2+J3+S6A intersection points
+----------------------------
+
+c.guv_at_intersection_points_box_12.py
+compute guv at TP+J1+J2+J3+S6A intersection points for different combinations of smoothing method and parameters
+
+c.odo_smooth.and.guv.all.py
+This script is specially for optimal difference operator, since it both smoothes computes slope (and guv) at the same time.
+
+c.msla_uvVSguv_TP+J1+J2+J3+S6A.py 
+compute metrics comparing with msla uv extracted at TP+J1+J2+J3+S6A intersection points and guv computed with specific combination of smoothing
+method and parameters
+
+p.msla_uv.guv.metrics.general.py
+plot a comparison metric like corr_u for different combinations of smoothing method and parameters

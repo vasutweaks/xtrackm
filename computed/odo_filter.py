@@ -22,7 +22,7 @@ def apply_optimal_operator(ds, p, q, dt=1.0):
         
         for i in range(N):
             # c_n derivation from the Lagrange function [cite: 85, 477]
-            A[i, :N] = 1.0 / (n * (-n[i] / 2.0))
+            A[i, :N] = (1.0 / n) * (-n[i] / 2.0)
             A[i, N] = (n[i]**2 * dt**2) / 4.0
             A[i, i] = -1.0
             
