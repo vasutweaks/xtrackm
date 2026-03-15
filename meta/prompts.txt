@@ -9,3 +9,5 @@ I am trying to find the intersection points of satellite tracks for each
 satellite mission with the script c.intersection_points.all.py
 Is the logic correct? Don't worry about efficiency.
 Don't edit any scripts. Just give opinions.
+
+Write a function to neatly print timestaps of time_self1 and time_other1 in two side by side columns to the required length.
