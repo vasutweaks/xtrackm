@@ -28,4 +28,4 @@ for full_path, fig_path in links_dict.items():
         else:
             continue
     print(f"{src} -> {dst}")
-    dst.symlink_to(src)
+    dst.hardlink_to(src)
