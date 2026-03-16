@@ -1,0 +1,2 @@
+zonal and meridional currents of altimetry derived geostrophic currents at an intersection
+point that falls within radar region.

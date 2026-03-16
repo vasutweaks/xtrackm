@@ -1,0 +1,5 @@
+Scatter plots of rama buoys' zonal currents (top) versus altimetry derived
+zonal currents at nearby points. The right subplot show scatter plots with altimetry
+derived currents corrected with ekman zonal currents. The bottom subplots shows the same
+with OMNI currents.
+

@@ -1,0 +1,2 @@
+Scatter plot of drifters' zonal velocities versus altimetry derived velocities (left).
+The right subplot shows scatter plot with altimetry derived velocities corrected with ekman zonal velocities.

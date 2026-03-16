@@ -16,7 +16,7 @@ CSV_NO_EK = f"drifter_ve_vs_gu_{SAT}.csv"
 CSV_W_EK = f"drifter_ve_vs_gu_ek_{SAT}.csv"
 OUT_PNG = f"scatter_drifter_ve_vs_gu_ww_ek_{SAT}.png"
 COAST_DIST_PATH = "~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc"
-PROXIMITY_DIST_M = 1000000.0
+PROXIMITY_DIST_M = 200_000.0
 MAX_ABS_TIME_DIFF_DAYS = None
 
 

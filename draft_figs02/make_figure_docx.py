@@ -1,4 +1,5 @@
 import os
+import sys
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -6,15 +7,20 @@ from docx.shared import Inches
 from docx.shared import Pt
 
 images_list = [
-    "std_mean_xtrackVSstd_mean_l2p_S3A.png",
-    "p.omni_uvVStrack_guv_c.ek.nearest.selected.png",
-    "scatter_omniVSrama_uVSgu_ww_ek.png",
-    "scatter_drifter_ve_vs_gu_ww_ek_TP+J1+J2+J3+S6A.png",
-    "guv_timeseries_S3A_608_137_TN.png",
-    "cross_structure_x_arrows_map_ERS1+ERS2+ENV+SRL_1by2.png",
-    "p.gc.clim.lat_wise.along_xwidth_ERS1+ERS2+ENV+SRLa.png",
-    "along_shore_timeseries_TP+J1+J2+J3+S6A_155_116.png",
+    "fig01_p.compare.std_mean.l2pVSxtrack_map.png",
+    "fig02_p.omni_uvVStrack_guv_c.ek.nearest.selected.png",
+    "fig03_p.scatter_omniVSrama_uVSgu_ww_ek.png",
+    "fig04_p.scatter_drifter_ve_vs_gu_ww_ek.png",
+    "fig05_p.radar_uvVStrack_guv.at.intersections_single.png",
+    "fig06_p.gc.clim.cross_structure_x_arrows_map_ERS.png",
+    "fig07_p.gc.clim.lat_wise.along_xwidth.png",
+    "fig08_p.along_shore_at_155_116.intersection.S6A.png",
 ]
+
+for image in images_list:
+    if not os.path.exists(image):
+        raise FileNotFoundError(f"Image {image} not found.")
+print("all good")
 
 captions_list = [
     "captions/p.compare.std_mean.l2pVSxtrack_map.txt",
