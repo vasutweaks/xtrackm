@@ -16,6 +16,7 @@ import sys
 
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
+method = "loess"
 
 @lru_cache(maxsize=None)
 def get_track_geometry(sat, track_number):
@@ -59,7 +60,7 @@ rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/raju_omni_clean"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 out_match_csv = "omni_guv_c_nearest_global_matches.csv"
 matched_rows_all = []
 # SELECT_SAT = "TP+J1+J2+J3+S6A"
@@ -145,7 +146,7 @@ print(
     angle_obtuse,
 )
 
-f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
 if not os.path.exists(f_guv):
     print(f"missing file: {f_guv}")
     raise("missing file")
@@ -297,8 +298,8 @@ if is_within_region(lonm, latm, *TRACKS_REG):
     )
 
 plt.savefig("p.omni_uvVStrack_guv_c.ek.nearest.selected.png")
-plt.show()
 ln_sf(f"p.omni_uvVStrack_guv_c.ek.nearest.selected.png", png_file)
+plt.show()
 plt.close("all")
 
 dse.close()
