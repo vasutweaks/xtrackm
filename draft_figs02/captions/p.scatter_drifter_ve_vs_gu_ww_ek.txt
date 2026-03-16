@@ -1,2 +1,1 @@
-Scatter plot of drifters' zonal velocities versus altimetry derived velocities (left).
-The right subplot shows scatter plot with altimetry derived velocities corrected with ekman zonal velocities.
+a) Scatter plot of drifters' zonal velocities versus altimetry derived velocities within 200km inshore of the coast for the satellite TP+J1+J2+J3+S6A. b) shows scatter plot with altimetry derived velocities corrected with ekman zonal velocities.

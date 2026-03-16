@@ -97,7 +97,7 @@ def prepare_xy_with_ek(df):
     return x[valid], y[valid]
 
 
-def plot_panel(ax, x, y, panel_title, x_label, y_label):
+def plot_panel(ax, x, y, panel_title, x_label, y_label, panel_label=None):
     slope, intercept, r, stderr = fit_and_stats(x, y)
     hb = ax.hexbin(x, y, gridsize=55, cmap="viridis", mincnt=1)
 
@@ -134,6 +134,18 @@ def plot_panel(ax, x, y, panel_title, x_label, y_label):
         bbox=dict(boxstyle="round,pad=0.25", facecolor="White", alpha=0.35, edgecolor="gray"),
         color="black",
     )
+    if panel_label:
+        ax.text(
+            0.03,
+            0.03,
+            panel_label,
+            transform=ax.transAxes,
+            va="bottom",
+            ha="left",
+            fontsize=14,
+            fontweight="bold",
+            color="black",
+        )
     ax.set_xlabel(x_label)
     # ax.set_ylabel("drifter ve (m/s)")
     ax.set_ylabel(y_label)
@@ -171,7 +183,8 @@ def main():
         y_no_ek,
         "Without Ekman",
         "Altimetry gu (m/s)",
-        "Drifter ve (m/s)"
+        "Drifter ve (m/s)",
+        panel_label="a)"
     )
     hb1 = plot_panel(
         axes[1],
@@ -179,7 +192,8 @@ def main():
         y_w_ek,
         "With Ekman",
         "Altimetry gu + u_ek (m/s)",
-        none
+        none,
+        panel_label="b)"
     )
 
     for ax in axes:

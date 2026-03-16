@@ -32,8 +32,8 @@ sm1 = plt.cm.ScalarMappable(cmap=cmap1, norm=norm1)
 sm1.set_array([])
 
 # fig, ax = plt.subplots(1, 1, figsize=(9, 4))
-frac1 = "0.2"
 frac1 = "0.05"
+method = "loess"
 for sat in sats[:]:
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     # adjust subplots increase x spacing
@@ -48,7 +48,7 @@ for sat in sats[:]:
         basename = os.path.basename(f_sla)
         ds_sla = xr.open_dataset(f_sla, decode_times=False)
         trackn = ds_sla.Pass
-        f = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat}_{trackn}_loess_{frac1}.nc"
+        f = f"../computed/sla_{method}_{frac1}a/track_sla_along_{sat}_{trackn}_{method}_{frac1}.nc"
         lons_track = ds_sla.lon.values
         lats_track = ds_sla.lat.values
         lons_track_rev = lons_track[::-1]
@@ -116,5 +116,5 @@ for sat in sats[:]:
         f"p.gc.clim.lat_wise.along_xwidth_{sat}a.png",
         png_file,
     )
-    # plt.show()
+    plt.show()
     plt.close("all")

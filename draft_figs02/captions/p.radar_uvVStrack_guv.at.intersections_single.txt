@@ -1,2 +1,1 @@
-zonal and meridional currents of altimetry derived geostrophic currents at an intersection
-point that falls within radar region.
+a) Shows the radar region of TN with a intersection point within the region. b) and c) show zonal and meridional currents of altimetry derived geostrophic currents at the intersection point along with radar zonal velocity time series.

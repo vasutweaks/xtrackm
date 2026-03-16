@@ -1,2 +1,1 @@
-Climatological mean cross-track velocities across the width of EICC for the months March
-and November at different latitudes.
+Climatological mean cross-track velocities across the width of EICC for the months March and November at different latitudes.

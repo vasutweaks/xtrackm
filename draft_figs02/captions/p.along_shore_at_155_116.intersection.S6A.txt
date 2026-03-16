@@ -1,2 +1,2 @@
-Thirty year timeseries of along shore and across shore current components at the
-intersection of two satellite tracks (155, 116) at point along the east coast of India.
+a) An intersection point very close to the east coast of India belonging to the satellite mission TP+J1+J2+J3+S6A. b) and c) show thirty year timeseries of along shore and across shore current components at the
+intersection of two satellite tracks (155, 116).

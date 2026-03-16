@@ -47,7 +47,7 @@ def load_xy(csv_path, y_col, with_ekman=False):
     return x, y, len(df)
 
 
-def add_panel(ax, x, y, title, ylabel, xlabel, extent=None):
+def add_panel(ax, x, y, title, ylabel, xlabel, extent=None, panel_label=None):
     if x.size < 3:
         ax.text(
             0.5,
@@ -57,12 +57,24 @@ def add_panel(ax, x, y, title, ylabel, xlabel, extent=None):
             va="top",
             ha="center",
             fontsize=10,
-            bbox=dict(boxstyle="round,pad=0.25", facecolor="black", alpha=0.5, edgecolor="white"),
+            bbox=dict(boxstyle="round,pad=0.25", facecolor="black", alpha=0.5, edgecolor="gray"),
             color="white",
         )
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.grid(alpha=0.25)
+        if panel_label:
+            ax.text(
+                0.03,
+                0.03,
+                panel_label,
+                transform=ax.transAxes,
+                va="bottom",
+                ha="left",
+                fontsize=14,
+                fontweight="bold",
+                color="black",
+            )
         return None
 
     slope, intercept = np.polyfit(x, y, 1)
@@ -90,8 +102,8 @@ def add_panel(ax, x, y, title, ylabel, xlabel, extent=None):
         va="top",
         ha="left",
         fontsize=10,
-        bbox=dict(boxstyle="round,pad=0.4", facecolor="black", alpha=0.55, edgecolor="white"),
-        color="white",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="white", alpha=0.55, edgecolor="gray"),
+        color="black",
     )
 
     ax.text(
@@ -111,6 +123,18 @@ def add_panel(ax, x, y, title, ylabel, xlabel, extent=None):
     ax.legend(loc="lower right", fontsize=9)
     ax.set_ylim(-1, 1)
     ax.set_xlim(-1, 1)
+    if panel_label:
+        ax.text(
+            0.03,
+            0.03,
+            panel_label,
+            transform=ax.transAxes,
+            va="bottom",
+            ha="left",
+            fontsize=14,
+            fontweight="bold",
+            color="black",
+        )
     return hb
 
 
@@ -144,6 +168,7 @@ def main():
         "RAMA u (m/s)",
         none,
         extent=global_extent,
+        panel_label="a)",
     )
     hb01 = add_panel(
         axs[0, 1],
@@ -153,6 +178,7 @@ def main():
         none,
         none,
         extent=global_extent,
+        panel_label="b)",
     )
     hb10 = add_panel(
         axs[1, 0],
@@ -162,6 +188,7 @@ def main():
         "OMNI u (m/s)",
         x_label_no_ek,
         extent=global_extent,
+        panel_label="c)",
     )
     hb11 = add_panel(
         axs[1, 1],
@@ -171,6 +198,7 @@ def main():
         none,
         x_label_ek,
         extent=global_extent,
+        panel_label="d)",
     )
 
     top_hbs = [hb for hb in [hb00, hb01] if hb is not None]

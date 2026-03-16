@@ -1,1 +1,1 @@
-Standard deviation of SLA of the tracks meeting the east coast of India for the satellite mission S3A compared between Xtrack along track products and AVISO l2p tracks.
+Standard deviation of SLA of the tracks meeting the east coast of India for the satellite mission S3A compared between Xtrack along track products and AVISO l2p tracks. The top panel shows the tracks from which mean standard deviation is calculated.

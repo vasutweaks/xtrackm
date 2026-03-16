@@ -92,11 +92,12 @@ print(
     angle_acute,
     angle_obtuse,
 )
+method = "loess"
 # sys.exit()
 f_self = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_self.zfill(3)}.nc"
 f_other = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_other.zfill(3)}.nc"
-f_self_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat1}_{track_number_self}_loess_{frac1}.nc"
-f_other_smooth = f"../computed/sla_loess_{frac1}a/track_sla_along_{sat1}_{track_number_other}_loess_{frac1}.nc"
+f_self_smooth = f"../computed/sla_{method}_{frac1}a/track_sla_along_{sat1}_{track_number_self}_{method}_{frac1}.nc"
+f_other_smooth = f"../computed/sla_{method}_{frac1}a/track_sla_along_{sat1}_{track_number_other}_{method}_{frac1}.nc"
 ds_self = xr.open_dataset(f_self, engine="netcdf4", decode_times=False)
 ds_self_smooth = xr.open_dataset(f_self_smooth)
 sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
@@ -223,5 +224,5 @@ plt.savefig(
 )
 ln_sf(
     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png", png_file)
-# plt.show()
+plt.show()
 plt.close("all")

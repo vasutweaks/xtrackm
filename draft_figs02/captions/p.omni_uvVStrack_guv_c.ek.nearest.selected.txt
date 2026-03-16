@@ -1,2 +1,1 @@
-Time series of geostrophic zonal component derived at an intersection point which close to a rama buoy () overlied with rama buoy's zonal current. Timeseries of gu correted with ekman u
-component is also added.
+Time series of geostrophic zonal component (gu) derived at an intersection point which close to an OMNI buoy (BD10) overlied with buoy's zonal current. Timeseries of gu correted with ekman u component is also added.

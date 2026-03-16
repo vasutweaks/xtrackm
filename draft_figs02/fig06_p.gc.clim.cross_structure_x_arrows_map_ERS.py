@@ -10,6 +10,8 @@ import sys
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
 
+method = "loess"
+frac1 = "0.05"
 sat = "ERS1+ERS2+ENV+SRL"
 
 REG = (80.0, 92.0, 11.0, 21.0)
@@ -29,7 +31,7 @@ ax1.coastlines()
 # ax1.legend()
 gl = ax1.gridlines(draw_labels=True, linewidth=0.5, color='gray', alpha=0.7, linestyle='--')
 gl.top_labels = gl.right_labels = False  # Hide top and right labels
-plt.text(0.3, 0.95, info,
+plt.text(0.4, 0.95, f"a) {info}",
          horizontalalignment='center',
          verticalalignment='center',
          fontsize=15,
@@ -43,8 +45,7 @@ for f_sla in sorted(
     basename = os.path.basename(f_sla)
     ds_sla = xr.open_dataset(f_sla, decode_times=False)
     trackn = ds_sla.Pass
-    # f = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{trackn}_loess_0.2.nc"
-    f = f"../computed/sla_loess_0.05a/track_sla_along_{sat}_{trackn}_loess_0.05.nc"
+    f = f"../computed/sla_{method}_{frac1}a/track_sla_along_{sat}_{trackn}_{method}_{frac1}.nc"
     lons_track = ds_sla.lon.values
     lats_track = ds_sla.lat.values
     lons_track_rev = lons_track[::-1]
@@ -77,8 +78,10 @@ for f_sla in sorted(
         ds_smooth = xr.open_dataset(f)
         sla_smooth = ds_smooth.sla_smooth
         gc = compute_geostrophy_gc(ds_sla, sla_smooth)
-        gc = gc.where(gc > -2.5)
-        gc = gc.where(gc < 2.5)
+        # gc = gc.where(gc > -2.5)
+        # gc = gc.where(gc < 2.5)
+        # gc = gc.where((gc <= 3.5) & (gc >= -3.5))
+        # gc = mad_outlier_detection_fixed(gc, threshold=3.5, dim="time")
         gc_clim = gc.groupby("time.month").mean("time")
         gc_clim_m = gc_clim.sel(month=month_num)
         # Convert gc from m/s to degrees (assuming cross-track direction)
@@ -113,7 +116,7 @@ ax2.coastlines()
 # ax1.legend()
 gl = ax2.gridlines(draw_labels=True, linewidth=0.5, color='gray', alpha=0.7, linestyle='--')
 gl.top_labels = gl.right_labels = False  # Hide top and right labels
-plt.text(0.3, 0.95, info,
+plt.text(0.4, 0.95, f"b) {info}",
          horizontalalignment='center',
          verticalalignment='center',
          fontsize=15,
@@ -128,7 +131,7 @@ for f_sla in sorted(
     ds_sla = xr.open_dataset(f_sla, decode_times=False)
     trackn = ds_sla.Pass
     # f = f"../computed/sla_loess_0.2a/track_sla_along_{sat}_{trackn}_loess_0.2.nc"
-    f = f"../computed/sla_loess_0.05a/track_sla_along_{sat}_{trackn}_loess_0.05.nc"
+    f = f"../computed/sla_{method}_{frac1}a/track_sla_along_{sat}_{trackn}_{method}_{frac1}.nc"
     lons_track = ds_sla.lon.values
     lats_track = ds_sla.lat.values
     lons_track_rev = lons_track[::-1]
@@ -161,8 +164,8 @@ for f_sla in sorted(
         ds_smooth = xr.open_dataset(f)
         sla_smooth = ds_smooth.sla_smooth
         gc = compute_geostrophy_gc(ds_sla, sla_smooth)
-        gc = gc.where(gc > -2.5)
-        gc = gc.where(gc < 2.5)
+        # gc = gc.where((gc <= 3.5) & (gc >= -3.5))
+        # gc = mad_outlier_detection_fixed(gc, threshold=3.5, dim="time")
         gc_clim = gc.groupby("time.month").mean("time")
         gc_clim_m = gc_clim.sel(month=month_num)
         # Convert gc from m/s to degrees (assuming cross-track direction)
@@ -191,5 +194,5 @@ for f_sla in sorted(
 plt.savefig(f"cross_structure_x_arrows_map_{sat}_1by2.png",
             bbox_inches='tight', dpi=300)
 ln_sf(f"cross_structure_x_arrows_map_{sat}_1by2.png", png_file)
-# plt.show()
+plt.show()
 plt.close("all")

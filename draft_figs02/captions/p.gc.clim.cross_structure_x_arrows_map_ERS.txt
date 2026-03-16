@@ -1,4 +1,1 @@
-Climatology of cross-track geostrophic currents for the months Mar (left) and Nov (right)
-derived from the satellite mission ERS1+ERS2+ENV+SRL. Only descending tracks are shown
-since cross track direction in this case makes small angle to the slope of the local coast which means
-that cross track geostrophic velocity is approximately along shelf.
+Climatology of cross-track geostrophic currents for the months Mar (a) and Nov (b) derived from the satellite mission ERS1+ERS2+ENV+SRL. Only descending tracks are shown since cross track direction in this case makes small angle to the slope of the local coast. Thus the cross track geostrophic velocity is approximately along shelf.

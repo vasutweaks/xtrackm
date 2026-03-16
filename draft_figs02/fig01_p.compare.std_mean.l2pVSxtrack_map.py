@@ -46,6 +46,15 @@ ax1.text(
     fontweight="bold",
     color="b",
 )
+ax1.text(
+    0.05,
+    0.80,
+    f"a)",
+    transform=ax1.transAxes,
+    fontsize=14,
+    fontweight="bold",
+    color="k",
+)
 
 colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
 i = 0
@@ -101,12 +110,21 @@ ax2.text(
     color="k",
     rotation=90,
 )
+ax2.text(
+    0.02,
+    0.80,
+    f"b)",
+    transform=ax2.transAxes,
+    fontsize=14,
+    fontweight="bold",
+    color="k",
+)
 
 plt.legend()
 plt.tight_layout()
 plt.savefig(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png")
 ln_sf(f"std_mean_xtrackVSstd_mean_l2p_{sat}.png", png_file)
-# plt.show()
+plt.show()
 plt.close("all")
 
 dse.close()

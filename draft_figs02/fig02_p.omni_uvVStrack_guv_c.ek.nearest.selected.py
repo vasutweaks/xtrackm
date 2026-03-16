@@ -220,6 +220,16 @@ plt.text(
     fontsize=12,
     fontweight="bold",
 )
+ax1.text(
+    0.02,
+    0.80,
+    f"b)",
+    transform=ax1.transAxes,
+    fontsize=14,
+    fontweight="bold",
+    color="k",
+)
+ax1.set_ylabel("zonal current (m/s)")
 plt.legend()
 
 rose_cut.plot(ax=ax2, add_colorbar=False, add_labels=False, cmap=cmap1)
@@ -246,7 +256,23 @@ ax2.plot(
     markeredgecolor="black",
     markeredgewidth=2,
 )
-plt.text(lon_omni, lat_omni, f"{SELECT_OMNI_ID}", fontsize=10, color="k")
+ax2.text(
+    0.05,
+    0.80,
+    f"a)",
+    transform=ax2.transAxes,
+    fontsize=14,
+    fontweight="bold",
+    color="k",
+)
+ax2.text(
+    lon_omni+0.8,
+    lat_omni,
+    f"{SELECT_OMNI_ID}",
+    transform=ccrs.PlateCarree(),
+    fontsize=10,
+    color="k",
+)
 ax2.scatter(
     lons_track_self, lats_track_self, marker=".", color="c", s=4
 )
@@ -263,8 +289,8 @@ lonm, latm = get_point_at_distance(
 )
 info = f"{sat} {track_number_self} {track_number_other} {distance_km:.2f} km"
 plt.text(
-    0.55,
-    0.90,
+    0.49,
+    0.92,
     info,
     transform=ax2.transAxes,
     fontsize=10,
