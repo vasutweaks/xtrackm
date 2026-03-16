@@ -48,6 +48,7 @@ d = 1.5
 dpth = 15
 height, width = 9, 9
 frac1 = "0.05"
+method = "loess"
 
 
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")
@@ -55,7 +56,7 @@ rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/raju_omni_clean"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 out_match_csv = "omni_guv_c_nearest_global_matches.csv"
 matched_rows_all = []
 # SELECT_SAT = "TP+J1+J2+J3+S6A"
@@ -141,7 +142,7 @@ print(
     angle_obtuse,
 )
 
-f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
 if not os.path.exists(f_guv):
     print(f"missing file: {f_guv}")
     raise("missing file")
@@ -172,6 +173,7 @@ with xr.open_dataset(f_guv) as ds_guv:
 gu_cut = gu
 gv_cut = gv
 
+# gu_cut_6 = gu.rolling(x=6, center=True).mean()
 # Collocate omni at track-gu timestamps; avoid sat-dependent smoothing.
 omni_u_match = omni_u.reindex(
     time=gu_cut.time,
@@ -185,6 +187,7 @@ ek_u_match = u_ek.reindex(
 )
 valid = np.isfinite(gu_cut) & np.isfinite(omni_u_match)
 gu_pair = gu_cut.where(valid)
+# gu_6_pair = gu_cut_6.where(valid)
 omni_u_pair = omni_u_match.where(valid)
 ek_u_pair = ek_u_match.where(valid)
 
@@ -200,6 +203,7 @@ ax2 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
 ax1 = fig.add_subplot(2, 1, 2)
 omni_u_pair.plot(ax=ax1, color="r", linewidth=2, label="omni")
 gu_pair.plot(ax=ax1, color="k", linewidth=2, label="track")
+# gu_6_pair.plot(ax=ax1, color="g", linewidth=2, label="track x 6 smooth")
 gu_ek_pair.plot(ax=ax1, color="b", linewidth=2, label="track+ekman")
 
 corr = xs.pearson_r(gu_pair, omni_u_pair, dim="time", skipna=True)

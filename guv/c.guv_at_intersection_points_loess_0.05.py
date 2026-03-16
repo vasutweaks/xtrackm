@@ -76,11 +76,13 @@ for sat in sats_new[:]:
         a2_d = math.degrees(a2)
         print(f"heading angle {sat}: a1 = {a1_d:.2f}, a2 = {a2_d:.2f}")
         gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
+        gc_self_smooth = gc_self.rolling(x=3, center=True).mean()
         gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-        gc_self_at = gc_self.sel(
+        gc_other_smooth = gc_other.rolling(x=3, center=True).mean()
+        gc_self_at = gc_self_smooth.sel(
             x=x_from_coast_self1, method="nearest", drop=True
         )
-        gc_other_at = gc_other.sel(
+        gc_other_at = gc_other_smooth.sel(
             x=x_from_coast_other1, method="nearest", drop=True
         )
         gc_other_at = gc_other_at.interp(time=gc_self_at.time)
