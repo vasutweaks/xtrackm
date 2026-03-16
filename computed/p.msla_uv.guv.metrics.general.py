@@ -15,11 +15,11 @@ SAT = "TP+J1+J2+J3+S6A"
 # Example: [("gauss", "3"), ("loess", "0.05"), ("odo", "56")]
 METHOD_PARA_PAIRS: list[tuple[str, str]] = [
     ("loess", "0.05"),
-    ("loess", "0.2"),
+    ("xsmooth", "0.05"),
 ]
 
 # Column to compare across files.
-METRIC = "rmse_u"
+METRIC = "corr_u"
 
 # Column used to align rows across CSVs.
 KEY_COL = "unique_str"

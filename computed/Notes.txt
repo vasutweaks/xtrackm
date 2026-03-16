@@ -1,3 +1,10 @@
+major reasong gc std is blowing up offshore for some tracks is that they
+very close to equator. Putting a tight limit on abs(lat) > 5 and excluding
+short tracks near equator is fixing the issue.
+
+rolling smooth along x dimension with 6 points is not giving any better
+guv currrent.
+
 Optimum difference operator:
 1. The window shape (weights) are fixed for given p and q.
 It is computed only once.

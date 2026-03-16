@@ -9,10 +9,11 @@ import xarray as xr
 
 SAT = "TP+J1+J2+J3+S6A"
 METHOD = "loess"
-PARA = "0.2"
+METHOD_OUT = "xsmooth"
+PARA = "0.05"
 GUV_ROOT = Path("/home/srinivasu/xtrackm/guv")
 MSLA_DIR = GUV_ROOT / "msla_uv_at_intersections"
-GUV_DIR = GUV_ROOT / f"guv_at_intersections_{METHOD}"
+GUV_DIR = GUV_ROOT / f"guv_at_intersections_{METHOD_OUT}"
 MONTHLY_RULE = "1ME"
 
 
@@ -100,7 +101,7 @@ def main() -> None:
             continue
 
         msla_path = MSLA_DIR / f"{unique_str}_msla_uv_at_intersections.nc"
-        guv_path = GUV_DIR / f"guv_at_intersection_{sat}_{track_self}_{track_other}_{METHOD}_{PARA}.nc"
+        guv_path = GUV_DIR / f"guv_at_intersection_{sat}_{track_self}_{track_other}_{METHOD_OUT}_{PARA}.nc"
 
         if not guv_path.exists():
             print(f"Skipping guv {unique_str}: missing file(s)")
@@ -143,11 +144,11 @@ def main() -> None:
 
     # metrics_df = pd.DataFrame(rows).sort_values("unique_str").reset_index(drop=True)
     metrics_df = pd.DataFrame(rows).sort_values("lats_inter", ascending=False).reset_index(drop=True)
-    out_csv = Path(__file__).resolve().with_name(f"metrics_msla_uvVSguv_{SAT}_{METHOD}_{PARA}.csv")
+    out_csv = Path(__file__).resolve().with_name(f"metrics_msla_uvVSguv_{SAT}_{METHOD_OUT}_{PARA}.csv")
     metrics_df.to_csv(out_csv, index=False)
     print(f"Saved metrics CSV: {out_csv}")
 
-    out_plot = Path(__file__).resolve().with_name(f"metrics_msla_uvVSguv_{SAT}_{METHOD}_{PARA}_2x2.png")
+    out_plot = Path(__file__).resolve().with_name(f"metrics_msla_uvVSguv_{SAT}_{METHOD_OUT}_{PARA}_2x2.png")
     plot_metrics_bars_2x2(metrics_df, out_plot)
     print(f"Saved metrics plot: {out_plot}")
 

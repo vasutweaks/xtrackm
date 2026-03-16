@@ -1,3 +1,10 @@
+I am trying to find the standard deviation of geostrophic currents as
+a function of distance away from the coast with the script
+p.std.gc.S3A.east_coast.common_tracks.with_mean.py
+I am expecting that the std is more near coast. But it is not the case.
+For many tracks the std is very high in the middle of the ocean.
+Computational or scientific issues?
+
 I am trying to code optimal difference operator discussed in 
  Powell_Leben_2004_optimal_difference_operator.pdf and
 'Liu et al.-2012-Comparison of the X-TRACK altimetry estimated currents with moored ADCP and HF radar observations on the West Florida Shelf.pdf'
