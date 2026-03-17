@@ -95,6 +95,61 @@ def mad_filter_1d_xr(da, thresh, dim=None):
     return da_out
 
 
+def mad_filter_2d_xr(da, thresh, dims=("time", "x")):
+    """
+    Apply MAD outlier filtering on a 2D DataArray across both dimensions.
+    The filter is applied sequentially for each dimension listed in `dims`.
+    """
+    if len(da.dims) != 2:
+        raise ValueError(
+            f"mad_filter_2d_xr expects a 2D DataArray, got dims: {da.dims}"
+        )
+    for dim in dims:
+        if dim not in da.dims:
+            raise ValueError(
+                f"Dimension '{dim}' not found in input DataArray dims: {da.dims}"
+            )
+
+    def mad_filter_1d_np(x, thresh_local):
+        if len(x) < 3 or np.all(np.isnan(x)):
+            return np.full_like(x, np.nan, dtype=float)
+        valid_mask = ~np.isnan(x)
+        if np.sum(valid_mask) < 3:
+            return np.full_like(x, np.nan, dtype=float)
+        valid_data = x[valid_mask]
+        median = np.median(valid_data)
+        mad = median_abs_deviation(valid_data, scale="normal")
+        if mad == 0:
+            mad = np.median(np.abs(valid_data - median)) * 1.4826
+            if mad == 0:
+                return np.full_like(x, np.nan, dtype=float)
+        modified_z_scores = 0.6745 * (x - median) / mad
+        outliers = np.abs(modified_z_scores) > thresh_local
+        x_filtered = x.astype(float).copy()
+        x_filtered[outliers] = np.nan
+        return x_filtered
+
+    orig_dims = da.dims
+    da_filtered = da.astype(float).copy()
+    for dim in dims:
+        da_filtered = xr.apply_ufunc(
+            lambda x: mad_filter_1d_np(x, thresh),
+            da_filtered,
+            input_core_dims=[[dim]],
+            output_core_dims=[[dim]],
+            vectorize=True,
+            dask="allowed",
+            output_dtypes=[float],
+        )
+        # apply_ufunc may reorder dimensions (e.g., to ('time', 'x'));
+        # force the original order after each pass.
+        da_filtered = da_filtered.transpose(*orig_dims)
+
+    da_filtered.attrs = da.attrs
+    da_filtered.name = da.name
+    return da_filtered
+
+
 def find_n_closest_points(df, lon0, lat0, n=4):
     """Return n rows closest to (lon0, lat0) using intersection lon/lat."""
     lons_inter = df["lons_inter"].tolist()

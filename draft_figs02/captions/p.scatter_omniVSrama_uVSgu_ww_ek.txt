@@ -1,2 +1,2 @@
-a) Scatter plot of rama buoys' zonal currents versus altimetry derived
-zonal currents at nearby intersection points. b) Shows scatter plot with altimetry derived currents corrected with ekman zonal currents. c) and d) show scatter plots of OMNI currents with and without correction for Ekman zonal currents. 
+a) Scatter plot of rama buoys' zonal currents(y-axis) versus altimetry derived
+zonal currents(x-axis) at nearby intersection points. b) Shows scatter plot with altimetry derived currents corrected with ekman zonal currents. c) and d) show scatter plots of OMNI currents with and without Ekman correction against altimetry zonal currents. The colorbar shows density of points in the scatter plot in terms of count. A redline passing through the points indicates linear fit.

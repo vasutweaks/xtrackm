@@ -76,7 +76,7 @@ for pass1 in common:
         latm = lats_track.mean()
         color = colors[i]
         print(f"{sat} {track_number} -------------------")
-        ax1.scatter(lons_track, lats_track, s=2, color=color)
+        ax1.scatter(lons_track, lats_track, s=2, color="w")
         if is_within_region(lonm, latm, *NIO):
             ax1.text(
                 lonm,
@@ -97,8 +97,8 @@ ax2.plot(std_xtr, label="xtrack std", color="red")
 ax2.plot(std_l2p, label="l2p std", color="blue")
 ax2.grid(alpha=0.3, linestyle="--", linewidth=0.5)
 ax2.set_xlabel("distance along track (km)")
-ax2.set_ylabel("std")
-ax2.set_title("std_mean_xtrack vs std_mean_l2p")
+ax2.set_ylabel("std (m)")
+# ax2.set_title("std_mean_xtrack vs std_mean_l2p")
 ax2.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
 ax2.text(
     0.02,

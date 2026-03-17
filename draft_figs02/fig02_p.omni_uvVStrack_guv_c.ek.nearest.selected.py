@@ -266,12 +266,13 @@ ax2.text(
     color="k",
 )
 ax2.text(
-    lon_omni+0.8,
+    lon_omni-0.5,
     lat_omni,
     f"{SELECT_OMNI_ID}",
     transform=ccrs.PlateCarree(),
     fontsize=10,
-    color="k",
+    color="r",
+    ha="right",
 )
 ax2.scatter(
     lons_track_self, lats_track_self, marker=".", color="c", s=4

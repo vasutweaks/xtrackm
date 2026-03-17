@@ -2,6 +2,7 @@ import xarray as xr
 from tools_xtrackm import *
 from namesm import sats_new
 
+sats_new = ["ERS1+ERS2+ENV+SRL"]
 for sat in sats_new[:]:
     for f in sorted(
         glob.glob(
@@ -19,5 +20,5 @@ for sat in sats_new[:]:
         dac_smooth = track_smooth_loess_statsmodels_x(dac_track, frac=0.05)
         ds_out = xr.Dataset({"sla_smooth": sla_smooth, "dac_smooth": dac_smooth})
         ds_out.to_netcdf(
-        f"sla_loess_0.05a/track_sla_along_{sat}_{track_number}_loess_0.05.nc"
+        f"sla_loess_0.05/track_sla_along_{sat}_{track_number}_loess_0.05.nc"
         )

@@ -1,3 +1,9 @@
+Write a python function using xarray to do a mad filter on 2 dimension
+gc variable which applies both on x and time dimensions.
+This is to be used in c.gc_at_intersection_points_loess_0.05.py
+There is 1d version of function in
+../lib/tools_xtrackm.py
+
 Club following script in to p.scatter_omniVSrama_uVSgu_ww_ek.py to plot a 2x2
 subplots with first row containing scatter plots (with and without ekman) of
 rama_uVSgu and second two containing scatter plots (with and without ekman) of
