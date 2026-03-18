@@ -1,3 +1,21 @@
+Write a python script to plot climatological cross track gc as arrows along
+the plotted tracks on a cartopy map set to a Bay Of Bengal region. Use 
+pre computed gc fields at
+../guv/guv_at_intersections_loess/gc_at_ERS1+ERS2+ENV+SRL_*_loess_0.05.nc
+1. Plot a cartopy map for Bay of Bengal region.
+WBOB2 = (78.0, 97.0, 0.0, 25.0)
+2. for the tracknumber open sla file at ../data/ERS1+ERS2+ENV+SRL
+3. Check if lat[-1] and lon[-1] fall in the the region and slope is negative
+4. Plot tracks
+5. Compute the monthly climatology of gc
+6. The length of arrows on the tracks should be proportional to the magnitude
+of gc at the point (Mar on left subplot) and Nov on right subplot.
+also see general scripts at 
+../meta
+../lib/tools_xtrackm.py
+use xarray for all operations.
+
+
 Write an all-encompassing function that take only the following arguments:
 query points
 smoothing sigma for guassion
