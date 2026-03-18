@@ -18,3 +18,4 @@ from itertools import zip_longest
 from numbers import Number
 if df["track_self"].dtype == object:
     df["track_self"] = df["track_self"].astype(int)
+lat_array = np.atleast_1d(latitude)
