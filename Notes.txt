@@ -1,3 +1,9 @@
+sla = altitude of satellite - altimeter range - altimeter ionospheric
+correction - model dry tropospheric correction - wet tropospheric correction
+- sea state bias correction - solid earth tide height - geocentric ocean tide
+- geocentric pole tide height - Dynamic atmospheric correction - X-TRACK mean
+sea surface - Global Mean Sea level Bias
+
 old important Notes
 ------
 
