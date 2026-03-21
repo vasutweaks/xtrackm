@@ -11,7 +11,7 @@ method = "loess"
 out_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}/"
 os.makedirs(out_dir, exist_ok=True)
 print(sats_new)
-sat = "S3A"
+sat = "ERS1+ERS2+ENV+SRL"
 sats_new = [sat]
 for sat in sats_new[:]:
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")

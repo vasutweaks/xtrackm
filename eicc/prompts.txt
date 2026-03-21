@@ -1,3 +1,38 @@
+1. Read intersections_near_coast_BOB_ERS1+ERS2+ENV+SRL.csv
+2. For each intersection point read corresponding guv files using track_self and track_other
+see p.along_shore_at_155_116.intersection.S6A_c1.py
+3. append u variables of guv files
+4. Form a transect dimension with selected intersection points sorted by latitude.
+see p.intersections_near_coast_bob.py once
+5. concat arrray of u dataarrays with above dimension
+6. Make a hovmullor diagram with latitude as y axis and time as x axis
+
+Add a left side subplot and 
+Plot a cartopy plot, selected to the region BOB (Bay of Bengal)
+plot the selected intersection points along the coast along with lon, lat pairs as annotations
+connect these points with lines to show the transect along the coast.
+Currently the hovmoller plot looks blank.
+
+Similar to the workflow of p.scatter_drifter_ve_vs_gu_ww_ek.py
+1. Read tracks_intersections_TP+J1+J2+J3+S6A_1.csv, get nearest distances to the coast for each intersection point.
+2. Gather points that are within a threshold distance, save them to a list
+3. Plot a cartopy plot, selected to the region BOB (Bay of Bengal)
+4. plot the listed points along the coast along with lon, lat pairs as annotations
+
+We need to furthur select the points
+On selected points discard points with lat < 9N or lon > 90E
+sort based on latitude
+if more than one point is on the same latitude (same with 2decimal points),
+ select the point that is close to the half of threshold distance
+
+ points > 90E are still present, 
+
+Extend the script p.along_shore_at_155_116.intersection.S6A_c.py to
+Shared periods Feb-May in Yellow, Jun-Sep in cyan and Oct-Dec in transparent gray for all years. Mark years with vertical bars. 
+Include periodogram of along shore current with periodicities in days
+inplace of cross current plot (bottom subplot)
+Mark important periodicities like 365, 180, 120 etc.
+
 Write a python script to plot climatological cross track gc as arrows along
 the plotted tracks on a cartopy map set to a Bay Of Bengal region. Use 
 pre computed gc fields at

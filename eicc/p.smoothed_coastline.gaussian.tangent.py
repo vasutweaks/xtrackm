@@ -1,11 +1,9 @@
-import geopandas as gpd
 import cartopy.io.shapereader as shpreader
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 from shapely.geometry import LineString, MultiLineString, Point, box
-from scipy.ndimage import gaussian_filter1d
-from scipy.signal import savgol_filter
-from shapely_smooth_funcs import *
+from tools_shapely import *
 
 lon_min, lon_max = 70, 95
 lat_min, lat_max = 5, 30
@@ -13,9 +11,7 @@ region_bbox = box(lon_min, lat_min, lon_max, lat_max)
 
 # Load Natural Earth 110m coastline
 shpfilename = shpreader.natural_earth(
-    resolution='50m',
-    category='physical',
-    name='coastline'
+    resolution="50m", category="physical", name="coastline"
 )
 
 coast = gpd.read_file(shpfilename)
@@ -91,11 +87,15 @@ def tangent_slope_near_point(geom, point_xy, neighborhood=2):
     Compute tangent slope near a point for LineString or MultiLineString geometry.
     """
     if isinstance(geom, LineString):
-        return tangent_slope_on_line_near_point(geom, point_xy, neighborhood=neighborhood)
+        return tangent_slope_on_line_near_point(
+            geom, point_xy, neighborhood=neighborhood
+        )
     if isinstance(geom, MultiLineString):
         pt = Point(point_xy)
         line = min(geom.geoms, key=lambda g: g.distance(pt))
-        return tangent_slope_on_line_near_point(line, point_xy, neighborhood=neighborhood)
+        return tangent_slope_on_line_near_point(
+            line, point_xy, neighborhood=neighborhood
+        )
     raise TypeError("Geometry must be LineString or MultiLineString.")
 
 
@@ -105,7 +105,9 @@ def tangent_slope_near_point_in_geoseries(geoms, point_xy, neighborhood=2):
     """
     pt = Point(point_xy)
     best_geom = min(geoms, key=lambda g: g.distance(pt))
-    return tangent_slope_near_point(best_geom, point_xy, neighborhood=neighborhood)
+    return tangent_slope_near_point(
+        best_geom, point_xy, neighborhood=neighborhood
+    )
 
 
 coast_gauss = coast_proj.copy()
@@ -120,7 +122,10 @@ coast_gauss = coast_gauss.to_crs("EPSG:4326")
 
 # Query point in lon/lat for tangent visualization
 query_point = (83.62, 17.17)
-
+query_point = (88.92, 19.00) # Paradip
+query_point = (80.203, 12.015) # Cuddalore
+query_point = (82.982, 16.837) ## Kakinada
+query_point = (85.442, 18.856) # Gopalpur
 tangent_info = tangent_slope_near_point_in_geoseries(
     coast_gauss.geometry, query_point, neighborhood=2
 )
@@ -143,6 +148,7 @@ tangent_y = [
     nearest_point[1] + uy * tangent_half_len,
 ]
 
+
 def angle_in_degrees(tangent_info):
     tx, ty = tangent_info["tangent_vector"]
     if tx < 0:
@@ -150,6 +156,7 @@ def angle_in_degrees(tangent_info):
     theta_east = (np.degrees(np.arctan2(ty, tx)) + 360) % 360
     print(theta_east, "---------------------------------------------------")
     return theta_east
+
 
 theta_east = angle_in_degrees(tangent_info)
 
@@ -159,9 +166,20 @@ fig, ax = plt.subplots(figsize=(10, 8))
 
 coast_orig.plot(ax=ax, linewidth=0.8, color="black", label="Original 110m")
 coast_gauss.plot(ax=ax, linewidth=2, color="red", label="Gaussian")
-ax.scatter(*query_point, color="dodgerblue", s=60, zorder=6, label="Input point")
-ax.scatter(*nearest_point, color="orange", s=60, zorder=7, label="Nearest point")
-ax.plot(tangent_x, tangent_y, color="green", linewidth=5, zorder=8, label="Tangent segment")
+ax.scatter(
+    *query_point, color="dodgerblue", s=60, zorder=6, label="Input point"
+)
+ax.scatter(
+    *nearest_point, color="orange", s=60, zorder=7, label="Nearest point"
+)
+ax.plot(
+    tangent_x,
+    tangent_y,
+    color="green",
+    linewidth=5,
+    zorder=8,
+    label="Tangent segment",
+)
 
 ax.set_xlim(lon_min, lon_max)
 ax.set_ylim(lat_min, lat_max)
