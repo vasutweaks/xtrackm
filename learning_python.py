@@ -37,3 +37,11 @@ def resolve_guv_file(guv_dir: Path, sat: str, track_self: int, track_other: int,
         f"({t1}, {t2}). Tried: " + ", ".join(str(x) for x in candidates)
     )
 
+legend_handles = [
+    Patch(facecolor="gold", edgecolor="none", alpha=0.25, label="Slope zone (200-2000 m)"),
+    Line2D([0], [0], color="k", lw=1.2, label="200 m isobath"),
+    Line2D([0], [0], color="darkorange", lw=1.0, label="1000 m isobath"),
+    Line2D([0], [0], color="red", lw=1.0, label="2000 m isobath"),
+]
+ax1.legend(handles=legend_handles, loc="lower left", frameon=True, framealpha=0.85, fontsize=10)
+return [tuple(xy) for xy in smooth_pts[::step]]

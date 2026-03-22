@@ -1,1 +1,0 @@
-../drifter_track_reg/p.scatter_drifter_ve_vs_gu_ww_ek.py

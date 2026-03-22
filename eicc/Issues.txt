@@ -1,0 +1,4 @@
+slope finding issue is still there
+At what isobath should we take slope on
+The shapely based slopes are not matching with that of isobath contour extraction scripts
+These are inturn not matching verymuch with mukherji 2014 paper slopes

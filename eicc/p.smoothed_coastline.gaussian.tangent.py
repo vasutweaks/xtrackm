@@ -117,6 +117,15 @@ coast_gauss["geometry"] = coast_proj.geometry.apply(
 
 # Reproject back to lat/lon
 
+def angle_in_degrees(tangent_info):
+    tx, ty = tangent_info["tangent_vector"]
+    if tx < 0:
+        tx, ty = -tx, -ty
+    theta_east = (np.degrees(np.arctan2(ty, tx)) + 360) % 360
+    # print(theta_east, "---------------------------------------------------")
+    return theta_east
+
+
 coast_orig = coast_clip
 coast_gauss = coast_gauss.to_crs("EPSG:4326")
 
@@ -130,6 +139,16 @@ tangent_info = tangent_slope_near_point_in_geoseries(
     coast_gauss.geometry, query_point, neighborhood=2
 )
 nearest_point = tangent_info["nearest_point"]
+query_points = ((83.62, 17.17),(88.92, 19.00),(80.203, 12.015),(82.982, 16.837),(85.442, 18.856))
+for q in query_points:
+    tangent_info = tangent_slope_near_point_in_geoseries(
+        coast_gauss.geometry, q, neighborhood=2
+    )
+    nearest_point = tangent_info["nearest_point"]
+    theta_east = angle_in_degrees(tangent_info)
+    # print(f"Query: {q}, Nearest: {nearest_point}, Angle from east: {degrees_from_east:.1f}°")
+    print(f"{q}, {theta_east:.1f}°")
+
 tx, ty = tangent_info["tangent_vector"]
 tangent_norm = np.hypot(tx, ty)
 if tangent_norm > 0:
@@ -147,15 +166,6 @@ tangent_y = [
     nearest_point[1] - uy * tangent_half_len,
     nearest_point[1] + uy * tangent_half_len,
 ]
-
-
-def angle_in_degrees(tangent_info):
-    tx, ty = tangent_info["tangent_vector"]
-    if tx < 0:
-        tx, ty = -tx, -ty
-    theta_east = (np.degrees(np.arctan2(ty, tx)) + 360) % 360
-    print(theta_east, "---------------------------------------------------")
-    return theta_east
 
 
 theta_east = angle_in_degrees(tangent_info)
