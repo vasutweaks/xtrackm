@@ -1,14 +1,12 @@
 import cmocean as cmo
-import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
-from scipy import signal
 from tools_xtrackm import *
 from tools_shapely import *
+# copilot --resume=6b563fd7-e036-45d8-95d0-bd5af130d84f
 
-# copilot --resume=c0c59aeb-32fd-409b-a69f-a03a902a3b60
 def along_across_shore_components(gu, gv, coast_heading_deg):
     """
     Resolve vector (gu, gv) into along-shore and across-shore components.
@@ -25,64 +23,6 @@ def along_across_shore_components(gu, gv, coast_heading_deg):
     along_shore = gu * c + gv * s
     across_shore = -gu * s + gv * c  # +90 deg CCW
     return along_shore, across_shore
-
-
-def shade_shared_periods(ax, time_index):
-    start_year = time_index.min().year
-    end_year = time_index.max().year
-    seasonal_windows = [
-        ((2, 1), (5, 31), "yellow", 0.18),
-        ((6, 1), (9, 30), "cyan", 0.16),
-        ((10, 1), (12, 31), "gray", 0.12),
-    ]
-    for year in range(start_year, end_year + 1):
-        for start_md, end_md, color, alpha in seasonal_windows:
-            ax.axvspan(
-                pd.Timestamp(year=year, month=start_md[0], day=start_md[1]),
-                pd.Timestamp(year=year, month=end_md[0], day=end_md[1]),
-                color=color,
-                alpha=alpha,
-                zorder=0,
-            )
-        ax.axvline(
-            pd.Timestamp(year=year, month=1, day=1),
-            color="k",
-            linewidth=0.8,
-            alpha=0.35,
-            zorder=1,
-        )
-    ax.axvline(
-        pd.Timestamp(year=end_year + 1, month=1, day=1),
-        color="k",
-        linewidth=0.8,
-        alpha=0.35,
-        zorder=1,
-    )
-
-
-def compute_periodogram_days(da):
-    series = pd.Series(da.values, index=pd.to_datetime(da.time.values)).sort_index()
-    series = series[~series.index.duplicated(keep="first")].dropna()
-    dt_days = np.diff(series.index.values).astype("timedelta64[s]").astype(float) / 86400.0
-    sample_days = int(round(np.nanmedian(dt_days)))
-    regular_index = pd.date_range(
-        series.index.min(), series.index.max(), freq=f"{sample_days}D"
-    )
-    regular_series = series.reindex(regular_index).interpolate("time").dropna()
-    regular_signal = regular_series.to_numpy(dtype=float)
-    freq, power = signal.welch(
-        regular_signal,
-        fs=1.0 / sample_days,
-        window="hann",
-        detrend="linear",
-        scaling="spectrum",
-        nperseg=min(256, regular_signal.size),
-    )
-    valid = freq > 0
-    period_days = 1.0 / freq[valid]
-    power = power[valid]
-    order = np.argsort(period_days)
-    return period_days[order], power[order], sample_days
 
 
 method = "loess"
@@ -170,41 +110,31 @@ print(f"heading angle {a1_d:.2f} {a2_d:.2f}")
 gu = ds_guv.gu
 gv = ds_guv.gv
 al, ac = along_across_shore_components(gu, gv, coast_heading_deg)
+
+# Bandpass filter: remove periods shorter than 45 days (high-freq noise)
+from scipy.signal import butter, filtfilt
+
+al_vals_raw = al.values.copy()
+dt_days_bp = np.median(np.diff(pd.to_datetime(al.time.values)).astype("timedelta64[D]").astype(float))
+fs_bp = 1.0 / dt_days_bp  # cycles per day
+# Low-pass cutoff: 1/45 cycles per day (keep periods > 45 days)
+cutoff = 1.0 / 60.0
+# Nyquist frequency
+nyq = fs_bp / 2.0
+b_filt, a_filt = butter(4, cutoff / nyq, btype="low")
+# Interpolate NaNs for filtering, then restore NaN positions
+nan_mask = np.isnan(al_vals_raw)
+al_interp = pd.Series(al_vals_raw).interpolate(limit_direction="both").values
+al_filtered = filtfilt(b_filt, a_filt, al_interp)
+al_filtered[nan_mask] = np.nan
+al = al.copy(data=al_filtered)
+
 fig = plt.figure(figsize=(12, 10))
 ax1 = fig.add_subplot(3, 1, 3)
 ax0 = fig.add_subplot(3, 1, 2)
 al.plot(ax=ax0, label="alongshore", color="r", linewidth=2)
-time_index = pd.to_datetime(al.time.values)
-shade_shared_periods(ax0, time_index)
 ax0.legend()
 ax0.set_ylabel("along current m/s")
-ax0.set_xlim(time_index.min(), time_index.max())
-ax0.xaxis.set_major_locator(mdates.YearLocator(base=2))
-ax0.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-ax0.grid(axis="x", alpha=0.25)
-period_days, power, sample_days = compute_periodogram_days(al)
-display_mask = (period_days >= 20) & (period_days <= 500)
-ax1.semilogy(
-    period_days[display_mask],
-    power[display_mask],
-    color="r",
-    linewidth=2,
-    label="alongshore spectrum",
-)
-important_periods = [365, 180, 120, 90, 60, 30]
-for period in important_periods:
-    if display_mask.any() and period_days[display_mask].min() <= period <= period_days[display_mask].max():
-        ax1.axvline(period, color="k", linestyle="--", linewidth=0.9, alpha=0.5)
-        ax1.text(
-            period,
-            ax1.get_ylim()[1] * 0.95,
-            f"{period}",
-            rotation=90,
-            va="top",
-            ha="right",
-            fontsize=9,
-            color="k",
-        )
 info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat1} {track_number_self} {track_number_other}"
 plt.text(
     0.15,
@@ -214,12 +144,52 @@ plt.text(
     fontsize=14,
     fontweight="bold",
 )
-ax1.legend()
-ax1.set_xlabel("period (days)")
-ax1.set_ylabel("power (log scale)")
-ax1.set_title(f"Alongshore current Welch spectrum ({sample_days}-day sampling)")
-ax1.set_xlim(20, 500)
-ax1.grid(alpha=0.3)
+
+# --- Seasonal shading and year markers on along-shore plot (ax0) ---
+times = pd.to_datetime(al.time.values)
+year_min, year_max = times.year.min(), times.year.max()
+for yr in range(year_min, year_max + 1):
+    # Feb-May: yellow
+    ax0.axvspan(pd.Timestamp(yr, 2, 1), pd.Timestamp(yr, 5, 31), color="yellow", alpha=0.15, zorder=0)
+    # Jun-Sep: cyan
+    ax0.axvspan(pd.Timestamp(yr, 6, 1), pd.Timestamp(yr, 9, 30), color="cyan", alpha=0.15, zorder=0)
+    # Oct-Dec: gray
+    ax0.axvspan(pd.Timestamp(yr, 10, 1), pd.Timestamp(yr, 12, 31), color="gray", alpha=0.15, zorder=0)
+    # Year boundary vertical line on Jan 1
+    ax0.axvline(pd.Timestamp(yr, 1, 1), color="k", linewidth=0.5, linestyle="--", alpha=0.5)
+
+# --- Periodogram of along-shore current ---
+from scipy.signal import periodogram as scipy_periodogram
+
+al_vals = al.values
+al_times = pd.to_datetime(al.time.values)
+# Compute median sampling interval in days
+dt_days = np.median(np.diff(al_times).astype("timedelta64[D]").astype(float))
+fs = 1.0 / dt_days  # sampling frequency in cycles/day
+
+# Remove NaNs for periodogram
+mask = np.isfinite(al_vals)
+al_clean = al_vals[mask]
+al_clean = al_clean - np.nanmean(al_clean)
+
+freqs, psd = scipy_periodogram(al_clean, fs=fs, scaling="density")
+# Convert frequency to period in days (skip freq=0)
+freqs = freqs[1:]
+psd = psd[1:]
+periods = 1.0 / freqs
+
+ax1.semilogy(periods, psd, color="b", linewidth=1)
+ax1.set_xlabel("Period (days)")
+ax1.set_ylabel("PSD (m²/s²/cpd)")
+ax1.set_title("Periodogram of along-shore current")
+ax1.set_xlim(0, 600)
+
+# Mark important periodicities
+important_periods = {"365 d": 365, "180 d": 180, "120 d": 120, "90 d": 90, "60 d": 60}
+for label, p in important_periods.items():
+    ax1.axvline(p, color="r", linewidth=0.8, linestyle="--", alpha=0.7)
+    ax1.text(p, ax1.get_ylim()[1] * 0.5, label, rotation=90, va="top", ha="right",
+             fontsize=9, color="r", alpha=0.9)
 ax2 = fig.add_subplot(3, 1, 1, projection=ccrs.PlateCarree())
 rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])

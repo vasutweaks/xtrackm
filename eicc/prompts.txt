@@ -27,8 +27,8 @@ if more than one point is on the same latitude (same with 2decimal points),
 
  points > 90E are still present, 
 
-Extend the script p.along_shore_at_155_116.intersection.S6A_c.py to
-Shared periods Feb-May in Yellow, Jun-Sep in cyan and Oct-Dec in transparent gray for all years. Mark years with vertical bars. 
+extend the script p.along_shore_at_155_116.intersection.S6A_periodogram.py to
+shade periods of Feb-May in Yellow, Jun-Sep in cyan and Oct-Dec in transparent gray for all years. Mark years with vertical bars. 
 Include periodogram of along shore current with periodicities in days
 inplace of cross current plot (bottom subplot)
 Mark important periodicities like 365, 180, 120 etc.
