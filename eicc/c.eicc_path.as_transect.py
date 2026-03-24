@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import argparse
 import os
 
 import cartopy.crs as ccrs
@@ -10,15 +9,18 @@ import pandas as pd
 import xarray as xr
 
 # codex resume 019d11d3-4f11-75a3-9cd3-897d94b9bb77
+
+SAT = "TP+J1+J2+J3+S6A"
+SAT = "HY2A"
 SAT = "ERS1+ERS2+ENV+SRL"
 INPUT_CSV = f"tracks_intersections_{SAT}_1.csv"
 COAST_DIST_PATH = (
     "~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc"
 )
-DIST_THRESHOLD_KM = 100.0
+THRESHOLD_KM = 100.0
 BOB_EXTENT = (78.0, 100.0, 4.0, 24.0)  # lon_min, lon_max, lat_min, lat_max
-OUT_PNG = f"intersections_near_coast_BOB_{SAT}.png"
-OUT_CSV = f"intersections_near_coast_BOB_{SAT}.csv"
+OUT_PNG = f"intersections_near_east_coast_{SAT}.png"
+OUT_CSV = f"intersections_near_east_coast_{SAT}.csv"
 
 
 def get_coast_distance_km(lons, lats):
@@ -31,7 +33,7 @@ def get_coast_distance_km(lons, lats):
     return coast_km.values.astype(float)
 
 
-def plot_bob(df_all, df_sel, threshold_km, out_png):
+def plot_bob(df_all, df_sel, THRESHOLD_KM, OUT_PNG):
     proj = ccrs.PlateCarree()
     fig = plt.figure(figsize=(11, 9))
     ax = plt.axes(projection=proj)
@@ -70,7 +72,18 @@ def plot_bob(df_all, df_sel, threshold_km, out_png):
         linewidths=0.4,
         transform=proj,
         zorder=4,
-        label=f"|coast distance| <= {threshold_km:.1f} km",
+        label=f"|coast distance| <= {THRESHOLD_KM:.1f} km",
+    )
+
+    ax.plot(
+        df_sel["lons_inter"],
+        df_sel["lats_inter"],
+        color="tab:blue",
+        linewidth=1.5,
+        marker="o",
+        markersize=4,
+        transform=proj,
+        zorder=3,
     )
 
     for i, row in df_sel.reset_index(drop=True).iterrows():
@@ -91,43 +104,27 @@ def plot_bob(df_all, df_sel, threshold_km, out_png):
 
     ax.set_title(
         f"Bay of Bengal intersections near coast\n"
-        f"Selected points: {len(df_sel)} / {len(df_all)} (threshold = {threshold_km:.1f} km)"
+        f"Selected points: {len(df_sel)} / {len(df_all)} (threshold = {THRESHOLD_KM:.1f} km)"
     )
     ax.legend(loc="lower left")
     fig.tight_layout()
-    fig.savefig(out_png, dpi=180)
+    fig.savefig(OUT_PNG, dpi=180)
     plt.show()
     plt.close(fig)
 
 
-parser = argparse.ArgumentParser(
-    description="Filter intersection points by nearest coast distance and plot Bay of Bengal map."
-)
-parser.add_argument(
-    "--input-csv", default=INPUT_CSV, help="Input intersections CSV path."
-)
-parser.add_argument(
-    "--threshold-km",
-    default=DIST_THRESHOLD_KM,
-    type=float,
-    help="Absolute coast-distance threshold in km.",
-)
-parser.add_argument("--out-png", default=OUT_PNG, help="Output PNG file path.")
-parser.add_argument(
-    "--out-csv", default=OUT_CSV, help="Output CSV for selected points."
-)
-args = parser.parse_args()
-
-df = pd.read_csv(args.input_csv)
+df = pd.read_csv(INPUT_CSV)
 coast_km = get_coast_distance_km(
     df["lons_inter"].values, df["lats_inter"].values
 )
 df["coast_distance_km_nearest"] = coast_km
 
+# Distance filtering
 keep_dist = np.isfinite(coast_km) & (
-    np.abs(coast_km) <= float(args.threshold_km)
+    np.abs(coast_km) <= float(THRESHOLD_KM)
 )
 lon_min, lon_max, lat_min, lat_max = BOB_EXTENT
+# BOB extent filtering
 keep_bob = (
     (df["lons_inter"] >= lon_min)
     & (df["lons_inter"] <= lon_max)
@@ -147,7 +144,7 @@ df_selected = df_selected.sort_values("lats_inter").copy()
 
 # If multiple points share the same latitude at 2 decimal places, keep the one
 # whose absolute coast distance is closest to half the threshold distance.
-target_half = float(args.threshold_km) / 2.0
+target_half = float(THRESHOLD_KM) / 2.0
 df_selected["lat_2dp"] = df_selected["lats_inter"].round(2)
 df_selected["dist_to_half"] = np.abs(
     np.abs(df_selected["coast_distance_km_nearest"]) - target_half
@@ -165,16 +162,16 @@ selected_points = [
     for _, r in df_selected.iterrows()
 ]
 
-df_selected.to_csv(args.out_csv, index=False)
-plot_bob(df, df_selected, args.threshold_km, args.out_png)
+df_selected.to_csv(OUT_CSV, index=False)
+plot_bob(df, df_selected, THRESHOLD_KM, OUT_PNG)
 
 print(f"Total points: {len(df)}")
 print(
-    f"Near-coast points in full domain (|distance| <= {args.threshold_km:.1f} km): {int(np.sum(keep_dist))}"
+    f"Near-coast points in full domain (|distance| <= {THRESHOLD_KM:.1f} km): {int(np.sum(keep_dist))}"
 )
 print(f"Selected points in BOB extent after extra rules: {len(df_selected)}")
-print(f"Saved selected points CSV: {args.out_csv}")
-print(f"Saved plot: {args.out_png}")
+print(f"Saved selected points CSV: {OUT_CSV}")
+print(f"Saved plot: {OUT_PNG}")
 print("Selected points list as (lon, lat, coast_distance_km):")
 for p in selected_points:
     print(p)

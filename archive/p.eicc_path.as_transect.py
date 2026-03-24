@@ -167,14 +167,3 @@ selected_points = [
 
 df_selected.to_csv(args.out_csv, index=False)
 plot_bob(df, df_selected, args.threshold_km, args.out_png)
-
-print(f"Total points: {len(df)}")
-print(
-    f"Near-coast points in full domain (|distance| <= {args.threshold_km:.1f} km): {int(np.sum(keep_dist))}"
-)
-print(f"Selected points in BOB extent after extra rules: {len(df_selected)}")
-print(f"Saved selected points CSV: {args.out_csv}")
-print(f"Saved plot: {args.out_png}")
-print("Selected points list as (lon, lat, coast_distance_km):")
-for p in selected_points:
-    print(p)

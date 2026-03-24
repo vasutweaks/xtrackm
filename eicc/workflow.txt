@@ -1,4 +1,4 @@
-1. Uses complicated shapely methods and functions to compute slopes at a given point.
+1. Uses complicated shapely methods and functions to compute slopes at a given point with actual coastline as the curve (not any isobaths)
 p.smoothed_coastline.gaussian.py
 p.smoothed_coastline.gaussian.tangent.py
 p.smoothed_coastline.others.py
@@ -7,8 +7,14 @@ p.coastline.gaussian.tangent.simple.py
 2. Isobaths are extracted for a given depth, smoothed and slope is found
 c.isobath_based_slopes.py
 
-3. Select points of sat ERS1+ERS2+ENV+SRL that are close to coast at distance of about 50km to trace the EICC path.
+3. Select points of SAT that are close to coast at distance of about 50km to trace the EICC path.
 c.eicc_path.as_transect.py
 
-4. Append the gu timeseries along the points as a trasect dimension and plot hovmoller diagram.
+4. Append the gu timeseries along the selected points (on eastcoast) as a trasect dimension and plot hovmoller diagram.
 p.hovmoller_u_near_coast_bob.py
+
+5. plots the along shore and cross shore components at a give intersection point.
+p.along_shore_at_155_116.intersection.S6A_c1.py
+
+6. plots periodogram of alongshore currents
+p.along_shore_at_155_116.intersection.S6A_periodogram.py

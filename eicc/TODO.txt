@@ -1,1 +1,2 @@
+[] manual selection of east coast points with mouse
 [] slope at points on 200m isobath

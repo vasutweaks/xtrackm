@@ -7,6 +7,7 @@ from tools_xtrackm import *
 from tools_shapely import *
 # copilot --resume=6b563fd7-e036-45d8-95d0-bd5af130d84f
 
+
 def along_across_shore_components(gu, gv, coast_heading_deg):
     """
     Resolve vector (gu, gv) into along-shore and across-shore components.

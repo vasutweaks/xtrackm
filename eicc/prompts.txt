@@ -1,3 +1,6 @@
+I have 30 years of along shore velocity data from several intersection points of (TP+J1+J2+J3+S6A mission) which are close to east coast (within 50km) of India at 10day resolution. What analysis can I done on these time series to get more information about EICC which are not discussed earlier in the studies
+
+
 1. Read intersections_near_coast_BOB_ERS1+ERS2+ENV+SRL.csv
 2. For each intersection point read corresponding guv files using track_self and track_other
 see p.along_shore_at_155_116.intersection.S6A_c1.py
