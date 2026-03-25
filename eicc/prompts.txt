@@ -1,3 +1,18 @@
+update the script
+p.speed_at_coastal_points.eicc.trends.all_in_one.py
+to
+1. Ignore the first intersection point (lowest latitude) of the .csv file
+2. There will be seven intersection points on the coast. Make seven rows of subplots on the right side to plot each point's timeseries, filtered timeseries, linear fit, other info
+3. On the left side, plot one big vertically elongated cartopy plot with all seven points with boundaries (10N-22N and 78E-88E).
+The way it is done in
+c.eicc_path.as_transect.py
+4. If a perticular intersection point's color is blue, its corresponding timeseries point on the right should be blue. Label each point from A (lowest lat) to G.
+Three things:
+1. Annotate slope values on the left plot. (don't print p value)
+If the slope is insigficant, gray it out, we will explain in the caption
+2. Remove trend annotations on the trend plots, tighten up ylimits so that whole space is occupied by plot
+3. Remove information about the points and their intersection on top of horizonal subplot. There should not be any vertical space between the right side subplots. Also the A plot should be bottom and G plot should be at the top.
+
 In the script p.speed_at_coastal_points.eicc.trends.py,
 1. smooth each speed (gs) through a 500 day lowpass filter, plot it over
 2. estimate linear trend and std error and plot the fit

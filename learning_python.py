@@ -45,3 +45,6 @@ legend_handles = [
 ]
 ax1.legend(handles=legend_handles, loc="lower left", frameon=True, framealpha=0.85, fontsize=10)
 return [tuple(xy) for xy in smooth_pts[::step]]
+gs_interp = (
+    pd.Series(gs_vals_raw).interpolate(limit_direction="both").values
+)

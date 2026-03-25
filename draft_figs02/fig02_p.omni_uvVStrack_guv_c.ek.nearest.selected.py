@@ -14,6 +14,16 @@ import sys
 
 # codex resume 019cc947-b006-7d82-8941-d68e330c388a
 
+cmap1 = cmo.cm.diff
+d = 1.5
+dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
+aviso_msla_uv_dir = "/home/srinivasu/sealevel/data/msla_uv/"
+aviso_msla_uv_dir = "/home/srinivasu/allData/aviso/msla_uv/"
+ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u.nc")
+ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v.nc")
+print(ds_aviso_u)
+aviso_u = ds_aviso_u.u
+aviso_v = ds_aviso_v.v
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
 method = "loess"
@@ -126,6 +136,7 @@ track_number_self = str(row["track_self"])
 track_number_other = str(row["track_other"])
 lon1 = row["lons_inter"]
 lat1 = row["lats_inter"]
+msla_u_at = aviso_u.interp(longitude=lon1, latitude=lat1)
 distance_km = row["distance_km"]
 angle_acute = row["angle_acute"]
 angle_obtuse = row["angle_obtuse"]
@@ -206,6 +217,8 @@ ax1 = fig.add_subplot(2, 1, 2)
 omni_u_pair.plot(ax=ax1, color="r", linewidth=2, label="omni")
 gu_pair.plot(ax=ax1, color="k", linewidth=2, label="track")
 gu_ek_pair.plot(ax=ax1, color="b", linewidth=2, label="track+ekman")
+msla_u_at.plot(ax=ax1, color="c", linewidth=2, label="msla u")
+ax1.set_xlim(omni_u_pair.time.min(), omni_u_pair.time.max())
 
 corr = xs.pearson_r(gu_pair, omni_u_pair, dim="time", skipna=True)
 corr1 = corr.item()
