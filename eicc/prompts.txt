@@ -1,5 +1,10 @@
-I have 30 years of along shore velocity data from several intersection points of (TP+J1+J2+J3+S6A mission) which are close to east coast (within 50km) of India at 10day resolution. What analysis can I done on these time series to get more information about EICC which are not discussed earlier in the studies
+In the script p.speed_at_coastal_points.eicc.trends.py,
+1. smooth each speed (gs) through a 500 day lowpass filter, plot it over
+2. estimate linear trend and std error and plot the fit
+3. determine whether the linear trend is significant or not
+4. add legend for seasonal shading done
 
+I have 30 years of along shore velocity data from several intersection points of (TP+J1+J2+J3+S6A mission) which are close to east coast (within 50km) of India at 10day resolution. What analysis can I done on these time series to get more information about EICC which are not discussed earlier in the studies
 
 1. Read intersections_near_coast_BOB_ERS1+ERS2+ENV+SRL.csv
 2. For each intersection point read corresponding guv files using track_self and track_other

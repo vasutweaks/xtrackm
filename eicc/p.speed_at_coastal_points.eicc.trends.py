@@ -3,30 +3,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 from tools_xtrackm import *
 from tools_shapely import *
 from scipy.signal import butter, filtfilt
 from scipy.signal import periodogram as scipy_periodogram
+from scipy.stats import linregress
 # copilot --resume=6b563fd7-e036-45d8-95d0-bd5af130d84f
-
-
-def along_across_shore_components(gu, gv, coast_heading_deg):
-    """
-    Resolve vector (gu, gv) into along-shore and across-shore components.
-    Sign convention:
-    - coast_heading_deg is measured CCW from +x (East).
-    - along_shore is positive in the heading direction.
-    - across_shore is positive 90 deg CCW from heading (left-hand side of coast).
-      If you need right-hand positive, negate across_shore.
-    """
-    theta = np.deg2rad(coast_heading_deg)
-    c = np.cos(theta)
-    s = np.sin(theta)
-    # Elementwise projection keeps scalar or array/xarray shape.
-    along_shore = gu * c + gv * s
-    across_shore = -gu * s + gv * c  # +90 deg CCW
-    return along_shore, across_shore
-
 
 method = "loess"
 cmap1 = cmo.cm.diff
@@ -34,8 +18,8 @@ d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 
 sat_val = "TP+J1+J2+J3+S6A"
-sat_val = "S3A"
 sat_val = "ERS1+ERS2+ENV+SRL"
+sat_val = "S3A"
 
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
 df_out = df.copy()
@@ -105,29 +89,52 @@ for i, rows in df_out.iterrows():
     print(f"heading angle {a1_d:.2f} {a2_d:.2f}")
     gu = ds_guv.gu
     gv = ds_guv.gv
-    al, ac = along_across_shore_components(gu, gv, coast_heading_deg)
+    gs = np.sqrt(gu**2 + gv**2)
+    times = pd.to_datetime(gs.time.values)
+    gs_vals_raw = gs.values.astype(float)
 
-    # Bandpass filter: remove periods shorter than 45 days (high-freq noise)
-    # al_vals_raw = al.values.copy()
-    # dt_days_bp = np.median(np.diff(pd.to_datetime(al.time.values)).astype("timedelta64[D]").astype(float))
-    # fs_bp = 1.0 / dt_days_bp  # cycles per day
-    # # Low-pass cutoff: 1/45 cycles per day (keep periods > 45 days)
-    # cutoff = 1.0 / 60.0
-    # # Nyquist frequency
-    # nyq = fs_bp / 2.0
-    # b_filt, a_filt = butter(4, cutoff / nyq, btype="low")
-    # # Interpolate NaNs for filtering, then restore NaN positions
-    # nan_mask = np.isnan(al_vals_raw)
-    # al_interp = pd.Series(al_vals_raw).interpolate(limit_direction="both").values
-    # al_filtered = filtfilt(b_filt, a_filt, al_interp)
-    # al_filtered[nan_mask] = np.nan
-    # al = al.copy(data=al_filtered)
+    # 500-day low-pass filter for long-term variability
+    dt_days = np.median(
+        np.diff(times).astype("timedelta64[s]").astype(float) / 86400.0
+    )
+    fs = 1.0 / dt_days  # cycles/day
+    nyq = fs / 2.0
+    cutoff = 1.0 / 500.0  # cycles/day
+    b_filt, a_filt = butter(4, cutoff / nyq, btype="low")
+    nan_mask = np.isnan(gs_vals_raw)
+    gs_interp = pd.Series(gs_vals_raw).interpolate(limit_direction="both").values
+    if len(gs_interp) > 3 * max(len(a_filt), len(b_filt)):
+        gs_lowpass_vals = filtfilt(b_filt, a_filt, gs_interp)
+    else:
+        # Fallback if the record is too short for filtfilt padding constraints
+        samples_500d = max(3, int(round(500.0 / dt_days)))
+        gs_lowpass_vals = (
+            pd.Series(gs_interp)
+            .rolling(window=samples_500d, center=True, min_periods=1)
+            .mean()
+            .values
+        )
+    gs_lowpass_vals[nan_mask] = np.nan
+    gs_lowpass = xr.DataArray(
+        gs_lowpass_vals, coords=gs.coords, dims=gs.dims, name="gs_lowpass"
+    )
+
+    # Linear trend on low-pass series with standard error and significance
+    t_days = (times - times[0]).days.astype(float)
+    valid = np.isfinite(gs_lowpass_vals)
+    trend_res = linregress(t_days[valid], gs_lowpass_vals[valid])
+    fit_vals = trend_res.intercept + trend_res.slope * t_days
+    trend_fit = xr.DataArray(fit_vals, coords=gs.coords, dims=gs.dims, name="trend_fit")
+    slope_per_year = trend_res.slope * 365.25
+    stderr_per_year = trend_res.stderr * 365.25
+    significant = trend_res.pvalue < 0.05
 
     fig = plt.figure(figsize=(12, 10))
     ax0 = fig.add_subplot(2, 1, 2)
-    al.plot(ax=ax0, label="alongshore", color="r", linewidth=2)
-    ax0.legend()
-    ax0.set_ylabel("along current m/s")
+    gs.plot(ax=ax0, label="current speed", color="lightcoral", linewidth=1.2, alpha=0.7)
+    gs_lowpass.plot(ax=ax0, label="500-day low-pass", color="r", linewidth=2.0)
+    trend_fit.plot(ax=ax0, label="linear trend fit", color="k", linewidth=2.0, linestyle="--")
+    ax0.set_ylabel("current speed m/s")
     info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat1} {track_number_self} {track_number_other}"
     plt.text(
         0.15,
@@ -138,36 +145,67 @@ for i, rows in df_out.iterrows():
         fontweight="bold",
     )
 
-    # --- Seasonal shading and year markers on along-shore plot (ax0) ---
-    times = pd.to_datetime(al.time.values)
+    # --- Seasonal shading and year markers on (ax0) ---
     year_min, year_max = times.year.min(), times.year.max()
     for yr in range(year_min, year_max + 1):
         # Feb-May: yellow
-        ax0.axvspan(pd.Timestamp(yr, 2, 1), pd.Timestamp(yr, 5, 31), color="yellow", alpha=0.15, zorder=0)
+        ax0.axvspan(
+            pd.Timestamp(yr, 2, 1),
+            pd.Timestamp(yr, 5, 31),
+            color="yellow",
+            alpha=0.15,
+            zorder=0,
+        )
         # Jun-Sep: cyan
-        ax0.axvspan(pd.Timestamp(yr, 6, 1), pd.Timestamp(yr, 9, 30), color="cyan", alpha=0.15, zorder=0)
+        ax0.axvspan(
+            pd.Timestamp(yr, 6, 1),
+            pd.Timestamp(yr, 9, 30),
+            color="cyan",
+            alpha=0.15,
+            zorder=0,
+        )
         # Oct-Dec: gray
-        ax0.axvspan(pd.Timestamp(yr, 10, 1), pd.Timestamp(yr, 12, 31), color="gray", alpha=0.15, zorder=0)
+        ax0.axvspan(
+            pd.Timestamp(yr, 10, 1),
+            pd.Timestamp(yr, 12, 31),
+            color="gray",
+            alpha=0.15,
+            zorder=0,
+        )
         # Year boundary vertical line on Jan 1
-        ax0.axvline(pd.Timestamp(yr, 1, 1), color="k", linewidth=0.5, linestyle="--", alpha=0.5)
+        ax0.axvline(
+            pd.Timestamp(yr, 1, 1),
+            color="k",
+            linewidth=0.5,
+            linestyle="--",
+            alpha=0.5,
+        )
 
-    # --- Periodogram of along-shore current ---
-    al_vals = al.values
-    al_times = pd.to_datetime(al.time.values)
-    # Compute median sampling interval in days
-    dt_days = np.median(np.diff(al_times).astype("timedelta64[D]").astype(float))
-    fs = 1.0 / dt_days  # sampling frequency in cycles/day
+    sig_txt = "significant (p<0.05)" if significant else "not significant (p>=0.05)"
+    trend_txt = (
+        f"Trend={slope_per_year:.4f} m/s/yr ± {stderr_per_year:.4f} (SE), "
+        f"p={trend_res.pvalue:.3g}, {sig_txt}"
+    )
+    ax0.text(
+        0.02,
+        0.03,
+        trend_txt,
+        transform=ax0.transAxes,
+        fontsize=11,
+        bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+    )
 
-    # Remove NaNs for periodogram
-    mask = np.isfinite(al_vals)
-    al_clean = al_vals[mask]
-    al_clean = al_clean - np.nanmean(al_clean)
-
-    freqs, psd = scipy_periodogram(al_clean, fs=fs, scaling="density")
-    # Convert frequency to period in days (skip freq=0)
-    freqs = freqs[1:]
-    psd = psd[1:]
-    periods = 1.0 / freqs
+    seasonal_handles = [
+        Patch(facecolor="yellow", alpha=0.15, edgecolor="none", label="Feb-May"),
+        Patch(facecolor="cyan", alpha=0.15, edgecolor="none", label="Jun-Sep"),
+        Patch(facecolor="gray", alpha=0.15, edgecolor="none", label="Oct-Dec"),
+    ]
+    line_handles = [
+        Line2D([0], [0], color="lightcoral", lw=1.2, label="current speed"),
+        Line2D([0], [0], color="r", lw=2.0, label="500-day low-pass"),
+        Line2D([0], [0], color="k", lw=2.0, linestyle="--", label="linear trend fit"),
+    ]
+    ax0.legend(handles=line_handles + seasonal_handles, loc="upper right")
 
     ax2 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
     rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
@@ -225,7 +263,7 @@ for i, rows in df_out.iterrows():
             color="k",
         )
     plt.savefig(
-        f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
+        f"speed_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
     )
     plt.show()
     plt.close("all")
