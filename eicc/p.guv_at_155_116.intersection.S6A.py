@@ -6,13 +6,35 @@ import pandas as pd
 import xarray as xr
 from tools_xtrackm import *
 
+
+def decode_id(raw_id):
+    if isinstance(raw_id, (bytes, np.bytes_)):
+        return raw_id.decode("utf-8").strip()
+    return str(raw_id).strip()
+
+
+def track_to_str(track):
+    track_f = float(track)
+    if track_f.is_integer():
+        return str(int(track_f))
+    return str(track)
+
+
+def build_unique_str(sat, row):
+    track_self = track_to_str(row["track_self"])
+    track_other = track_to_str(row["track_other"])
+    return f"{sat}_{track_self}_{track_other}"
+
+
 cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 
 sat_val = "TP+J1+J2+J3+S6A"
+SAT = "TP+J1+J2+J3+S6A"
 track_self_val = 155
 track_other_val = 116
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections"
 
 df = pd.read_csv(f"tracks_intersections_{sat_val}_1.csv")
 df_out = df.copy()
@@ -25,19 +47,21 @@ rows = df_out.loc[
 
 frac1 = "0.05"
 i = 0
-sat1 = rows["sat"].values[i]
+row = rows.iloc[i]
+sat1 = row["sat"]
 # track_number_self = rows["track_self"].apply(lambda x: str(x)).values[i]
 # track_number_other = rows["track_other"].apply(lambda x: str(x)).values[i]
-track_number_self = str(rows["track_self"].values[i])
-track_number_other = str(rows["track_other"].values[i])
-lons_inter1 = rows["lons_inter"].values[i]
-lats_inter1 = rows["lats_inter"].values[i]
+track_number_self = str(row["track_self"])
+track_number_other = str(row["track_other"])
+unique_str = build_unique_str(SAT, row)
+lons_inter1 = row["lons_inter"]
+lats_inter1 = row["lats_inter"]
 lon1 = lons_inter1
 lat1 = lats_inter1
-x_from_coast_self1 = rows["x_from_coast_self"].values[i]
-x_from_coast_other1 = rows["x_from_coast_other"].values[i]
-angle_acute = rows["angle_acute"].values[i]
-angle_obtuse = rows["angle_obtuse"].values[i]
+x_from_coast_self1 = row["x_from_coast_self"]
+x_from_coast_other1 = row["x_from_coast_other"]
+angle_acute = row["angle_acute"]
+angle_obtuse = row["angle_obtuse"]
 print(
     sat1,
     track_number_self,
@@ -97,9 +121,15 @@ ax1 = fig.add_subplot(3, 1, 3)
 ax0 = fig.add_subplot(3, 1, 2)
 gu_cut = gu.resample(time="1ME").mean()
 gv_cut = gv.resample(time="1ME").mean()
+f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_at_intersections.nc"
+ds_ek = xr.open_dataset(f_ek)
+u_ek = ds_ek['u_at']
+v_ek = ds_ek['v_at']
+gu_ek = gu_cut + u_ek.interp(time=gu_cut.time)
 gc_self_at_cut = gc_self_at.resample(time="1ME").mean()
 gc_other_at_cut = gc_other_at.resample(time="1ME").mean()
 gu_cut.plot(ax=ax0, label="track zonal", color="r", linewidth=2)
+gu_ek.plot(ax=ax0, label="track+ek zonal", color="b", linewidth=2)
 # gc_self_at_cut.plot(ax=ax0, label=f"gc at {track_number_self}", color="r", linewidth=2)
 ax0.legend()
 ax0.set_ylabel("zonal current u m/s")
