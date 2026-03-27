@@ -12,6 +12,7 @@ links_dict = {
     "p.gc.clim.cross_structure_x_arrows_map_ERS.py": "fig06.py",
     "p.gc.clim.lat_wise.along_xwidth.py": "fig07.py",
     "p.along_shore_at_155_116.intersection.S6A.py": "fig08.py",
+    "p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py": "fig09.py",
     "satellite_mission_time_spans_new.py": "fig_sup_01.py"
 }
 

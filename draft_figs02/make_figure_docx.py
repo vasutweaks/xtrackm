@@ -15,6 +15,7 @@ images_list = [
     "fig06_p.gc.clim.cross_structure_x_arrows_map_ERS.png",
     "fig07_p.gc.clim.lat_wise.along_xwidth.png",
     "fig08_p.along_shore_at_155_116.intersection.S6A.png",
+    "fig09_p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.png",
 ]
 
 for image in images_list:
@@ -31,6 +32,7 @@ captions_list = [
     "captions/p.gc.clim.cross_structure_x_arrows_map_ERS.txt",
     "captions/p.gc.clim.lat_wise.along_xwidth.txt",
     "captions/p.along_shore_at_155_116.intersection.S6A.txt",
+    "captions/p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.txt",
 ]
 
 # Caption styling options (edit these as needed).
