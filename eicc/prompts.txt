@@ -1,3 +1,9 @@
+update the script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py
+to add
+1. 200, 1000, 2000 isobaths on left cartopy map as dashed contours with labels
+2. discription of points A to G on the top space of left cartopy map
+With coordinates of intersection, the track numbers corresponding to the intersection points; all enclosed in box 
+
 Write one huge function that combines all functions in the script
 c.isobath_based_slopes.py
 which return heading angle (angle in counter-clockwise from positive x axis east). It can take following arguments

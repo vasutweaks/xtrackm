@@ -1,3 +1,5 @@
+import os
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.gridspec as gridspec
@@ -24,7 +26,6 @@ sat_val = "TP+J1+J2+J3+S6A"
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
 
 # Skip the first point (lowest latitude)
-# df_out = df.sort_values("lats_inter").iloc[1:].reset_index(drop=True)
 df_out = df.sort_values("lats_inter").reset_index(drop=True)
 
 N_PTS = 3
@@ -33,10 +34,10 @@ assert len(df_out) == N_PTS, (
 )
 
 POINT_COLORS = [plt.cm.tab10(i) for i in range(N_PTS)]
-POINT_LABELS = list("ABCDEFG")
+POINT_LABELS = list("ABC")
 
 # Map extent: 10N–22N, 78E–88E
-MAP_EXTENT = (78.0, 90.0, 9.0, 23.0)
+MAP_EXTENT = (78., 89.0, 9.5, 22.0)
 
 # --- Pre-collect all timeseries data ---
 point_data = []
@@ -120,7 +121,7 @@ gs_layout = gridspec.GridSpec(
     figure=fig,
     width_ratios=[1, 2.5],
     hspace=0.0,
-    wspace=0.3,
+    wspace=0.15,
 )
 
 # --- Left: vertically elongated cartopy map spanning all rows ---
@@ -138,7 +139,43 @@ gl = ax_map.gridlines(
 )
 gl.top_labels = False
 gl.right_labels = False
-# ax_map.set_title(f"{sat_val}\nIntersection points", fontsize=9)
+
+# --- Isobaths: 200, 1000, 2000 m ---
+dse = xr.open_dataset(os.path.expanduser("~/allData/topo/etopo5.cdf"))
+rose_slice = dse.ROSE.sel(
+    ETOPO05_X=slice(MAP_EXTENT[0], MAP_EXTENT[1]),
+    ETOPO05_Y=slice(MAP_EXTENT[2], MAP_EXTENT[3]),
+)
+lons_topo = rose_slice.ETOPO05_X.values
+lats_topo = rose_slice.ETOPO05_Y.values
+topo_vals = rose_slice.values
+iso_levels = [-2000, -1000, -200]
+iso_level1 = [-200]
+cs_iso = ax_map.contour(
+    lons_topo, lats_topo, topo_vals,
+    levels=iso_level1,
+    colors="steelblue",
+    linewidths=0.7,
+    linestyles="--",
+    transform=ccrs.PlateCarree(),
+    zorder=4,
+)
+iso_level2 = [-1000]
+cs_iso = ax_map.contour(
+    lons_topo, lats_topo, topo_vals,
+    levels=iso_level2,
+    colors="r",
+    linewidths=0.7,
+    linestyles="--",
+    transform=ccrs.PlateCarree(),
+    zorder=4,
+)
+# ax_map.clabel(
+#     cs_iso,
+#     fmt={-200: "200 m", -1000: "1000 m", -2000: "2000 m"},
+#     fontsize=7,
+#     inline=True,
+# )
 
 # Connect all 7 points with a dashed gray line
 lons_pts = [e["lon1"] for e in point_data]
@@ -161,7 +198,7 @@ for idx, entry in enumerate(point_data):
         entry["lon1"],
         entry["lat1"],
         marker="o",
-        markersize=9,
+        markersize=5,
         color=color,
         markeredgecolor="black",
         markeredgewidth=0.8,
@@ -189,6 +226,31 @@ for idx, entry in enumerate(point_data):
         transform=ccrs.PlateCarree(),
         zorder=6,
     )
+
+# --- Description box above the map ---
+desc_lines = ["Pt   Longitude   Latitude    Tracks"]
+desc_lines.append("─" * 38)
+for idx, entry in enumerate(point_data):
+    desc_lines.append(
+        f" {POINT_LABELS[idx]}   {entry['lon1']:6.2f}°E  "
+        f"{entry['lat1']:5.2f}°N   T{entry['tno_s']}×T{entry['tno_o']}"
+    )
+ax_map.text(
+    0.15, 1.05,
+    "\n".join(desc_lines),
+    transform=ax_map.transAxes,
+    fontsize=7.5,
+    fontfamily="monospace",
+    va="bottom", ha="left",
+    clip_on=False,
+    bbox=dict(
+        boxstyle="round,pad=0.45",
+        facecolor="white",
+        edgecolor="0.35",
+        alpha=0.95,
+    ),
+    zorder=10,
+)
 
 # --- Right: 7 timeseries subplots, A at bottom (row 6) → G at top (row 0) ---
 for idx, entry in enumerate(point_data):
