@@ -41,8 +41,13 @@ with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
 colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
 counts_arrays = []
 i=0
+# exclude_tracks=["679"]
+exclude_tracks = ["451", "565", "679", "23", "621"]
 for pass1 in common:
     pass2 = pass1[1:]
+    pass3 = pass1.lstrip('0')
+    if pass3 in exclude_tracks:
+        continue
     f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
     ds = xr.open_dataset(f, decode_times=False)
     lon_eq = ds.lon.values[0]

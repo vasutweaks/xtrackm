@@ -70,7 +70,7 @@ colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
 i = 0
 frac1 = "0.05"
 std_arrays = []
-exclude_tracks = ["451", "565", "679", "23"]
+exclude_tracks = ["451", "565", "679", "23", "621"]
 for pass1 in common:
     pass2 = pass1[1:]
     f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
