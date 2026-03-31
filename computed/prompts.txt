@@ -1,3 +1,8 @@
+modify following script p.compare.std_meanANDvalid_count.mean.l2pVSxtrack_map.py to 
+1. The cartopy plot should be on the left side
+2. Left side should include two subplots
+a) top one plots sla std mean as it is currently in the bottom plot
+b) bottom new subplot should include a new plot of valid points count comparison
 I am trying to find the standard deviation of geostrophic currents as
 a function of distance away from the coast with the script
 p.std.gc.S3A.east_coast.common_tracks.with_mean.py

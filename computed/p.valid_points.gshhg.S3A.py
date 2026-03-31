@@ -43,6 +43,7 @@ counts_arrays = []
 i=0
 # exclude_tracks=["679"]
 exclude_tracks = ["451", "565", "679", "23", "621"]
+track_numbers = []
 for pass1 in common:
     pass2 = pass1[1:]
     pass3 = pass1.lstrip('0')
@@ -97,11 +98,20 @@ for pass1 in common:
     #     s=1.0,
     # )
     counts_arrays.append(count_perc_interp)
+    track_numbers.append(pass3)
     i+=1
 
-counts_mean = xr.concat(counts_arrays, dim="track").mean(dim="track", skipna=True)
-ds_out = xr.Dataset({"counts": counts_mean})
-ds_out.to_netcdf(f"counts_mean_S3A_xtrack.nc")
+# counts_mean = xr.concat(counts_arrays, dim="track").mean(dim="track", skipna=True)
+# ds_out = xr.Dataset({"counts": counts_mean})
+# ds_out.to_netcdf(f"counts_mean_S3A_xtrack.nc")
+track_coord = xr.DataArray(track_numbers, dims=["track"], name="track")
+counts_all = xr.concat(counts_arrays, dim=track_coord)
+counts_mean = counts_all.mean(dim="track", skipna=True)
+
+ds_out2 = xr.Dataset({"counts_all": counts_all})
+ds_out2.to_netcdf(f"counts_all_S3A_xtrack.nc")
+ds_out1 = xr.Dataset({"counts": counts_mean})
+ds_out1.to_netcdf(f"counts_mean_S3A_xtrack.nc")
 ax2.plot(
     counts_mean.x.values,
     counts_mean.values,

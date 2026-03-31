@@ -41,8 +41,10 @@ with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
 colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
 i = 0
 std_arrays = []
+track_numbers = []
 for pass1 in common:
     pass2 = pass1[1:]
+    pass3 = pass1.lstrip("0")
     f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
     ds = xr.open_dataset(f, decode_times=False)
     lon_eq = ds.lon.values[0]
@@ -77,11 +79,20 @@ for pass1 in common:
         )
     ax2.plot(std.x.values, std.values, color=color, linewidth=1, label=str(track_number))
     std_arrays.append(std)
+    track_numbers.append(pass3)
     i += 1
 
-std_mean = xr.concat(std_arrays, dim="track").mean(dim="track", skipna=True)
-ds_out = xr.Dataset({"std": std_mean})
-ds_out.to_netcdf(f"std_mean_S3A_xtrack.nc")
+# std_mean = xr.concat(std_arrays, dim="track").mean(dim="track", skipna=True)
+# std_all = xr.concat(std_arrays, dim="track")
+track_coord = xr.DataArray(track_numbers, dims=["track"], name="track")
+std_all = xr.concat(std_arrays, dim=track_coord)
+std_mean = std_all.mean(dim="track", skipna=True)
+
+ds_out2 = xr.Dataset({"std_all": std_all})
+ds_out2.to_netcdf(f"std_all_S3A_xtrack.nc")
+ds_out1 = xr.Dataset({"std": std_mean})
+ds_out1.to_netcdf(f"std_mean_S3A_xtrack.nc")
+
 ax2.plot(
     std_mean.x.values,
     std_mean.values,

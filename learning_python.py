@@ -48,3 +48,4 @@ return [tuple(xy) for xy in smooth_pts[::step]]
 gs_interp = (
     pd.Series(gs_vals_raw).interpolate(limit_direction="both").values
 )
+x_scatter = np.broadcast_to(x_vals, std_all.shape).ravel()
