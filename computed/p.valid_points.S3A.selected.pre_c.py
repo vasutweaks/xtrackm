@@ -1,6 +1,7 @@
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 
 # Input file produced by your processing script
 nc_file = "counts_all_S3A_xtrack.nc"
@@ -24,6 +25,8 @@ ax.scatter(x_scatter, y_scatter, s=8, c="cyan", alpha=0.6, edgecolors="none")
 # Mean counts as thick cyan solid line
 ax.plot(counts_mean["x"].values, counts_mean.values, color="b", linewidth=3.5, linestyle="-")
 
+ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
+ax.set_xlim(-10e3, 300e3)
 ax.set_xlabel("Distance (m)")
 ax.set_ylabel("counts (m)")
 ax.set_title("All track counts points and mean counts")

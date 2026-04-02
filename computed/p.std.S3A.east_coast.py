@@ -8,7 +8,7 @@ import math
 
 sat = 'S3A'
 cmap = 'twilight_shifted'
-EAST_COAST_REG = (78.0, 95, 0, 25.4)
+EAST_COAST_REG = (78.0, 99, 0, 25.4)
 dse = xr.open_dataset(
     f"/home/srinivasu/allData/topo/etopo5.cdf"
 )
@@ -95,7 +95,7 @@ for f in files:
             rotation=90,
         )
         ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
-        # plt.show()
+        plt.show()
         plt.close("all")
 dse.close()
 east_coast_tracks = sorted(east_coast_tracks)

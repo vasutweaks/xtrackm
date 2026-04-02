@@ -35,7 +35,7 @@ ax1.text(
 x_common = xr.DataArray(np.arange(0, 1_300_001, 6_000), dims=["x"],
   attrs={"units": "m"})  # 0..1300 km, 1 km step
 
-with open("common_passes_l2pVSxtrack.pkl", "rb") as f:
+with open("common_passes_l2pVSxtrack_selected.pkl", "rb") as f:
     common = pickle.load(f)
 
 colors = colormaps["tab20"](np.linspace(0, 1, len(common)))
