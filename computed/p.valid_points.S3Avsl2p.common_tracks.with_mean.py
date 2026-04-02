@@ -9,7 +9,7 @@ from tools_xtrackm import *
 import pickle
 
 L2P_PATH = "/home/srinivasu/allData/aviso_l2p/s3a/"
-sat = "S3A"
+SAT = "S3A"
 EAST_COAST_REG = (78.0, 95, 0, 25.4)
 
 x_common = xr.DataArray(np.arange(0, 1_300_001, 6_000), dims=["x"],
@@ -24,7 +24,7 @@ track_numbers = []
 for pass1 in common:
     pass2 = pass1[1:]
     pass3 = pass1.lstrip("0")
-    f = f"../data/{sat}/ctoh.sla.ref.{sat}.nindian.{pass2}.nc"
+    f = f"../data/{SAT}/ctoh.sla.ref.{SAT}.nindian.{pass2}.nc"
     ds = xr.open_dataset(f, decode_times=False)
     lon_eq = ds.lon.values[0]
     lons_track = ds.lon.values
@@ -40,9 +40,11 @@ for pass1 in common:
     latm = lats_track.mean()
     sla_track = track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
     sla_track = sla_track.interp(x=x_common)
-    std = sla_track.std(dim="time")
-    print(f"{sat} {track_number} -------------------")
-    ax1.scatter(std.x.values, std.values, color='cyan', marker='.', s=1)
+    gshhg_track = dist_asn_gshhg(ds, var_str="dist_to_coast_gshhg", units_in="m")
+    gshhg_track_interp = gshhg_track.interp(x=x_common)
+    std = sla_track.count(dim="time")
+    print(f"{SAT} {track_number} -------------------")
+    ax1.scatter(gshhg_track_interp.values, std.values, color='cyan', marker='.', s=1)
     std_arrays.append(std)
     track_numbers.append(pass3)
 
@@ -83,11 +85,12 @@ for pass1 in common:
         track_number = ds.attrs["pass"]
         lons_track = ds.lons.values
         lats_track = ds.lats.values
+        gshhg_da_trim = ds.gshhg_da_trim
         ln = len(lons_track)
         sla_track = ds.sla
-        std = sla_track.std(dim="time")
-        print(f"{sat} {track_number} -------------------")
-        ax1.scatter(std.x.values, std.values, color='gray', marker='.', s=1)
+        std = sla_track.count(dim="time")
+        print(f"{SAT} {track_number} -------------------")
+        ax1.scatter(gshhg_da_trim.values, std.values, color='gray', marker='.', s=1)
         std_arrays.append(std)
         track_numbers.append(pass3)
 
@@ -115,6 +118,7 @@ ax1.text(
     color="r",
     rotation=90,
 )
+ax1.set_xlim(0, 1000e3)
 ax1.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
 ax1.grid(alpha=0.3, linestyle="--", linewidth=0.5)
 ax1.legend(title="Track", ncol=4, fontsize=7, title_fontsize=8)

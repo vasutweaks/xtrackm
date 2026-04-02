@@ -28,7 +28,7 @@ import math
 from tools_shapely import *
 
 
-def dist_asn_gshhg(ds, var_str="gshhg", units_in="m"):
+def dist_asn_gshhg(ds, var_str="dist_to_coast_gshhg", units_in="m"):
     dists = compute_dist(ds, units=units_in)
     dists_rev = dists[::-1]
     # print(dists_rev)

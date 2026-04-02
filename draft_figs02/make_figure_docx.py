@@ -7,7 +7,7 @@ from docx.shared import Inches
 from docx.shared import Pt
 
 images_list = [
-    "fig01_p.compare.std_mean.l2pVSxtrack_map.png",
+    "fig01_f.combined_map_std_valid.S3A.png",
     "fig02_p.omni_uvVStrack_guv_c.ek.nearest.selected.png",
     "fig03_p.scatter_omniVSrama_uVSgu_ww_ek.png",
     "fig04_p.scatter_drifter_ve_vs_gu_ww_ek.png",
@@ -24,7 +24,7 @@ for image in images_list:
 print("all good")
 
 captions_list = [
-    "captions/p.compare.std_mean.l2pVSxtrack_map.txt",
+    "captions/f.combined_map_std_valid.S3A.txt",
     "captions/p.omni_uvVStrack_guv_c.ek.nearest.selected.txt",
     "captions/p.scatter_omniVSrama_uVSgu_ww_ek.txt",
     "captions/p.scatter_drifter_ve_vs_gu_ww_ek.txt",
