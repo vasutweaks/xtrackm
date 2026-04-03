@@ -1,8 +1,5 @@
-1. link_all.py
-link long name python scripts to fig??.py files
-
-2. Run all fig??.py files
+1. Run all fig??.py files
 run_all.py
 
-3. make_figure_docx.py
+2. make_figure_docx.py
 To make docx with on fig??.png file insert in each page

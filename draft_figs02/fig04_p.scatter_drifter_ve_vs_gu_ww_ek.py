@@ -214,15 +214,16 @@ def main():
     cax = fig.add_axes([0.91, 0.13, 0.015, 0.75])
     cbar = fig.colorbar(hb1, cax=cax)
     cbar.set_label("Count")
-    fig.savefig(OUT_PNG, dpi=180)
+    # fig.savefig(OUT_PNG, dpi=180)
+    plt.savefig(f"{png_file}", dpi=300)
     plt.show()
     plt.close(fig)
 
     print(f"Rows after filters (without_ek): {len(df_no_ek)}")
     print(f"Rows after filters (with_ek): {len(df_w_ek)}")
-    print(f"Saved {OUT_PNG}")
+    # print(f"Saved {OUT_PNG}")
 
-    ln_sf(OUT_PNG, png_file)
+    # ln_sf(OUT_PNG, png_file)
 
 if __name__ == "__main__":
     main()

@@ -14,6 +14,9 @@ import sys
 
 # codex resume 019cc947-b006-7d82-8941-d68e330c388a
 
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
+
 cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
@@ -86,7 +89,8 @@ SELECT_OMNI_ID = 'BD10'
 SELECT_TRACK_SELF = '636'
 SELECT_TRACK_OTHER = '393'
 
-EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections"
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
+EKMAN_DEPTH = "10"
 # TP+J1+J2+J3+S6A BD09 53 14
 # S3A BD10 522 279 
 
@@ -141,7 +145,7 @@ distance_km = row["distance_km"]
 angle_acute = row["angle_acute"]
 angle_obtuse = row["angle_obtuse"]
 unique_str = build_unique_str(sat, row)
-f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_at_intersections.nc"
+f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
 ds_ek = xr.open_dataset(f_ek)
 u_ek = ds_ek['u_at']
 v_ek = ds_ek['v_at']
@@ -219,6 +223,7 @@ gu_pair.plot(ax=ax1, color="k", linewidth=2, label="track")
 gu_ek_pair.plot(ax=ax1, color="b", linewidth=2, label="track+ekman")
 msla_u_at.plot(ax=ax1, color="c", linewidth=2, label="msla u")
 ax1.set_xlim(omni_u_pair.time.min(), omni_u_pair.time.max())
+ax1.axhline(0, color="k", linestyle="--", linewidth=0.5)
 
 corr = xs.pearson_r(gu_pair, omni_u_pair, dim="time", skipna=True)
 corr1 = corr.item()
@@ -337,8 +342,9 @@ if is_within_region(lonm, latm, *TRACKS_REG):
         color="w",
     )
 
-plt.savefig("p.omni_uvVStrack_guv_c.ek.nearest.selected.png")
-ln_sf(f"p.omni_uvVStrack_guv_c.ek.nearest.selected.png", png_file)
+# plt.savefig("p.omni_uvVStrack_guv_c.ek.nearest.selected.png")
+# ln_sf(f"p.omni_uvVStrack_guv_c.ek.nearest.selected.png", png_file)
+plt.savefig(f"{png_file}", dpi=300)
 plt.show()
 plt.close("all")
 

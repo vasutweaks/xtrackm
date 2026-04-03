@@ -217,15 +217,16 @@ def main():
         cbar_bottom = fig.colorbar(bottom_hbs[0], ax=axs[1, :], location="right", fraction=0.03, pad=0.02)
         cbar_bottom.set_label("Count")
 
-    fig.savefig(OUT_PNG, dpi=180)
+    # fig.savefig(OUT_PNG, dpi=180)
+    plt.savefig(f"{png_file}", dpi=300)
     plt.show()
     plt.close(fig)
 
     print(f"Rows after distance filter | RAMA no-ek: {n_rama_no}, RAMA ek: {n_rama_ek}")
     print(f"Rows after distance filter | OMNI no-ek: {n_omni_no}, OMNI ek: {n_omni_ek}")
-    print(f"Saved {OUT_PNG}")
+    # print(f"Saved {OUT_PNG}")
     # link OUT_PNG to png_file
-    ln_sf(OUT_PNG, png_file)
+    # ln_sf(OUT_PNG, png_file)
 
 
 if __name__ == "__main__":

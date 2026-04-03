@@ -269,10 +269,11 @@ for idx, row in df_filter.iterrows():
             rotation=angle_other,
             color="k",
         )
-    plt.savefig(
-        f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}_{radar_str}.png",
-    )
-    ln_sf(OUT_PNG, png_file)
+    # plt.savefig(
+    #     f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}_{radar_str}.png",
+    # )
+    plt.savefig(f"{png_file}", dpi=300)
+    # ln_sf(OUT_PNG, png_file)
     plt.show()
     plt.close("all")
 

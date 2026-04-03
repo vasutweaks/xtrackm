@@ -306,9 +306,10 @@ for idx, entry in enumerate(point_data):
 #     fontweight="bold",
 #     y=1.002,
 # )
-out_png = f"speed_timeseries_allinone_{sat_val}.png"
-plt.savefig(out_png, dpi=150, bbox_inches="tight")
-ln_sf(out_png, png_file)
+# out_png = f"speed_timeseries_allinone_{sat_val}.png"
+# plt.savefig(out_png, dpi=150, bbox_inches="tight")
+# ln_sf(out_png, png_file)
+plt.savefig(f"{png_file}", dpi=300)
 plt.show()
 plt.close("all")
-print(f"Saved: {out_png}")
+# print(f"Saved: {out_png}")

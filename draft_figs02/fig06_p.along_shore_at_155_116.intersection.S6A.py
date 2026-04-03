@@ -219,10 +219,11 @@ if is_within_region(lonm, latm, *TRACKS_REG):
         rotation=a2_d,
         color="k",
     )
-plt.savefig(
-    f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
-)
-ln_sf(
-    f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png", png_file)
+# plt.savefig(
+#     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
+# )
+# ln_sf(
+#     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png", png_file)
+plt.savefig(f"{png_file}", dpi=300)
 plt.show()
 plt.close("all")

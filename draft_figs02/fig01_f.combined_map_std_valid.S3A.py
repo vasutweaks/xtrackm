@@ -7,11 +7,16 @@ import xarray as xr
 from matplotlib import colormaps
 from matplotlib.ticker import FuncFormatter
 from tools_xtrackm import *
+from pathlib import Path
+import sys
 
 SAT = "S3A"
 L2P_PATH = "/home/srinivasu/allData/aviso_l2p/s3a/"
 EAST_COAST_REG = (78.0, 95, 0, 25.4)
 cmap = "twilight_shifted"
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 with open("common_passes_l2pVSxtrack_selected.pkl", "rb") as f:
     common = pickle.load(f)
@@ -221,6 +226,7 @@ ax_std.set_title("(b)", loc="left", fontweight="bold")
 ax_vp.set_title("(c)", loc="left", fontweight="bold")
 
 plt.tight_layout()
-plt.savefig("f.combined_map_std_valid.S3A.png", dpi=300)
+# plt.savefig("f.combined_map_std_valid.S3A.png", dpi=300)
+plt.savefig(f"{png_file}", dpi=300)
 plt.show()
 plt.close("all")
