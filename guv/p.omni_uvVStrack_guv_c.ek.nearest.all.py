@@ -40,6 +40,7 @@ def track_to_str(track):
         return str(int(track_f))
     return str(track)
 
+method = "loess"
 cmap1 = cmo.cm.diff
 d = 1.5
 height, width = 9, 9
@@ -51,12 +52,12 @@ rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 out_match_csv = "omni_guv_c_nearest_global_matches.ek.csv"
 matched_rows_all = []
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/raju_omni_clean"
-EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections"
-
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
+EKMAN_DEPTH = "15"
 # BD08_current_sst.nc
 
 df_all_list = []
@@ -72,7 +73,7 @@ for omni_id in omni_d.keys():
     if not os.path.exists(omni_file):
         print(f"File not found: {omni_file}")
         continue
-    if abs(lat_omni) < 2:
+    if abs(lat_omni) < 5:
         continue
 
     ds_omni = xr.open_dataset(omni_file)
@@ -100,12 +101,12 @@ for omni_id in omni_d.keys():
         angle_obtuse = row["angle_obtuse"]
 
         unique_str = build_unique_str(sat, row)
-        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_at_intersections.nc"
+        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
         ds_ek = xr.open_dataset(f_ek)
         u_ek = ds_ek['u_at']
         v_ek = ds_ek['v_at']
 
-        if abs(lat1) < 2:
+        if abs(lat1) < 5:
             continue
 
         print(
@@ -125,7 +126,7 @@ for omni_id in omni_d.keys():
         f"\nSELECT_TRACK_OTHER = '{track_number_other}'"
         ))
 
-        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
         if not os.path.exists(f_guv):
             print(f"missing file: {f_guv}")
             continue

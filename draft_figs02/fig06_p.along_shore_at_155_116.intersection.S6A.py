@@ -138,6 +138,7 @@ gc_other_at = gc_other_at.interp(time=gc_self_at.time)
 print(f"heading angle {a1_d:.2f} {a2_d:.2f}")
 gu, gv = geostrophic_components(gc_self_at, gc_other_at, a1, a2)
 al, ac = along_across_shore_components(gu, gv, coast_heading_deg)
+ac = xr.where(np.abs(ac) > 2, np.nan, ac)
 fig = plt.figure(figsize=(12, 10))
 ax1 = fig.add_subplot(3, 1, 3)
 ax0 = fig.add_subplot(3, 1, 2)
@@ -149,9 +150,12 @@ gc_other_at_cut = gc_other_at.resample(time="1ME").mean()
 al.plot(ax=ax0, label="alongshore", color="r", linewidth=2)
 # gc_self_at_cut.plot(ax=ax0, label=f"gc at {track_number_self}", color="r", linewidth=2)
 ax0.legend()
+ax0.axhline(0, color="k", linestyle="--", linewidth=0.5)
+# add grid lines
+ax0.grid()
 ax0.set_ylabel("along current m/s")
 # gv_cut.plot(ax=ax1, label="track meridional", color="r", linewidth=2)
-ac.plot(ax=ax1, label="acrossshore", color="r", linewidth=2)
+ac.plot(ax=ax1, label="crossshore", color="r", linewidth=2)
 # gc_other_at_cut.plot(ax=ax1, label=f"gc at {track_number_other}", color="r", linewidth=2)
 info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat1} {track_number_self} {track_number_other}"
 plt.text(
@@ -163,7 +167,9 @@ plt.text(
     fontweight="bold",
 )
 ax1.legend()
-ax1.set_ylabel("across current m/s")
+ax1.axhline(0, color="k", linestyle="--", linewidth=0.5)
+ax1.grid()
+ax1.set_ylabel("cross current m/s")
 ax2 = fig.add_subplot(3, 1, 1, projection=ccrs.PlateCarree())
 rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])

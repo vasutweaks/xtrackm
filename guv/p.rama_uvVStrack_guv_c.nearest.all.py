@@ -31,6 +31,7 @@ def get_track_geometry(sat, track_number):
 cmap1 = cmo.cm.diff
 d = 1.5
 height, width = 9, 9
+method = "loess"
 frac1 = "0.05"
 
 
@@ -39,7 +40,7 @@ rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
 rama_data_dir = "/home/srinivasu/allData/rama/cur/"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 out_match_csv = "rama_guv_c_nearest_global_matches.csv"
 matched_rows_all = []
 
@@ -51,7 +52,7 @@ df_all = pd.concat(df_all_list, ignore_index=True)
 
 
 for rama_id, (lon_rama, lat_rama) in rama_d.items():
-    if abs(lat_rama) < 2:
+    if abs(lat_rama) < 5:
         continue
 
     rama_file = f"{rama_data_dir}/cur{rama_id}_dy.cdf"
@@ -78,7 +79,7 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
         angle_acute = row["angle_acute"]
         angle_obtuse = row["angle_obtuse"]
 
-        if abs(lat1) < 2:
+        if abs(lat1) < 5:
             continue
 
         print(
@@ -92,7 +93,7 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
             angle_obtuse,
         )
 
-        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
         if not os.path.exists(f_guv):
             print(f"missing file: {f_guv}")
             continue
@@ -263,14 +264,12 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
                 color="w",
             )
 
-        plt.show()
+        # plt.show()
         plt.close("all")
-        break
-    break
 
-# if len(matched_rows_all) > 0:
-#     df_matched_all = pd.concat(matched_rows_all, ignore_index=True)
-#     df_matched_all.to_csv(out_match_csv, index=False)
-#     print(f"saved global match csv: {out_match_csv}, rows={len(df_matched_all)}")
+if len(matched_rows_all) > 0:
+    df_matched_all = pd.concat(matched_rows_all, ignore_index=True)
+    df_matched_all.to_csv(out_match_csv, index=False)
+    print(f"saved global match csv: {out_match_csv}, rows={len(df_matched_all)}")
 #
 dse.close()

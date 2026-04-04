@@ -79,7 +79,7 @@ for i, img in enumerate(image_list):
         print(f"Skipping missing image: {img}")
         continue
 
-    doc.add_picture(img, width=Inches(8))
+    doc.add_picture(img, width=Inches(6))
     inserted_count += 1
 
     caption_text = ""

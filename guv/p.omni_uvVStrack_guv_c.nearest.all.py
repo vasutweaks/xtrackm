@@ -28,6 +28,7 @@ def get_track_geometry(sat, track_number):
     return lons, lats, lon_equat, lat_equat, lon_coast, lat_coast, angle_deg
 
 
+method = "loess"
 cmap1 = cmo.cm.diff
 d = 1.5
 height, width = 9, 9
@@ -39,7 +40,7 @@ rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 out_match_csv = "omni_guv_c_nearest_global_matches.csv"
 matched_rows_all = []
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/raju_omni_clean"
@@ -60,7 +61,7 @@ for omni_id in omni_d.keys():
     if not os.path.exists(omni_file):
         print(f"File not found: {omni_file}")
         continue
-    if abs(lat_omni) < 2:
+    if abs(lat_omni) < 5:
         continue
 
     ds_omni = xr.open_dataset(omni_file)
@@ -87,7 +88,7 @@ for omni_id in omni_d.keys():
         angle_acute = row["angle_acute"]
         angle_obtuse = row["angle_obtuse"]
 
-        if abs(lat1) < 2:
+        if abs(lat1) < 5:
             continue
 
         print(
@@ -101,7 +102,7 @@ for omni_id in omni_d.keys():
             angle_obtuse,
         )
 
-        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
         if not os.path.exists(f_guv):
             print(f"missing file: {f_guv}")
             continue
@@ -271,7 +272,7 @@ for omni_id in omni_d.keys():
                 color="w",
             )
 
-        plt.show()
+        # plt.show()
         plt.close("all")
     ds_omni.close()
 

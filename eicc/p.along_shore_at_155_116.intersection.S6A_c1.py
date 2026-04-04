@@ -42,21 +42,17 @@ rows = df_out.loc[
     & (df_out["track_self"] == track_self_val)
     & (df_out["track_other"] == track_other_val)
 ]
-# Optional input: Gaussian smoothing sigma
 sigma = 3
-# Optional input: clipping bbox tuple
-# Default used by the function is (70, 5, 95, 30)
 region_bbox_tuple = (70, 5, 95, 30)
 
 frac1 = "0.05"
 i = 0
-sat1 = rows["sat"].values[i]
-# track_number_self = rows["track_self"].apply(lambda x: str(x)).values[i]
-# track_number_other = rows["track_other"].apply(lambda x: str(x)).values[i]
-track_number_self = str(rows["track_self"].values[i])
-track_number_other = str(rows["track_other"].values[i])
-lons_inter1 = rows["lons_inter"].values[i]
-lats_inter1 = rows["lats_inter"].values[i]
+row = rows.iloc[i]
+sat1 = row["sat"]
+track_number_self = str(row["track_self"])
+track_number_other = str(row["track_other"])
+lons_inter1 = row["lons_inter"]
+lats_inter1 = row["lats_inter"]
 lon1 = lons_inter1
 lat1 = lats_inter1
 query_point = (lon1, lat1)
@@ -114,6 +110,8 @@ fig = plt.figure(figsize=(12, 10))
 ax1 = fig.add_subplot(3, 1, 3)
 ax0 = fig.add_subplot(3, 1, 2)
 al.plot(ax=ax0, label="alongshore", color="r", linewidth=2)
+ax0.axhline(y=0, color="k", linewidth=0.8, linestyle="--")
+ax0.grid(True, linestyle="--", alpha=0.5)
 ax0.legend()
 ax0.set_ylabel("along current m/s")
 ac.plot(ax=ax1, label="acrossshore", color="r", linewidth=2)
@@ -126,6 +124,8 @@ plt.text(
     fontsize=14,
     fontweight="bold",
 )
+ax1.axhline(y=0, color="k", linewidth=0.8, linestyle="--")
+ax1.grid(True, linestyle="--", alpha=0.5)
 ax1.legend()
 ax1.set_ylabel("across current m/s")
 ax2 = fig.add_subplot(3, 1, 1, projection=ccrs.PlateCarree())

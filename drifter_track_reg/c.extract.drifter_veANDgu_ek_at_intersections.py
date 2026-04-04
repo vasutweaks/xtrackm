@@ -13,7 +13,8 @@ CANDIDATE_PICKLE_DIR = "candidate_pickles"
 GUV_DIR = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
 OUTPUT_CSV = f"drifter_ve_vs_gu_ek_{SAT}.csv"
 GUV_SUFFIX = "0.05"
-EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections"
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
+EKMAN_DEPTH = "15"
 
 def decode_id(raw_id):
     if isinstance(raw_id, (bytes, np.bytes_)):
@@ -84,10 +85,12 @@ def main():
         unique_str = build_unique_str(SAT, row)
         lon_inter = float(row["lons_inter"])
         lat_inter = float(row["lats_inter"])
+        if np.abs(lat_inter) < 5:
+            continue
 
         pickle_path = os.path.join(CANDIDATE_PICKLE_DIR, f"{unique_str}.pkl")
 
-        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_at_intersections.nc"
+        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
         ds_ek = xr.open_dataset(f_ek)
         u_ek = ds_ek['u_at']
         v_ek = ds_ek['v_at']

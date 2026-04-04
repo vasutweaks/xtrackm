@@ -12,12 +12,13 @@ from matplotlib.colors import ListedColormap
 
 # codex resume 019cce35-fb6a-7e52-9604-ec4d6b2361c9
 
+method = "loess"
 cmap1 = cmo.cm.diff
 cmap2 = ListedColormap(['white'])
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 oscar_extracted_dir = f"/home/srinivasu/xtrackm/guv/oscar_at_intersections/"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 frac1 = "0.05"
 
 radar_str = "OR"
@@ -88,7 +89,7 @@ for idx, row in df_all.iterrows():
     # check if radar region contains intersection
     if not polygon.contains(Point(lon1, lat1)):
         continue
-    if abs(lat1) < 2:
+    if abs(lat1) < 5:
         continue
     # print(
     #     sat1,
@@ -110,7 +111,7 @@ for idx, row in df_all.iterrows():
         oscar_u = ds_oscar.u
         oscar_v = ds_oscar.v
 
-    f_guv = f"{guv_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{frac1}.nc"
+    f_guv = f"{guv_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
     if not os.path.exists(f_guv):
         print(f"missing file: {f_guv}")
         continue

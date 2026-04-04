@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+from astropy.timeseries import LombScargle
 from tools_xtrackm import *
 from tools_shapely import *
-# copilot --resume=6b563fd7-e036-45d8-95d0-bd5af130d84f
 
-
+# copilot --resume=a326e1fd-f9c8-4838-98b1-4a2232442728
 def along_across_shore_components(gu, gv, coast_heading_deg):
     """
     Resolve vector (gu, gv) into along-shore and across-shore components.
@@ -43,21 +43,17 @@ rows = df_out.loc[
     & (df_out["track_self"] == track_self_val)
     & (df_out["track_other"] == track_other_val)
 ]
-# Optional input: Gaussian smoothing sigma
 sigma = 3
-# Optional input: clipping bbox tuple
-# Default used by the function is (70, 5, 95, 30)
 region_bbox_tuple = (70, 5, 95, 30)
 
 frac1 = "0.05"
 i = 0
-sat1 = rows["sat"].values[i]
-# track_number_self = rows["track_self"].apply(lambda x: str(x)).values[i]
-# track_number_other = rows["track_other"].apply(lambda x: str(x)).values[i]
-track_number_self = str(rows["track_self"].values[i])
-track_number_other = str(rows["track_other"].values[i])
-lons_inter1 = rows["lons_inter"].values[i]
-lats_inter1 = rows["lats_inter"].values[i]
+row = rows.iloc[i]
+sat1 = row["sat"]
+track_number_self = str(row["track_self"])
+track_number_other = str(row["track_other"])
+lons_inter1 = row["lons_inter"]
+lats_inter1 = row["lats_inter"]
 lon1 = lons_inter1
 lat1 = lats_inter1
 query_point = (lon1, lat1)
@@ -112,139 +108,107 @@ gu = ds_guv.gu
 gv = ds_guv.gv
 al, ac = along_across_shore_components(gu, gv, coast_heading_deg)
 
-# Bandpass filter: remove periods shorter than 45 days (high-freq noise)
-from scipy.signal import butter, filtfilt
+fig = plt.figure(figsize=(18, 14))
+gs = fig.add_gridspec(3, 3, hspace=0.35, wspace=0.3)
 
-al_vals_raw = al.values.copy()
-dt_days_bp = np.median(np.diff(pd.to_datetime(al.time.values)).astype("timedelta64[D]").astype(float))
-fs_bp = 1.0 / dt_days_bp  # cycles per day
-# Low-pass cutoff: 1/45 cycles per day (keep periods > 45 days)
-cutoff = 1.0 / 60.0
-# Nyquist frequency
-nyq = fs_bp / 2.0
-b_filt, a_filt = butter(4, cutoff / nyq, btype="low")
-# Interpolate NaNs for filtering, then restore NaN positions
-nan_mask = np.isnan(al_vals_raw)
-al_interp = pd.Series(al_vals_raw).interpolate(limit_direction="both").values
-al_filtered = filtfilt(b_filt, a_filt, al_interp)
-al_filtered[nan_mask] = np.nan
-al = al.copy(data=al_filtered)
+ax_map = fig.add_subplot(gs[0, :], projection=ccrs.PlateCarree())
+ax_al = fig.add_subplot(gs[1, :2])
+ax_al_psd = fig.add_subplot(gs[1, 2])
+ax_ac = fig.add_subplot(gs[2, :2])
+ax_ac_psd = fig.add_subplot(gs[2, 2])
 
-fig = plt.figure(figsize=(12, 10))
-ax1 = fig.add_subplot(3, 1, 3)
-ax0 = fig.add_subplot(3, 1, 2)
-al.plot(ax=ax0, label="alongshore", color="r", linewidth=2)
-ax0.legend()
-ax0.set_ylabel("along current m/s")
+# --- Along-shore time series ---
+al.plot(ax=ax_al, label="alongshore", color="r", linewidth=2)
+ax_al.axhline(y=0, color="k", linewidth=0.8, linestyle="--")
+ax_al.grid(True, linestyle="--", alpha=0.5)
+ax_al.set_ylabel("along current m/s")
 info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat1} {track_number_self} {track_number_other}"
-plt.text(
-    0.15,
-    0.90,
-    info,
-    transform=ax0.transAxes,
-    fontsize=14,
-    fontweight="bold",
-)
+ax_al.text(0.15, 0.90, info, transform=ax_al.transAxes, fontsize=14, fontweight="bold")
 
-# --- Seasonal shading and year markers on along-shore plot (ax0) ---
-times = pd.to_datetime(al.time.values)
-year_min, year_max = times.year.min(), times.year.max()
+# --- Cross-shore time series ---
+ac.plot(ax=ax_ac, label="acrossshore", color="b", linewidth=2)
+ax_ac.axhline(y=0, color="k", linewidth=0.8, linestyle="--")
+ax_ac.grid(True, linestyle="--", alpha=0.5)
+ax_ac.set_ylabel("across current m/s")
+
+# Seasonal shading and year markers on both time series
+times_pd = pd.to_datetime(al.time.values)
+year_min, year_max = times_pd.min().year, times_pd.max().year
 for yr in range(year_min, year_max + 1):
-    # Feb-May: yellow
-    ax0.axvspan(pd.Timestamp(yr, 2, 1), pd.Timestamp(yr, 5, 31), color="yellow", alpha=0.15, zorder=0)
-    # Jun-Sep: cyan
-    ax0.axvspan(pd.Timestamp(yr, 6, 1), pd.Timestamp(yr, 9, 30), color="cyan", alpha=0.15, zorder=0)
-    # Oct-Dec: gray
-    ax0.axvspan(pd.Timestamp(yr, 10, 1), pd.Timestamp(yr, 12, 31), color="gray", alpha=0.15, zorder=0)
-    # Year boundary vertical line on Jan 1
-    ax0.axvline(pd.Timestamp(yr, 1, 1), color="k", linewidth=0.5, linestyle="--", alpha=0.5)
+    for ax_ts in [ax_al, ax_ac]:
+        ax_ts.axvline(pd.Timestamp(yr, 1, 1), color="k", linewidth=0.5, alpha=0.5)
+        ax_ts.axvspan(
+            pd.Timestamp(yr, 2, 1), pd.Timestamp(yr, 6, 1),
+            color="yellow", alpha=0.3, zorder=0,
+        )
+        ax_ts.axvspan(
+            pd.Timestamp(yr, 6, 1), pd.Timestamp(yr, 10, 1),
+            color="cyan", alpha=0.3, zorder=0,
+        )
+        ax_ts.axvspan(
+            pd.Timestamp(yr, 10, 1), pd.Timestamp(yr + 1, 1, 1),
+            color="gray", alpha=0.2, zorder=0,
+        )
+ax_al.legend(loc="upper right")
+ax_ac.legend(loc="upper right")
 
-# --- Periodogram of along-shore current ---
-from scipy.signal import periodogram as scipy_periodogram
+# --- Lomb-Scargle periodograms ---
+t_days = (times_pd - times_pd[0]).total_seconds().to_numpy() / 86400.0
+important_periods = [
+    (365, "365d"), (180, "180d"), (120, "120d"), (90, "90d"), (60, "60d"),
+]
+for signal, ax_psd, title in [
+    (al, ax_al_psd, "Along-shore"),
+    (ac, ax_ac_psd, "Cross-shore"),
+]:
+    vals = signal.values
+    mask = ~np.isnan(vals)
+    frequency, power = LombScargle(t_days[mask], vals[mask]).autopower(
+        minimum_frequency=1.0 / 1000, maximum_frequency=1.0 / 10,
+    )
+    periods = 1.0 / frequency
+    ax_psd.plot(periods, power, color="b", linewidth=1)
+    ax_psd.set_xscale("log")
+    ax_psd.set_xlabel("Period (days)")
+    ax_psd.set_ylabel("Power")
+    ax_psd.set_title(f"Periodogram — {title}")
+    ax_psd.grid(True, linestyle="--", alpha=0.5, which="both")
+    ymax = ax_psd.get_ylim()[1]
+    for pval, label in important_periods:
+        ax_psd.axvline(pval, color="r", linewidth=0.8, linestyle="--", alpha=0.7)
+        ax_psd.text(
+            pval, ymax * 0.92, label, rotation=90, va="top", ha="right",
+            fontsize=9, color="r", fontweight="bold",
+        )
 
-al_vals = al.values
-al_times = pd.to_datetime(al.time.values)
-# Compute median sampling interval in days
-dt_days = np.median(np.diff(al_times).astype("timedelta64[D]").astype(float))
-fs = 1.0 / dt_days  # sampling frequency in cycles/day
-
-# Remove NaNs for periodogram
-mask = np.isfinite(al_vals)
-al_clean = al_vals[mask]
-al_clean = al_clean - np.nanmean(al_clean)
-
-freqs, psd = scipy_periodogram(al_clean, fs=fs, scaling="density")
-# Convert frequency to period in days (skip freq=0)
-freqs = freqs[1:]
-psd = psd[1:]
-periods = 1.0 / freqs
-
-ax1.semilogy(periods, psd, color="b", linewidth=1)
-ax1.set_xlabel("Period (days)")
-ax1.set_ylabel("PSD (m²/s²/cpd)")
-ax1.set_title("Periodogram of along-shore current")
-ax1.set_xlim(0, 600)
-
-# Mark important periodicities
-important_periods = {"365 d": 365, "180 d": 180, "120 d": 120, "90 d": 90, "60 d": 60}
-for label, p in important_periods.items():
-    ax1.axvline(p, color="r", linewidth=0.8, linestyle="--", alpha=0.7)
-    ax1.text(p, ax1.get_ylim()[1] * 0.5, label, rotation=90, va="top", ha="right",
-             fontsize=9, color="r", alpha=0.9)
-ax2 = fig.add_subplot(3, 1, 1, projection=ccrs.PlateCarree())
+# --- Map subplot ---
 rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
-rose_cut.plot(ax=ax2, add_colorbar=False, add_labels=False, cmap=cmap1)
-decorate_axis(ax2, "", *TRACKS_REG, step=5)
-ax2.grid()
-ax2.plot(
-    lon1,
-    lat1,
-    c="r",
-    marker="o",
-    markersize=6,
-    markerfacecolor="red",
-    markeredgecolor="black",
-    markeredgewidth=2,
+rose_cut.plot(ax=ax_map, add_colorbar=False, add_labels=False, cmap=cmap1)
+decorate_axis(ax_map, "", *TRACKS_REG, step=5)
+ax_map.grid()
+ax_map.plot(
+    lon1, lat1, c="r", marker="o", markersize=6,
+    markerfacecolor="red", markeredgecolor="black", markeredgewidth=2,
 )
-ax2.scatter(
-    lons_track_self,
-    lats_track_self,
-    marker=".",
-    color="c",
-    s=4,
-)
-ax2.scatter(
-    lons_track_other,
-    lats_track_other,
-    marker=".",
-    color="c",
-    s=4,
-)
+ax_map.scatter(lons_track_self, lats_track_self, marker=".", color="c", s=4)
+ax_map.scatter(lons_track_other, lats_track_other, marker=".", color="c", s=4)
 lonm, latm = get_point_at_distance(
     lon_equat_self, lat_equat_self, lon_coast_self, lat_coast_self, d
 )
 if is_within_region(lonm, latm, *TRACKS_REG):
     plt.text(
-        lonm,
-        latm,
-        s=track_number_self,
-        fontsize=14,
-        rotation=a1_d,
-        color="k",
+        lonm, latm, s=track_number_self,
+        fontsize=14, rotation=a1_d, color="k",
     )
 lonm, latm = get_point_at_distance(
     lon_equat_other, lat_equat_other, lon_coast_other, lat_coast_other, d
 )
 if is_within_region(lonm, latm, *TRACKS_REG):
     plt.text(
-        lonm,
-        latm,
-        s=track_number_other,
-        fontsize=14,
-        rotation=a2_d,
-        color="k",
+        lonm, latm, s=track_number_other,
+        fontsize=14, rotation=a2_d, color="k",
     )
 plt.savefig(
     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",

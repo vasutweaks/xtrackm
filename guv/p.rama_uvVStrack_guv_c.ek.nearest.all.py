@@ -45,6 +45,7 @@ cmap1 = cmo.cm.diff
 d = 1.5
 height, width = 9, 9
 frac1 = "0.05"
+method = "loess"
 
 
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")
@@ -52,9 +53,10 @@ rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
 rama_data_dir = "/home/srinivasu/allData/rama/cur/"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 out_match_csv = "rama_guv_c_nearest_global_matches.ek.csv"
-EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections"
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd/"
+EKMAN_DEPTH = "10"
 matched_rows_all = []
 
 df_all_list = []
@@ -63,7 +65,7 @@ for sat in sats_new:
 df_all = pd.concat(df_all_list, ignore_index=True)
 
 for rama_id, (lon_rama, lat_rama) in rama_d.items():
-    if abs(lat_rama) < 2:
+    if abs(lat_rama) < 5:
         continue
     rama_file = f"{rama_data_dir}/cur{rama_id}_dy.cdf"
     if not os.path.exists(rama_file):
@@ -89,12 +91,12 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
         angle_obtuse = row["angle_obtuse"]
 
         unique_str = build_unique_str(sat, row)
-        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_at_intersections.nc"
+        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
         ds_ek = xr.open_dataset(f_ek)
         u_ek = ds_ek['u_at']
         v_ek = ds_ek['v_at']
 
-        if abs(lat1) < 2:
+        if abs(lat1) < 5:
             continue
 
         print(
@@ -114,7 +116,7 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
         f"\nSELECT_TRACK_OTHER = '{track_number_other}'"
         ))
 
-        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{frac1}.nc"
+        f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
         if not os.path.exists(f_guv):
             print(f"missing file: {f_guv}")
             continue

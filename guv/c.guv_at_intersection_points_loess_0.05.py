@@ -11,8 +11,7 @@ method = "loess"
 out_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}/"
 os.makedirs(out_dir, exist_ok=True)
 print(sats_new)
-sat = "TPN+J1N+J2N+J3N"
-sats_new = [sat]
+sats_new = ["S3B", "HY2A", "HY2B", "GFO"]
 for sat in sats_new[:]:
     df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
     for i, r in df.iterrows():
@@ -27,7 +26,7 @@ for sat in sats_new[:]:
         angle_obtuse = r["angle_obtuse"]
         lon1 = lons_inter1
         lat1 = lats_inter1
-        if abs(lat1) < 2:
+        if abs(lat1) < 5:
             continue
         # print(
         #     sat,

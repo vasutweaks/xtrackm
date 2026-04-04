@@ -7,7 +7,6 @@ import pandas as pd
 import xarray as xr
 
 SAT = "TP+J1+J2+J3+S6A"
-SAT = "S3A"
 DRIFTER_DIR = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 INTERSECTION_CSV = f"tracks_intersections_{SAT}_1.csv"
 CANDIDATE_PICKLE_DIR = "candidate_pickles"
@@ -84,6 +83,8 @@ def main():
         unique_str = build_unique_str(SAT, row)
         lon_inter = float(row["lons_inter"])
         lat_inter = float(row["lats_inter"])
+        if np.abs(lat_inter) < 5:
+            continue
 
         pickle_path = os.path.join(CANDIDATE_PICKLE_DIR, f"{unique_str}.pkl")
         if not os.path.exists(pickle_path):

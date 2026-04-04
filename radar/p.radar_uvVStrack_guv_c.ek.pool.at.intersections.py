@@ -11,13 +11,15 @@ from matplotlib.colors import ListedColormap
 
 # codex resume 019cce35-fb6a-7e52-9604-ec4d6b2361c9
 
+method = "loess"
 cmap1 = cmo.cm.diff
 cmap2 = ListedColormap(['white'])
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 oscar_extracted_dir = f"/home/srinivasu/xtrackm/guv/oscar_at_intersections/"
-guv_dir = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
-EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections"
+guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
+EKMAN_DEPTH = "0" 
 frac1 = "0.05"
 
 radar_str = "OR"
@@ -91,14 +93,14 @@ for idx, row in df_all.iterrows():
     unique_str = build_unique_str(sat1, row)
     angle_acute = row["angle_acute"]
     angle_obtuse = row["angle_obtuse"]
-    f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_at_intersections.nc"
+    f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
     ds_ek = xr.open_dataset(f_ek)
     u_ek = ds_ek['u_at']
     v_ek = ds_ek['v_at']
     # check if radar region contains intersection
     if not polygon.contains(Point(lon1, lat1)):
         continue
-    if abs(lat1) < 2:
+    if abs(lat1) < 5:
         continue
     # print(
     #     sat1,
@@ -120,7 +122,7 @@ for idx, row in df_all.iterrows():
         oscar_u = ds_oscar.u
         oscar_v = ds_oscar.v
 
-    f_guv = f"{guv_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{frac1}.nc"
+    f_guv = f"{guv_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
     if not os.path.exists(f_guv):
         print(f"missing file: {f_guv}")
         continue
@@ -194,15 +196,17 @@ for idx, row in df_all.iterrows():
     gv_cut = gv_cut.where(gv_cut < oscar_max, np.nan)
     gv_cut = gv_cut.where(gv_cut > -oscar_max, np.nan)
 
-    oscar_u.plot(ax=ax0, color="b", linewidth=2, label="oscar u")
+    oscar_u.plot(ax=ax0, color="g", linewidth=2, label="oscar u")
     gu_cut.plot(ax=ax0, label=f"track zonal", color="k", linewidth=2)
+    gu_ek.plot(ax=ax0, label=f"track zonal + ek", color="b", linewidth=2)
     ru_at.plot(ax=ax0, label=f"radar zonal", color="r", linewidth=2)
     # ax0.set_xlim(datetime(2010, 1, 1), datetime(2020, 1, 1))
     ax0.legend()
     ax0.set_ylabel("oscar u m/s")
 
-    oscar_v.plot(ax=ax1, color="b", linewidth=2, label="oscar v")
+    oscar_v.plot(ax=ax1, color="g", linewidth=2, label="oscar v")
     gv_cut.plot(ax=ax1, label=f"track meridional", color="k", linewidth=2)
+    gv_ek.plot(ax=ax0, label=f"track meridional + ek", color="b", linewidth=2)
     rv_at.plot(ax=ax1, label=f"radar meridional", color="r", linewidth=2)
 
     valid_ru_gu = np.isfinite(gu_cut.values) & np.isfinite(ru_at.values)
