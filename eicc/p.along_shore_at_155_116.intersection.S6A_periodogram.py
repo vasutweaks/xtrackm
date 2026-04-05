@@ -7,7 +7,7 @@ from astropy.timeseries import LombScargle
 from tools_xtrackm import *
 from tools_shapely import *
 
-# copilot --resume=a326e1fd-f9c8-4838-98b1-4a2232442728
+
 def along_across_shore_components(gu, gv, coast_heading_deg):
     """
     Resolve vector (gu, gv) into along-shore and across-shore components.

@@ -10,11 +10,11 @@ import xarray as xr
 
 # codex resume 019d11d3-4f11-75a3-9cd3-897d94b9bb77
 
-SAT = "TP+J1+J2+J3+S6A"
 SAT = "HY2A"
-SAT = "ERS1+ERS2+ENV+SRL"
 SAT = "S3A"
 SAT = "TPN+J1N+J2N+J3N"
+SAT = "ERS1+ERS2+ENV+SRL"
+SAT = "TP+J1+J2+J3+S6A"
 INPUT_CSV = f"tracks_intersections_{SAT}_1.csv"
 COAST_DIST_PATH = (
     "~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc"
