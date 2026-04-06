@@ -193,7 +193,7 @@ def plot_ts_panel(ax, ts_f, yhat, fit, ylabel, line_color="k"):
     ax.axhline(0.0, color="0.4", lw=0.8, ls="--")
     ax.grid(True, alpha=0.3, linestyle="--")
     ax.set_ylabel(ylabel, fontsize=8)
-    ax.legend(loc="upper right", fontsize=8)
+    # ax.legend(loc="upper right", fontsize=8)
 
 
 def main():
@@ -236,7 +236,7 @@ def main():
 
     # Figure layout: left map, right 4-row time series
     fig = plt.figure(figsize=(16, 10), dpi=160, constrained_layout=False)
-    gs = fig.add_gridspec(4, 2, width_ratios=[1.05, 1.7], wspace=0.05, hspace=0.0)
+    gs = fig.add_gridspec(4, 2, width_ratios=[1.05, 1.7], wspace=0.18, hspace=0.0)
 
     ax_map = fig.add_subplot(gs[:, 0], projection=ccrs.PlateCarree())
     ax1 = fig.add_subplot(gs[0, 1])
@@ -277,10 +277,10 @@ def main():
         ylabel="Windstress (N m$^{-2}$)",
         line_color="tab:green",
     )
-    ax1.text(0.01, 0.96, "a", transform=ax1.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
-    ax2.text(0.01, 0.96, "b", transform=ax2.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
-    ax3.text(0.01, 0.96, "c", transform=ax3.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
-    ax4.text(0.01, 0.96, "d", transform=ax4.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
+    ax1.text(0.01, 0.96, "a)", transform=ax1.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
+    ax2.text(0.01, 0.96, "b)", transform=ax2.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
+    ax3.text(0.01, 0.96, "c)", transform=ax3.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
+    ax4.text(0.01, 0.96, "d)", transform=ax4.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
     ax1.tick_params(axis="x", labelbottom=False)
     ax2.tick_params(axis="x", labelbottom=False)
     ax3.tick_params(axis="x", labelbottom=False)

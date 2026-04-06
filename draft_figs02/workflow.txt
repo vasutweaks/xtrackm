@@ -1,5 +1,10 @@
 1. Run all fig??.py files
 run_all.py
 
-2. make_figure_docx.py
-To make docx with on fig??.png file insert in each page
+2. To organise files in fig?? files organise_scripts_pngs.py
+
+3. make_figure_docx_new.py
+To make docx with on fig??*.png and sup??*.png file insert in each page, with corresponding caption txt files
+--------------------------------------------
+It is old. Seems to have issues with touching captions for draft figures
+touch_captions_files.py

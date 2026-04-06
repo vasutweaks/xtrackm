@@ -1,0 +1,1 @@
+Total number of coastal altimetry tracks for the region NINDIAN, temporal and spatial resolution of reference tracks for all the satellite missions.

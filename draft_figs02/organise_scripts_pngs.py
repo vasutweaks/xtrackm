@@ -1,73 +1,78 @@
 import os
 import re
 from glob import glob
-
-base_names = {
-    "f.combined_map_std_valid.S3A.py": 1,
-    "p.omni_uvVStrack_guv_c.ek.nearest.selected.py": 1,
-    "p.scatter_omniVSrama_uVSgu_ww_ek.py": 1,
-    "p.scatter_drifter_ve_vs_gu_ww_ek.py": 1,
-    "p.radar_uvVStrack_guv.at.intersections_single.py": 1,
-    "p.along_shore_at_155_116.intersection.S6A.py": 1,
-    "p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py": 1,
-    "satellite_mission_time_spans_new.py": 2,
-    "p.compare.std_mean.l2pVSxtrack_map.py": 0,
-    "p.gc.clim.cross_structure_x_arrows_map_ERS.py": 0,
-    "p.gc.clim.lat_wise.along_xwidth.py": 0,
-    "p.aviso_only_uvVStrack_guv.at.intersections_single.py": 0,
-    "p.metrics.track_guvVSoscar_ww_ekman.py": 0,
-    "p.vskp.tseries_new_v2.2.py": 0,
-}
+from base_names import base_names
 
 
 def get_clean_name(filename):
     """Strips any existing 'figNN_' or 'supNN_' prefix."""
-    return re.sub(r'^(fig|sup)\d{2}_', '', filename)
+    fig_strip = re.sub(r'^(fig|sup)\d+_', '', filename)
+    if fig_strip.endswith(".py"):
+        ext_strip = fig_strip[:-3]
+    elif fig_strip.endswith(".png"):
+        ext_strip = fig_strip[:-4]
+    elif fig_strip.endswith(".txt"):
+        ext_strip = fig_strip[:-4]
+    else:
+        ext_strip = os.path.splitext(fig_strip)[0]
+    return ext_strip
 
 
-def strip_all_files(base_names):
-    files = sorted(glob(f"fig??_*.py"))
+def strip_all_files():
+    # files = sorted(glob(f"fig??_*.p*"))
+    # strip all works only for fig|sup ending with .py or .png
+    pattern = re.compile(r'^(fig|sup)\d+_.*\.(py|png|txt)$')
+    files = [f for f in os.listdir('.') if pattern.match(f)]
     if not files:
-        print("No figNN files found.")
+        print("No matching files to strip.")
         return
     for f in files:
-        f_clean = get_clean_name(f)
-        print(f"Striping {f} -> {f_clean}")
-        os.rename(f, f_clean)
-    files = sorted(glob(f"sup??_*.py"))
-    if not files:
-        print("No supNN files found.")
-        return
-    for f in files:
-        f_clean = get_clean_name(f)
-        print(f"Striping {f} -> {f_clean}")
-        os.rename(f, f_clean)
+        if f.endswith(".png"):
+            new_name = get_clean_name(f) + ".png"
+            print(f"{f} -> {new_name}")
+            os.rename(f, new_name)
+        elif f.endswith(".py"):
+            new_name = get_clean_name(f) + ".py"
+            print(f"{f} -> {new_name}")
+            os.rename(f, new_name)
+        elif f.endswith(".txt"):
+            new_name = get_clean_name(f) + ".txt"
+            print(f"{f} -> {new_name}")
+            os.rename(f, new_name)
         
 
 def new_order_rename(base_names):
-    strip_all_files(base_names)
-    fig_i = 1
-    sup_j = 1
+    # strip all works only for fig|sup ending with .py or .png
+    strip_all_files()
+    exts = (".py", ".png", ".txt")
+    status_to_label = {1: "fig", 2: "sup"}
+    counters = {"fig": 1, "sup": 1}
+
+    def rename_group(original_key, label):
+        idx = counters[label]
+        target_stem = f"{label}{idx:02d}_{original_key}"
+        renamed_any = False
+
+        for ext in exts:
+            old_name = f"{original_key}{ext}"
+            if not os.path.exists(old_name):
+                continue
+            new_name = f"{target_stem}{ext}"
+            print(f"{old_name} -> {new_name}")
+            os.rename(old_name, new_name)
+            renamed_any = True
+
+        if renamed_any:
+            counters[label] += 1
+
     print(f"{'Current File':<45} | {'New Name':<45} | {'Caption'}")
     print("-" * 60)
+
     for original_key, status in base_names.items():
-        if status == 1:
-            new_name = f"fig{str(fig_i).zfill(2)}_{original_key}"
-            fig_i += 1
-        elif status == 2:
-            new_name = f"sup{str(sup_j).zfill(2)}_{original_key}"
-            sup_j += 1
-        else:
-            new_name = original_key
+        label = status_to_label.get(status)
+        if label is None:
+            continue
+        rename_group(original_key, label)
 
-        # Check Caption
-        ktxt = f"{os.path.splitext(original_key)[0]}.txt"
-        kpng = f"{os.path.splitext(original_key)[0]}.png"
-        # cap_path = os.path.join(cap_dir, ktxt)
-        # cap_status = "✅" if os.path.exists(cap_path) else "❌"
-        if os.path.exists(original_key):
-            os.rename(original_key, new_name)
-            print(f"{original_key:<45} -> {new_name:<45}")
-
+# strip_all_files()
 new_order_rename(base_names)
-# sync_filenames_and_captions(base_names)

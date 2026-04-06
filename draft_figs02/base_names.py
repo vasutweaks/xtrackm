@@ -1,0 +1,17 @@
+base_names = {
+    "f.combined_map_std_valid.S3A": 1,
+    "p.omni_uvVStrack_guv_c.ek.nearest.selected": 1,
+    "p.scatter_omniVSrama_uVSgu_ww_ek": 1,
+    "p.scatter_drifter_ve_vs_gu_ww_ek": 1,
+    "p.radar_uvVStrack_guv.at.intersections_single": 1,
+    "p.along_shore_at_155_116.intersection.S6A": 1,
+    "p.speed_at_coastal_points.eicc.trends.all_in_one.ERS": 1,
+    "plot_indian_ocean_regions_and_timeseries":1,
+    "satellite_mission_time_spans_new": 2,
+    "p.compare.std_mean.l2pVSxtrack_map": 0,
+    "p.gc.clim.cross_structure_x_arrows_map_ERS": 0,
+    "p.gc.clim.lat_wise.along_xwidth": 0,
+    "p.aviso_only_uvVStrack_guv.at.intersections_single": 0,
+    "p.metrics.track_guvVSoscar_ww_ekman": 0,
+    "p.vskp.tseries_new_v2.2": 0,
+}
