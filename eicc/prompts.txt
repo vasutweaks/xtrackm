@@ -1,3 +1,23 @@
+Write a python script that does the following plot
+1. On the left side, plots a cartopy Indian Ocean region
+Shade the equitorial region (5S-5N) with green checkered pattern
+Bay of Bengal gyre region with blue checkered pattern 
+Along shore Bay Of Bengal region with red checkered pattern 
+Adds a legend for all the regions
+2. On the right column, four rows for time series plots
+a. Average of windstress_curl over BoB masking after applying gyre mask.
+see /home/srinivasu/allData/ccmp31/bob_windstress_curl_trend_unwrap_gyre_mask.py
+b. Average of aviso sealevel anomaly over BoB gyre region
+see /home/srinivasu/allData/aviso/plot_bob_gyre_timeseries.py
+c. Average of windstress over along shore region, see along shore mask in
+/home/srinivasu/allData/ccmp31/bob_windstress_curl_trend_unwrap_along_shore_mask.py
+4. Average of windstress over equitorial band
+see /home/srinivasu/allData/ccmp31/eq_windstress_alongshore_trend_unwrap.py
+These scripts are using functions in various forms that do the same thing
+Unify the functions.
+All timeseries are passed throught 500day filter.
+Indicate standard error, and p value in all timeseris plots
+
 update the script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py
 to add
 1. 200, 1000, 2000 isobaths on left cartopy map as dashed contours with labels
