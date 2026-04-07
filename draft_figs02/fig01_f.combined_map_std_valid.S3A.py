@@ -33,8 +33,8 @@ fig = plt.figure(figsize=(16, 8))
 gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1.3], wspace=0.05, hspace=0.3)
 
 ax_map = fig.add_subplot(gs[:, 0], projection=ccrs.PlateCarree())
-ax_std = fig.add_subplot(gs[0, 1])
-ax_vp = fig.add_subplot(gs[1, 1])
+ax_std = fig.add_subplot(gs[1, 1])
+ax_vp = fig.add_subplot(gs[0, 1])
 
 # ════════════════════════════════════════════════════════════
 # LEFT PANEL — track map
@@ -145,6 +145,7 @@ ax_std.plot(
 ax_std.set_xlabel("Distance (km)")
 ax_std.set_ylabel("STD (m)")
 ax_std.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
+ax_std.axvline(x=50e3, color="gray", linewidth=0.5, linestyle="--")
 ax_std.text(
     0.02,
     0.5,
@@ -218,6 +219,7 @@ ax_vp.plot(
 ax_vp.set_xlabel("GSHHG Distance from coast (km)")
 ax_vp.set_ylabel("Percentage Valid Points")
 ax_vp.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
+ax_vp.axvline(x=50e3, color="gray", linewidth=0.5, linestyle="--")
 ax_vp.text(
     0.02,
     0.5,
@@ -235,8 +237,8 @@ ax_vp.legend(ncol=2, fontsize=8)
 
 # ── panel labels ──
 ax_map.set_title("(a)", loc="left", fontweight="bold")
-ax_std.set_title("(b)", loc="left", fontweight="bold")
-ax_vp.set_title("(c)", loc="left", fontweight="bold")
+ax_std.set_title("(c)", loc="left", fontweight="bold")
+ax_vp.set_title("(b)", loc="left", fontweight="bold")
 
 plt.tight_layout()
 # plt.savefig("f.combined_map_std_valid.S3A.png", dpi=300)

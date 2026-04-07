@@ -1,4 +1,5 @@
+With the context from Notebooklm and draft under the preparation and figures pdf, explain the figure attached in detail. Write it in a form that can be added to the draft as is. Corroborate the explanation with other studies with references. The figure's caption is as follows
+
 I am trying to automatize the generation of the doc figures_v2.1.docx with
 figures in order along with captions(captions/*.txt) with the script make_figure_docx.py.
 I am changing the figure numbers and sometimes removing some figures.
-
