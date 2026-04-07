@@ -6,7 +6,7 @@ base_names = {
     "p.radar_uvVStrack_guv.at.intersections_single": 1,
     "p.along_shore_at_155_116.intersection.S6A": 1,
     "p.speed_at_coastal_points.eicc.trends.all_in_one.ERS": 1,
-    "plot_indian_ocean_regions_and_timeseries":1,
+    "plot_indian_ocean_regions_and_timeseries_pumping":1,
     "satellite_mission_time_spans_new": 2,
     "p.compare.std_mean.l2pVSxtrack_map": 0,
     "p.gc.clim.cross_structure_x_arrows_map_ERS": 0,

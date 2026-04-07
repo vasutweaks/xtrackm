@@ -11,13 +11,8 @@ import cartopy.feature as cfeature
 import regionmask
 from scipy.signal import butter, filtfilt
 from scipy.stats import linregress
-from pathlib import Path
-import sys
 
 # codex resume 019d633e-790a-7633-9992-2651d98a8294
-
-script = Path(sys.argv[0])
-png_file = script.with_suffix(".png")
 
 # Input files
 CCMP_CURL_FILE = "/home/srinivasu/allData/ccmp31/ccmp_v31_daily_iod_windstress_curl_mon.nc"
@@ -40,6 +35,8 @@ MAP_EXTENT = [40.0, 102.0, -10.0, 25.0]
 # Windstress constants
 RHO_AIR = 1.22
 DRAG_COEFF = 1.3e-3
+RHO_WATER = 1025.0
+OMEGA = 7.2921e-5
 
 
 def subset_lat_lon(da, lat_bounds, lon_bounds):
@@ -121,6 +118,16 @@ def compute_windstress_magnitude(u, v):
     tau_x = RHO_AIR * DRAG_COEFF * speed * u
     tau_y = RHO_AIR * DRAG_COEFF * speed * v
     return np.hypot(tau_x, tau_y)
+
+
+def compute_ekman_pumping_from_curl(curl_da):
+    lat_rad = np.deg2rad(curl_da.latitude)
+    f = xr.DataArray(
+        2.0 * OMEGA * np.sin(lat_rad),
+        coords={"latitude": curl_da.latitude},
+        dims=("latitude",),
+    )
+    return curl_da / (RHO_WATER * f)
 
 
 def build_series(da, mask_2d=None, remove_clim=True):
@@ -206,12 +213,13 @@ def main():
     gyre_mask = ds_mask["gyre_mask"]
     along_mask = ds_mask["along_shore_mask"]
 
-    # 1) Windstress curl over BoB gyre region
+    # 1) Ekman pumping over BoB gyre region (from windstress curl)
     ds_curl = xr.open_dataset(CCMP_CURL_FILE)
     curl_var = "wind_stress_curl" if "wind_stress_curl" in ds_curl.data_vars else "windstress_curl"
     curl_bob = subset_lat_lon(ds_curl[curl_var], BOB_LAT_BOUNDS, BOB_LON_BOUNDS)
+    ekman_bob = compute_ekman_pumping_from_curl(curl_bob)
     gyre_on_curl = interp_mask_to_target(subset_lat_lon(gyre_mask, BOB_LAT_BOUNDS, BOB_LON_BOUNDS), curl_bob)
-    ts1_f, yhat1, fit1, _ = build_series(curl_bob, mask_2d=gyre_on_curl, remove_clim=True)
+    ts1_f, yhat1, fit1, _ = build_series(ekman_bob, mask_2d=gyre_on_curl, remove_clim=True)
 
     # 2) AVISO SLA over BoB gyre region
     ds_sla = xr.open_dataset(AVISO_SLA_FILE)
@@ -255,7 +263,7 @@ def main():
         ts1_f,
         yhat1,
         fit1,
-        ylabel="Windstress curl (N m$^{-3}$)",
+        ylabel="Ekman pumping (m s$^{-1}$)",
         line_color="tab:blue",
     )
     plot_ts_panel(
@@ -292,8 +300,7 @@ def main():
     ax4.set_xlabel("Time")
     fig.subplots_adjust(hspace=0.0)
 
-    # fig.savefig(OUT_FIG, bbox_inches="tight")
-    plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
+    fig.savefig(OUT_FIG, bbox_inches="tight")
     if matplotlib.get_backend().lower() != "agg":
         plt.show()
     plt.close(fig)

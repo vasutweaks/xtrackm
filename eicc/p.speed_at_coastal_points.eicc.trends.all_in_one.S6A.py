@@ -13,31 +13,47 @@ from scipy.signal import butter, filtfilt
 from scipy.stats import linregress
 from tools_shapely import *
 from tools_xtrackm import *
+import sys
 
 # copilot --resume=d419a1e5-878f-477e-813b-3b06f3d9a50b
 
+def build_unique_str(sat, row):
+    track_self = track_to_str(row["track_self"])
+    track_other = track_to_str(row["track_other"])
+    return f"{sat}_{track_self}_{track_other}"
+
+
+def track_to_str(track):
+    track_f = float(track)
+    if track_f.is_integer():
+        return str(int(track_f))
+    return str(track)
+
+
 method = "loess"
 frac1 = "0.05"
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd/"
+EKMAN_DEPTH = "0"
 
-sat_val = "S3A"
-sat_val = "ERS1+ERS2+ENV+SRL"
 sat_val = "TP+J1+J2+J3+S6A"
 
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
 
 # Skip the first point (lowest latitude)
-df_out = df.sort_values("lats_inter").reset_index(drop=True)
+df_out = df.sort_values("lats_inter").iloc[1:].reset_index(drop=True)
 
-N_PTS = 3
+# print(len(df_out))
+N_PTS = len(df_out)
 assert len(df_out) == N_PTS, (
     f"Expected {N_PTS} points after skipping first, got {len(df_out)}"
 )
+# sys.exit()
 
 POINT_COLORS = [plt.cm.tab10(i) for i in range(N_PTS)]
-POINT_LABELS = list("ABC")
+POINT_LABELS = list("ABCDEFG")
 
 # Map extent: 10N–22N, 78E–88E
-MAP_EXTENT = (78., 89.0, 9.5, 22.0)
+MAP_EXTENT = (78.5, 88.0, 10.0, 22.0)
 
 # --- Pre-collect all timeseries data ---
 point_data = []
@@ -56,6 +72,13 @@ for i, row in df_out.iterrows():
     gu = ds_guv.gu
     gv = ds_guv.gv
     gs = np.sqrt(gu**2 + gv**2)
+    unique_str = build_unique_str(sat1, row)
+    f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
+    ds_ek = xr.open_dataset(f_ek)
+    u_ek = ds_ek['u_at']
+    v_ek = ds_ek['v_at']
+    s_ek = np.sqrt(u_ek**2 + v_ek**2)
+    gs = gs + s_ek
     times = pd.to_datetime(gs.time.values)
     gs_vals_raw = gs.values.astype(float)
 
@@ -125,7 +148,7 @@ gs_layout = gridspec.GridSpec(
 )
 
 # --- Left: vertically elongated cartopy map spanning all rows ---
-ax_map = fig.add_subplot(gs_layout[:, 0], projection=ccrs.PlateCarree())
+ax_map = fig.add_subplot(gs_layout[1:, 0], projection=ccrs.PlateCarree())
 ax_map.set_extent(MAP_EXTENT, crs=ccrs.PlateCarree())
 ax_map.add_feature(cfeature.LAND, facecolor="0.93", zorder=0)
 ax_map.add_feature(cfeature.OCEAN, facecolor="aliceblue", zorder=0)

@@ -13,14 +13,28 @@ from scipy.signal import butter, filtfilt
 from scipy.stats import linregress
 from tools_shapely import *
 from tools_xtrackm import *
+import sys
 
 # copilot --resume=d419a1e5-878f-477e-813b-3b06f3d9a50b
 
+def build_unique_str(sat, row):
+    track_self = track_to_str(row["track_self"])
+    track_other = track_to_str(row["track_other"])
+    return f"{sat}_{track_self}_{track_other}"
+
+
+def track_to_str(track):
+    track_f = float(track)
+    if track_f.is_integer():
+        return str(int(track_f))
+    return str(track)
+
+
 method = "loess"
 frac1 = "0.05"
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd/"
+EKMAN_DEPTH = "0"
 
-sat_val = "TP+J1+J2+J3+S6A"
-sat_val = "S3A"
 sat_val = "ERS1+ERS2+ENV+SRL"
 
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
@@ -28,10 +42,12 @@ df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
 # Skip the first point (lowest latitude)
 df_out = df.sort_values("lats_inter").iloc[1:].reset_index(drop=True)
 
-N_PTS = 7
+# print(len(df_out))
+N_PTS = len(df_out)
 assert len(df_out) == N_PTS, (
     f"Expected {N_PTS} points after skipping first, got {len(df_out)}"
 )
+# sys.exit()
 
 POINT_COLORS = [plt.cm.tab10(i) for i in range(N_PTS)]
 POINT_LABELS = list("ABCDEFG")
@@ -56,6 +72,13 @@ for i, row in df_out.iterrows():
     gu = ds_guv.gu
     gv = ds_guv.gv
     gs = np.sqrt(gu**2 + gv**2)
+    unique_str = build_unique_str(sat1, row)
+    f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
+    ds_ek = xr.open_dataset(f_ek)
+    u_ek = ds_ek['u_at']
+    v_ek = ds_ek['v_at']
+    s_ek = np.sqrt(u_ek**2 + v_ek**2)
+    gs = gs + s_ek
     times = pd.to_datetime(gs.time.values)
     gs_vals_raw = gs.values.astype(float)
 

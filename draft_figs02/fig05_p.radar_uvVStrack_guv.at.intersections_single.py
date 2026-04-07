@@ -14,6 +14,21 @@ from pathlib import Path
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
 
+def build_unique_str(sat, row):
+    track_self = track_to_str(row["track_self"])
+    track_other = track_to_str(row["track_other"])
+    return f"{sat}_{track_self}_{track_other}"
+
+
+def track_to_str(track):
+    track_f = float(track)
+    if track_f.is_integer():
+        return str(int(track_f))
+    return str(track)
+
+
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd/"
+EKMAN_DEPTH = "0"
 radar_str = "TN"
 track_self_here = 608
 track_other_here = 137
@@ -120,12 +135,19 @@ for idx, row in df_filter.iterrows():
     with xr.open_dataset(f_guv) as ds_guv:
         gu = ds_guv.gu.load()
         gv = ds_guv.gv.load()
+    unique_str = build_unique_str(sat1, row)
+    f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
+    ds_ek = xr.open_dataset(f_ek)
+    u_ek = ds_ek['u_at']
+    v_ek = ds_ek['v_at']
     fig = plt.figure(figsize=(12, 10))
     ax0 = fig.add_subplot(3, 1, 2)
     ax1 = fig.add_subplot(3, 1, 3)
 
     gu_cut = gu
     gv_cut = gv
+    gu_ek = gu_cut + u_ek
+    gv_ek = gv_cut + v_ek
     tfreq = sats_tfreq[sat1]
 
     oscar_u = oscar_u.resample(time=f"{tfreq}D").mean()
@@ -146,11 +168,13 @@ for idx, row in df_filter.iterrows():
 
     oscar_u.plot(ax=ax0, color="b", linewidth=2, label="oscar u")
     gu_cut.plot(ax=ax0, label=f"track zonal", color="k", linewidth=2)
+    gu_ek.plot(ax=ax0, label=f"track zonal+ek", color="g", linewidth=2)
     ru_at.plot(ax=ax0, label=f"radar zonal", color="r", linewidth=2)
     ax0.legend()
     ax0.set_ylabel("oscar u m/s")
     oscar_v.plot(ax=ax1, color="b", linewidth=2, label="oscar v")
     gv_cut.plot(ax=ax1, label=f"track meridional", color="k", linewidth=2)
+    gv_ek.plot(ax=ax1, label=f"track meridional+ek", color="g", linewidth=2)
     rv_at.plot(ax=ax1, label=f"radar meridional", color="r", linewidth=2)
     corr_u = xs.pearson_r(gu_cut, ru_at, dim="time", skipna=True)
     rmse_u = xs.rmse(gu_cut, ru_at, dim="time", skipna=True)

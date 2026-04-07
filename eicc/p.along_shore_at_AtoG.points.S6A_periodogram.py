@@ -7,14 +7,31 @@ from astropy.timeseries import LombScargle
 from tools_xtrackm import *
 from tools_shapely import *
 # codex resume 019d5ed6-75c3-7ec3-b74c-b7b7403d77f7
+
+
+def build_unique_str(sat, row):
+    track_self = track_to_str(row["track_self"])
+    track_other = track_to_str(row["track_other"])
+    return f"{sat}_{track_self}_{track_other}"
+
+
+def track_to_str(track):
+    track_f = float(track)
+    if track_f.is_integer():
+        return str(int(track_f))
+    return str(track)
+
+
 sat_val = "TP+J1+J2+J3+S6A"
 
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
 
 # Skip the first point (lowest latitude)
-df_out = df.sort_values("lats_inter")#.iloc[1:].reset_index(drop=True)
+df_out = df.sort_values("lats_inter").iloc[1:].reset_index(drop=True)
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd/"
+EKMAN_DEPTH = "0"
 
-N_PTS = 3
+N_PTS = len(df_out)
 assert len(df_out) == N_PTS, (
     f"Expected {N_PTS} points after skipping first, got {len(df_out)}"
 )
@@ -121,6 +138,14 @@ for i, row in df_out.iterrows():
     print(f"heading angle {a1_d:.2f} {a2_d:.2f}")
     gu = ds_guv.gu
     gv = ds_guv.gv
+    unique_str = build_unique_str(sat1, row)
+    f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
+    ds_ek = xr.open_dataset(f_ek)
+    u_ek = ds_ek['u_at']
+    v_ek = ds_ek['v_at']
+    gu = gu + u_ek
+    gv = gv + v_ek
+    # s_ek = np.sqrt(u_ek**2 + v_ek**2)
     al, ac = along_across_shore_components(gu, gv, coast_heading_deg)
 
     fig = plt.figure(figsize=(12, 10))

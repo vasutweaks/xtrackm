@@ -1,3 +1,8 @@
+Write a python script that does a multilinear regression
+for each point timeseries (of speed) in p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py
+as a weighted sum of four timeseries in plot_indian_ocean_regions_and_timeseries_pumping.py
+and pretty print the equations at each point.
+
 Write a python script that does the following plot
 1. On the left side, plots a cartopy Indian Ocean region
 Shade the equitorial region (5S-5N) with green checkered pattern
