@@ -1,18 +1,26 @@
-import math
-
 import cmocean as cmo
+import importlib.util
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pathlib import Path
 import xarray as xr
+from astropy.timeseries import LombScargle
+from scipy.signal import detrend
 from tools_xtrackm import *
 from tools_shapely import *
-import sys
 from pathlib import Path
 import sys
 
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
+
+def _load_isobath_heading_func():
+    module_path = Path(__file__).with_name("c.isobath_based_slopes.one_func.py")
+    spec = importlib.util.spec_from_file_location("isobath_one_func", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.isobath_heading_at_point
 
 
 def along_across_shore_components(gu, gv, coast_heading_deg):
@@ -33,9 +41,14 @@ def along_across_shore_components(gu, gv, coast_heading_deg):
     return along_shore, across_shore
 
 
+method = "loess"
+frac1 = "0.05"
 cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
+topo_ds = xr.open_dataset("/home/srinivasu/allData/topo/etopo_60s_io.nc")
+topo_reg = topo_ds.rose.sel(lon=slice(62, 92)).sel(lat=slice(0, 30))
+isobath_heading_at_point = _load_isobath_heading_func()
 
 sat_val = "TP+J1+J2+J3+S6A"
 track_self_val = 155
@@ -49,187 +62,211 @@ rows = df_out.loc[
     & (df_out["track_self"] == track_self_val)
     & (df_out["track_other"] == track_other_val)
 ]
-# Optional input: Gaussian smoothing sigma
-sigma = 3
-# Optional input: clipping bbox tuple
-# Default used by the function is (70, 5, 95, 30)
-region_bbox_tuple = (70, 5, 95, 30)
+print(len(rows), "length of rows ...")
 
-frac1 = "0.05"
 i = 0
-sat1 = rows["sat"].values[i]
-# track_number_self = rows["track_self"].apply(lambda x: str(x)).values[i]
-# track_number_other = rows["track_other"].apply(lambda x: str(x)).values[i]
-track_number_self = str(rows["track_self"].values[i])
-track_number_other = str(rows["track_other"].values[i])
-lons_inter1 = rows["lons_inter"].values[i]
-lats_inter1 = rows["lats_inter"].values[i]
+row = rows.iloc[i]
+sat1 = row["sat"]
+track_number_self = str(row["track_self"])
+track_number_other = str(row["track_other"])
+lons_inter1 = row["lons_inter"]
+lats_inter1 = row["lats_inter"]
 lon1 = lons_inter1
 lat1 = lats_inter1
 query_point = (lon1, lat1)
-result = coastline_gaussian_tangent(
+result = isobath_heading_at_point(
+    topo=topo_reg,
+    level=-1500,
     query_point=query_point,
-    sigma=sigma,
-    region_bbox_tuple=region_bbox_tuple,
+    method="gaussian",
+    sigma=10.0,
+    step=15,
 )
-print("heading_angle_deg:", result["heading_angle_deg"])
-print("tangent_vector:", result["tangent_vector"])
+print(lon1, lat1)
+print("heading_deg:", result["heading_deg"])
 print("nearest_point:", result["nearest_point"])
-print("distance:", result["distance"])
-coast_heading_deg = result["heading_angle_deg"]
-x_from_coast_self1 = rows["x_from_coast_self"].values[i]
-x_from_coast_other1 = rows["x_from_coast_other"].values[i]
-angle_acute = rows["angle_acute"].values[i]
-angle_obtuse = rows["angle_obtuse"].values[i]
+
+coast_heading_deg = result["heading_deg"]
 print(
     sat1,
     track_number_self,
     track_number_other,
     lons_inter1,
     lats_inter1,
-    x_from_coast_self1,
-    x_from_coast_other1,
-    angle_acute,
-    angle_obtuse,
 )
-method = "loess"
-# sys.exit()
 f_self = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_self.zfill(3)}.nc"
 f_other = f"../data/{sat1}/ctoh.sla.ref.{sat1}.nindian.{track_number_other.zfill(3)}.nc"
-f_self_smooth = f"../computed/sla_{method}_{frac1}a/track_sla_along_{sat1}_{track_number_self}_{method}_{frac1}.nc"
-f_other_smooth = f"../computed/sla_{method}_{frac1}a/track_sla_along_{sat1}_{track_number_other}_{method}_{frac1}.nc"
+f_guv = (
+    f"../guv/guv_at_intersections_{method}/"
+    f"guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
+)
 ds_self = xr.open_dataset(f_self, engine="netcdf4", decode_times=False)
-ds_self_smooth = xr.open_dataset(f_self_smooth)
-sla_self = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
-sla_self_smooth = ds_self_smooth.sla_smooth
 ds_other = xr.open_dataset(f_other, engine="netcdf4", decode_times=False)
-ds_other_smooth = xr.open_dataset(f_other_smooth)
-sla_other = track_dist_time_asn(ds_other, var_str="sla", units_in="m")
-sla_other_smooth = ds_other_smooth.sla_smooth
+ds_guv = xr.open_dataset(f_guv)
 lons_track_self = ds_self.lon.values
 lats_track_self = ds_self.lat.values
 lon_coast_self = lons_track_self[-1]  # this on coast
 lat_coast_self = lats_track_self[-1]  # this on coast
 lon_equat_self = lons_track_self[0]  # this on equator
 lat_equat_self = lats_track_self[0]  # this on equator
-iself = index_at_lat(ds_self, lat1)
-a1 = local_angle(
-    lons_track_self, lats_track_self, iself, ioff=3, degrees=False
-)
-a1_d = math.degrees(a1)
 lons_track_other = ds_other.lon.values
 lats_track_other = ds_other.lat.values
-iothr = index_at_lat(ds_other, lat1)
-a2 = local_angle(
-    lons_track_other, lats_track_other, iothr, ioff=3, degrees=False
-)
-a2_d = math.degrees(a2)
 lon_equat_other = lons_track_other[0]
 lat_equat_other = lats_track_other[0]
 lon_coast_other = lons_track_other[-1]
 lat_coast_other = lats_track_other[-1]
-gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
-gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
-gc_self_at = gc_self.sel(x=x_from_coast_self1, method="nearest", drop=True)
-gc_other_at = gc_other.sel(
-    x=x_from_coast_other1, method="nearest", drop=True
+iself = index_at_lat(ds_self, lat1)
+a1_d = local_angle(
+    lons_track_self, lats_track_self, iself, ioff=3, degrees=True
 )
-gc_other_at = gc_other_at.interp(time=gc_self_at.time)
+iothr = index_at_lat(ds_other, lat1)
+a2_d = local_angle(
+    lons_track_other, lats_track_other, iothr, ioff=3, degrees=True
+)
 print(f"heading angle {a1_d:.2f} {a2_d:.2f}")
-gu, gv = geostrophic_components(gc_self_at, gc_other_at, a1, a2)
+gu = ds_guv.gu
+gv = ds_guv.gv
 al, ac = along_across_shore_components(gu, gv, coast_heading_deg)
-ac = xr.where(np.abs(ac) > 2, np.nan, ac)
-fig = plt.figure(figsize=(12, 10))
-ax1 = fig.add_subplot(3, 1, 3)
-ax0 = fig.add_subplot(3, 1, 2)
-gu_cut = gu.resample(time="1ME").mean()
-gv_cut = gv.resample(time="1ME").mean()
-gc_self_at_cut = gc_self_at.resample(time="1ME").mean()
-gc_other_at_cut = gc_other_at.resample(time="1ME").mean()
-# gu_cut.plot(ax=ax0, label="track zonal", color="r", linewidth=2)
-al.plot(ax=ax0, label="alongshore", color="r", linewidth=2)
-# gc_self_at_cut.plot(ax=ax0, label=f"gc at {track_number_self}", color="r", linewidth=2)
-ax0.legend()
-ax0.axhline(0, color="k", linestyle="--", linewidth=0.5)
-# add grid lines
-ax0.grid()
-ax0.set_ylabel("along current m/s")
-# gv_cut.plot(ax=ax1, label="track meridional", color="r", linewidth=2)
-ac.plot(ax=ax1, label="crossshore", color="r", linewidth=2)
-# gc_other_at_cut.plot(ax=ax1, label=f"gc at {track_number_other}", color="r", linewidth=2)
+# Low-pass Butterworth filter: remove periodicities < 60 days (for FFT only)
+al_filt = butter_lowpass_1d(al, cutoff_days=60, order=4)
+ac_filt = butter_lowpass_1d(ac, cutoff_days=60, order=4)
+
+fig = plt.figure(figsize=(18, 14))
+gs = fig.add_gridspec(3, 3, hspace=0.35, wspace=0.3)
+
+ax_map = fig.add_subplot(gs[0, :], projection=ccrs.PlateCarree())
+ax_al = fig.add_subplot(gs[1, :2])
+ax_al_psd = fig.add_subplot(gs[1, 2])
+ax_ac = fig.add_subplot(gs[2, :2])
+ax_ac_psd = fig.add_subplot(gs[2, 2])
+
+for label, ax in zip(
+    ["a)", "b)", "c)", "d)", "e)"],
+    [ax_map, ax_al, ax_al_psd, ax_ac, ax_ac_psd],
+):
+    ax.text(
+        0.01,
+        0.99,
+        label,
+        transform=ax.transAxes,
+        ha="left",
+        va="top",
+        fontsize=14,
+        fontweight="bold",
+        zorder=10,
+    )
+
+# --- Along-shore time series ---
+al.plot(ax=ax_al, label="alongshore", color="r", linewidth=2)
+ax_al.axhline(y=0, color="k", linewidth=0.8, linestyle="--")
+ax_al.grid(True, linestyle="--", alpha=0.5)
+ax_al.set_ylabel("along current m/s")
 info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat1} {track_number_self} {track_number_other}"
-plt.text(
-    0.15,
-    0.90,
-    info,
-    transform=ax0.transAxes,
-    fontsize=14,
-    fontweight="bold",
-)
-ax1.legend()
-ax1.axhline(0, color="k", linestyle="--", linewidth=0.5)
-ax1.grid()
-ax1.set_ylabel("cross current m/s")
-ax2 = fig.add_subplot(3, 1, 1, projection=ccrs.PlateCarree())
+ax_al.text(0.15, 0.90, info, transform=ax_al.transAxes, fontsize=14, fontweight="bold")
+
+# --- Cross-shore time series ---
+ac.plot(ax=ax_ac, label="acrossshore", color="b", linewidth=2)
+ax_ac.axhline(y=0, color="k", linewidth=0.8, linestyle="--")
+ax_ac.grid(True, linestyle="--", alpha=0.5)
+ax_ac.set_ylabel("across current m/s")
+
+# Seasonal shading and year markers on both time series
+times_pd = pd.to_datetime(al.time.values)
+year_min, year_max = times_pd.min().year, times_pd.max().year
+for yr in range(year_min, year_max + 1):
+    for ax_ts in [ax_al, ax_ac]:
+        ax_ts.axvline(pd.Timestamp(yr, 1, 1), color="k", linewidth=0.5, alpha=0.5)
+        ax_ts.axvspan(
+            pd.Timestamp(yr, 2, 1), pd.Timestamp(yr, 6, 1),
+            color="yellow", alpha=0.3, zorder=0,
+        )
+        ax_ts.axvspan(
+            pd.Timestamp(yr, 6, 1), pd.Timestamp(yr, 10, 1),
+            color="cyan", alpha=0.3, zorder=0,
+        )
+        ax_ts.axvspan(
+            pd.Timestamp(yr, 10, 1), pd.Timestamp(yr + 1, 1, 1),
+            color="gray", alpha=0.2, zorder=0,
+        )
+ax_al.legend(loc="upper right")
+ax_ac.legend(loc="upper right")
+
+# --- Lomb-Scargle periodograms ---
+
+important_periods = [
+    (365, "365d"), (180, "180d"), (120, "120d"), (90, "90d"),
+]
+period_grid = np.linspace(90, 600, 2000)  # days
+freq_grid = 1.0 / period_grid             # cycles per day
+false_alarm_prob = 0.01  # 1% significance level
+
+for signal, ax_psd, title in [
+    (al, ax_al_psd, "Along-shore"),
+    (ac, ax_ac_psd, "Cross-shore"),
+]:
+    vals = signal.values
+    mask = ~np.isnan(vals)
+    vals_clean = vals[mask]
+    vals_clean = detrend(vals_clean - np.mean(vals_clean))
+    t_days_arr = (times_pd[mask] - times_pd[mask][0]).total_seconds().to_numpy() / 86400.0
+
+    ls = LombScargle(t_days_arr, vals_clean)
+    ls_power = ls.power(freq_grid)
+    # Significance threshold for the given false-alarm probability
+    sig_level = ls.false_alarm_level(false_alarm_prob, method="baluev")
+
+    ax_psd.plot(period_grid, ls_power, color="b", linewidth=1.2)
+    ax_psd.axhline(sig_level, color="green", linewidth=1.2, linestyle="--",
+                    label=f"{100*(1 - false_alarm_prob):.0f}% significance")
+    ax_psd.set_xlim(90, 600)
+    ax_psd.set_xscale("log")
+    ax_psd.set_xlabel("Period (days)")
+    ax_psd.set_ylabel("Lomb-Scargle Power")
+    ax_psd.set_title(f"Lomb-Scargle — {title}")
+    ax_psd.legend(loc="upper right", fontsize=8)
+    ax_psd.grid(True, linestyle="--", alpha=0.5, which="both")
+    ymax = ax_psd.get_ylim()[1]
+    for pval, label in important_periods:
+        ax_psd.axvline(pval, color="r", linewidth=0.8, linestyle="--", alpha=0.7)
+        ax_psd.text(
+            pval, ymax * 0.92, label, rotation=90, va="top", ha="right",
+            fontsize=9, color="r", fontweight="bold",
+        )
+
+
+# --- Map subplot ---
 rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
-rose_cut.plot(ax=ax2, add_colorbar=False, add_labels=False, cmap=cmap1)
-decorate_axis(ax2, "", *TRACKS_REG, step=5)
-ax2.grid()
-ax2.plot(
-    lon1,
-    lat1,
-    c="r",
-    marker="o",
-    markersize=6,
-    markerfacecolor="red",
-    markeredgecolor="black",
-    markeredgewidth=2,
+rose_cut.plot(ax=ax_map, add_colorbar=False, add_labels=False, cmap=cmap1)
+decorate_axis(ax_map, "", *TRACKS_REG, step=5)
+ax_map.grid()
+ax_map.plot(
+    lon1, lat1, c="r", marker="o", markersize=6,
+    markerfacecolor="red", markeredgecolor="black", markeredgewidth=2,
 )
-ax2.scatter(
-    lons_track_self,
-    lats_track_self,
-    marker=".",
-    color="c",
-    s=4,
-)
-ax2.scatter(
-    lons_track_other,
-    lats_track_other,
-    marker=".",
-    color="c",
-    s=4,
-)
+ax_map.scatter(lons_track_self, lats_track_self, marker=".", color="c", s=4)
+ax_map.scatter(lons_track_other, lats_track_other, marker=".", color="c", s=4)
 lonm, latm = get_point_at_distance(
     lon_equat_self, lat_equat_self, lon_coast_self, lat_coast_self, d
 )
 if is_within_region(lonm, latm, *TRACKS_REG):
-    plt.text(
-        lonm,
-        latm,
-        s=track_number_self,
-        fontsize=14,
-        rotation=a1_d,
-        color="k",
+    ax_map.text(
+        lonm, latm, s=track_number_self,
+        fontsize=14, rotation=a1_d, color="k",
+        transform=ccrs.PlateCarree(),
     )
 lonm, latm = get_point_at_distance(
     lon_equat_other, lat_equat_other, lon_coast_other, lat_coast_other, d
 )
 if is_within_region(lonm, latm, *TRACKS_REG):
-    plt.text(
-        lonm,
-        latm,
-        s=track_number_other,
-        fontsize=14,
-        rotation=a2_d,
-        color="k",
+    ax_map.text(
+        lonm, latm, s=track_number_other,
+        fontsize=14, rotation=a2_d, color="k",
+        transform=ccrs.PlateCarree(),
     )
-# plt.savefig(
-#     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
-# )
-# ln_sf(
-#     f"along_shore_timeseries_{sat1}_{track_number_self}_{track_number_other}.png", png_file)
-plt.savefig(f"{png_file}", dpi=300)
+
+print(png_file)
+plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
 plt.show()
 plt.close("all")

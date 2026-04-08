@@ -1,11 +1,23 @@
 import cmocean as cmo
+import importlib.util
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pathlib import Path
 import xarray as xr
 from astropy.timeseries import LombScargle
+from scipy.signal import detrend
 from tools_xtrackm import *
 from tools_shapely import *
+import sys
+
+
+def _load_isobath_heading_func():
+    module_path = Path(__file__).with_name("c.isobath_based_slopes.one_func.py")
+    spec = importlib.util.spec_from_file_location("isobath_one_func", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.isobath_heading_at_point
 
 
 def along_across_shore_components(gu, gv, coast_heading_deg):
@@ -27,9 +39,13 @@ def along_across_shore_components(gu, gv, coast_heading_deg):
 
 
 method = "loess"
+frac1 = "0.05"
 cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
+topo_ds = xr.open_dataset("/home/srinivasu/allData/topo/etopo_60s_io.nc")
+topo_reg = topo_ds.rose.sel(lon=slice(62, 92)).sel(lat=slice(0, 30))
+isobath_heading_at_point = _load_isobath_heading_func()
 
 sat_val = "TP+J1+J2+J3+S6A"
 track_self_val = 155
@@ -43,10 +59,8 @@ rows = df_out.loc[
     & (df_out["track_self"] == track_self_val)
     & (df_out["track_other"] == track_other_val)
 ]
-sigma = 3
-region_bbox_tuple = (70, 5, 95, 30)
+print(len(rows), "length of rows ...")
 
-frac1 = "0.05"
 i = 0
 row = rows.iloc[i]
 sat1 = row["sat"]
@@ -57,16 +71,19 @@ lats_inter1 = row["lats_inter"]
 lon1 = lons_inter1
 lat1 = lats_inter1
 query_point = (lon1, lat1)
-result = coastline_gaussian_tangent(
+result = isobath_heading_at_point(
+    topo=topo_reg,
+    level=-1500,
     query_point=query_point,
-    sigma=sigma,
-    region_bbox_tuple=region_bbox_tuple,
+    method="gaussian",
+    sigma=10.0,
+    step=15,
 )
-print("heading_angle_deg:", result["heading_angle_deg"])
-print("tangent_vector:", result["tangent_vector"])
+print(lon1, lat1)
+print("heading_deg:", result["heading_deg"])
 print("nearest_point:", result["nearest_point"])
-print("distance:", result["distance"])
-coast_heading_deg = result["heading_angle_deg"]
+
+coast_heading_deg = result["heading_deg"]
 print(
     sat1,
     track_number_self,
@@ -107,6 +124,9 @@ print(f"heading angle {a1_d:.2f} {a2_d:.2f}")
 gu = ds_guv.gu
 gv = ds_guv.gv
 al, ac = along_across_shore_components(gu, gv, coast_heading_deg)
+# Low-pass Butterworth filter: remove periodicities < 60 days (for FFT only)
+al_filt = butter_lowpass_1d(al, cutoff_days=60, order=4)
+ac_filt = butter_lowpass_1d(ac, cutoff_days=60, order=4)
 
 fig = plt.figure(figsize=(18, 14))
 gs = fig.add_gridspec(3, 3, hspace=0.35, wspace=0.3)
@@ -153,25 +173,38 @@ ax_al.legend(loc="upper right")
 ax_ac.legend(loc="upper right")
 
 # --- Lomb-Scargle periodograms ---
-t_days = (times_pd - times_pd[0]).total_seconds().to_numpy() / 86400.0
+
 important_periods = [
-    (365, "365d"), (180, "180d"), (120, "120d"), (90, "90d"), (60, "60d"),
+    (365, "365d"), (180, "180d"), (120, "120d"), (90, "90d"),
 ]
+period_grid = np.linspace(90, 600, 2000)  # days
+freq_grid = 1.0 / period_grid             # cycles per day
+false_alarm_prob = 0.01  # 1% significance level
+
 for signal, ax_psd, title in [
     (al, ax_al_psd, "Along-shore"),
     (ac, ax_ac_psd, "Cross-shore"),
 ]:
     vals = signal.values
     mask = ~np.isnan(vals)
-    frequency, power = LombScargle(t_days[mask], vals[mask]).autopower(
-        minimum_frequency=1.0 / 1000, maximum_frequency=1.0 / 10,
-    )
-    periods = 1.0 / frequency
-    ax_psd.plot(periods, power, color="b", linewidth=1)
+    vals_clean = vals[mask]
+    vals_clean = detrend(vals_clean - np.mean(vals_clean))
+    t_days_arr = (times_pd[mask] - times_pd[mask][0]).total_seconds().to_numpy() / 86400.0
+
+    ls = LombScargle(t_days_arr, vals_clean)
+    ls_power = ls.power(freq_grid)
+    # Significance threshold for the given false-alarm probability
+    sig_level = ls.false_alarm_level(false_alarm_prob, method="baluev")
+
+    ax_psd.plot(period_grid, ls_power, color="b", linewidth=1.2)
+    ax_psd.axhline(sig_level, color="green", linewidth=1.2, linestyle="--",
+                    label=f"{100*(1 - false_alarm_prob):.0f}% significance")
+    ax_psd.set_xlim(90, 600)
     ax_psd.set_xscale("log")
     ax_psd.set_xlabel("Period (days)")
-    ax_psd.set_ylabel("Power")
-    ax_psd.set_title(f"Periodogram — {title}")
+    ax_psd.set_ylabel("Lomb-Scargle Power")
+    ax_psd.set_title(f"Lomb-Scargle — {title}")
+    ax_psd.legend(loc="upper right", fontsize=8)
     ax_psd.grid(True, linestyle="--", alpha=0.5, which="both")
     ymax = ax_psd.get_ylim()[1]
     for pval, label in important_periods:
@@ -180,6 +213,7 @@ for signal, ax_psd, title in [
             pval, ymax * 0.92, label, rotation=90, va="top", ha="right",
             fontsize=9, color="r", fontweight="bold",
         )
+
 
 # --- Map subplot ---
 rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(

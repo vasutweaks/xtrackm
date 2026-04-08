@@ -159,30 +159,30 @@ for yr in range(year_min, year_max + 1):
     # Year boundary vertical line on Jan 1
     ax0.axvline(pd.Timestamp(yr, 1, 1), color="k", linewidth=0.5, linestyle="--", alpha=0.5)
 
-# --- Periodogram of along-shore current ---
-from scipy.signal import periodogram as scipy_periodogram
+# --- Lomb-Scargle Periodogram of along-shore current ---
+from astropy.timeseries import LombScargle
 
 al_vals = al.values
 al_times = pd.to_datetime(al.time.values)
-# Compute median sampling interval in days
-dt_days = np.median(np.diff(al_times).astype("timedelta64[D]").astype(float))
-fs = 1.0 / dt_days  # sampling frequency in cycles/day
 
 # Remove NaNs for periodogram
 mask = np.isfinite(al_vals)
 al_clean = al_vals[mask]
+al_times_clean = al_times[mask]
 al_clean = al_clean - np.nanmean(al_clean)
 
-freqs, psd = scipy_periodogram(al_clean, fs=fs, scaling="density")
-# Convert frequency to period in days (skip freq=0)
-freqs = freqs[1:]
-psd = psd[1:]
-periods = 1.0 / freqs
+# Time in days from start
+t_days = (al_times_clean - al_times_clean[0]).total_seconds() / 86400.0
+
+# Define period grid (days)
+periods = np.linspace(30, 600, 2000)
+
+psd = LombScargle(t_days, al_clean).power(1.0 / periods, method="auto")
 
 ax1.semilogy(periods, psd, color="b", linewidth=1)
 ax1.set_xlabel("Period (days)")
-ax1.set_ylabel("PSD (m²/s²/cpd)")
-ax1.set_title("Periodogram of along-shore current")
+ax1.set_ylabel("Lomb-Scargle Power")
+ax1.set_title("Lomb-Scargle Periodogram of along-shore current")
 ax1.set_xlim(0, 600)
 
 # Mark important periodicities

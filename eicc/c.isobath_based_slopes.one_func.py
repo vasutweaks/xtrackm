@@ -209,6 +209,7 @@ if __name__ == "__main__":
         (80.203, 12.015),  # Chennai shelf
         (82.982, 16.837),  # Visakhapatnam area
         (85.442, 18.856),  # Northern Andhra shelf
+        (83.62535053133864, 17.176960950502675), # Test
     )
 
     query_points_names = {
@@ -216,6 +217,7 @@ if __name__ == "__main__":
             "Cuddalore":(80.203, 12.015),  # Chennai shelf
             "Kakinada ":(82.492, 16.387),  # Visakhapatnam area
             "Gopalpur ":(85.442, 18.856),  # Northern Andhra shelf
+            "Test"     :(83.62535053133864, 17.176960950502675), # Test
     }
 
     common_kw = dict(topo=topo, level=-1000, step=15)

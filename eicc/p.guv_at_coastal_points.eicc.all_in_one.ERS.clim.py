@@ -14,11 +14,44 @@ from tools_xtrackm import *
 method = "loess"
 frac1 = "0.05"
 
-sat_val = "TP+J1+J2+J3+S6A"
-sat_val = "S3A"
 sat_val = "ERS1+ERS2+ENV+SRL"
 
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
+drifter_path = "/home/srinivasu/allData/drifter_clim/drifter_monthlymeans.nc"
+ds_drifter = xr.open_dataset(drifter_path)
+drifter_u = ds_drifter["U"]
+drifter_lons = drifter_u["longitude"].values
+drifter_lats = drifter_u["latitude"].values
+
+
+def sample_drifter_u_at_point(lon, lat, max_radius_cells=8):
+    """Nearest-point sample with coastal fallback to nearest valid drifter grid cell."""
+    u_near = drifter_u.sel(longitude=lon, latitude=lat, method="nearest")
+    if np.isfinite(u_near.values).any():
+        return u_near
+
+    ilon0 = int(np.abs(drifter_lons - lon).argmin())
+    ilat0 = int(np.abs(drifter_lats - lat).argmin())
+
+    for radius in range(1, max_radius_cells + 1):
+        i0 = max(0, ilon0 - radius)
+        i1 = min(len(drifter_lons) - 1, ilon0 + radius)
+        j0 = max(0, ilat0 - radius)
+        j1 = min(len(drifter_lats) - 1, ilat0 + radius)
+
+        sub = drifter_u.isel(longitude=slice(i0, i1 + 1), latitude=slice(j0, j1 + 1))
+        valid = np.isfinite(sub.values).any(axis=0)  # lon x lat
+        if not valid.any():
+            continue
+
+        lon2d = drifter_lons[i0 : i1 + 1][:, None]
+        lat2d = drifter_lats[j0 : j1 + 1][None, :]
+        dist2 = (lon2d - lon) ** 2 + (lat2d - lat) ** 2
+        dist2 = np.where(valid, dist2, np.inf)
+        ii, jj = np.unravel_index(np.argmin(dist2), dist2.shape)
+        return drifter_u.isel(longitude=i0 + ii, latitude=j0 + jj)
+
+    return u_near
 
 # Skip the first point (lowest latitude)
 df_out = df.sort_values("lats_inter").iloc[1:].reset_index(drop=True)
@@ -55,6 +88,11 @@ for i, row in df_out.iterrows():
     # Monthly climatology (mean of each calendar month across all years)
     gs_clim = gs.groupby("time.month").mean("time")
     gu_clim = gu.groupby("time.month").mean("time")
+    drifter_u_clim = sample_drifter_u_at_point(lon1, lat1)
+    # Dataset month index is 0..11 (0=Jan); convert to 1..12 for direct plotting.
+    drifter_u_clim = drifter_u_clim.assign_coords(
+        ClimatologicalMonth=drifter_u_clim["ClimatologicalMonth"] + 1
+    )
 
     point_data.append(
         dict(
@@ -64,7 +102,9 @@ for i, row in df_out.iterrows():
             lon1=lon1,
             lat1=lat1,
             gs=gs,
+            gs_clim=gs_clim,
             gu_clim=gu_clim,
+            drifter_u_clim=drifter_u_clim,
         )
     )
 
@@ -144,7 +184,9 @@ for idx, entry in enumerate(point_data):
     ax_ts = fig.add_subplot(gs_layout[row, 1])
     color = POINT_COLORS[idx]
     label = POINT_LABELS[idx]
+    gs_clim = entry["gs_clim"]
     gu_clim = entry["gu_clim"]
+    drifter_u_clim = entry["drifter_u_clim"]
 
     # Seasonal background shading (month-based x-axis)
     ax_ts.axvspan(2 - 0.5, 5 + 0.5, color="yellow", alpha=0.15, zorder=0)   # Feb–May
@@ -167,6 +209,17 @@ for idx, entry in enumerate(point_data):
         gu_clim.values,
         color=color,
         linewidth=3,
+        label="Altimeter u",
+        zorder=2,
+    )
+
+    ax_ts.plot(
+        MONTHS,
+        drifter_u_clim.values,
+        color="black",
+        linewidth=1.8,
+        linestyle="--",
+        label="Drifter u",
         zorder=2,
     )
 
@@ -200,8 +253,15 @@ for idx, entry in enumerate(point_data):
             Patch(facecolor="cyan",   alpha=0.4, edgecolor="none", label="Jun–Sep"),
             Patch(facecolor="gray",   alpha=0.4, edgecolor="none", label="Oct–Dec"),
         ]
-        ax_ts.legend(handles=handles, loc="upper right", fontsize=12, ncol=3)
-        ax_ts.set_title("Monthly climatology of |u| (gs)", fontsize=11)
+        line_handles, line_labels = ax_ts.get_legend_handles_labels()
+        ax_ts.legend(
+            handles=line_handles + handles,
+            labels=line_labels + [h.get_label() for h in handles],
+            loc="upper right",
+            fontsize=10,
+            ncol=3,
+        )
+        ax_ts.set_title("Monthly climatology of u (altimeter vs drifter)", fontsize=11)
 
 # fig.suptitle(
 #     f"Current speed at EICC coastal intersection points — {sat_val}",
@@ -213,4 +273,5 @@ out_png = f"speed_timeseries_allinone_{sat_val}.png"
 plt.savefig(out_png, dpi=150, bbox_inches="tight")
 plt.show()
 plt.close("all")
+ds_drifter.close()
 print(f"Saved: {out_png}")

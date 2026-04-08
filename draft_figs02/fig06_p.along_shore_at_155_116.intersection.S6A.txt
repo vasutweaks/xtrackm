@@ -1,2 +1,6 @@
-a) An intersection point very close to the east coast of India belonging to the satellite mission TP+J1+J2+J3+S6A. b) and c) show thirty year timeseries of along shore and across shore current components at the
-intersection of two satellite tracks (155, 116).
+Figure 6. Along-shore and cross-shore geostrophic current variability at a coastal-track intersection (TP+J1+J2+J3+S6A).
+(a) Map of the study region showing the altimeter track intersection near (83.63°E, 17.18°N) (red marker), with tracks 155 and 116 overlaid. The local coastal orientation was estimated from the -1500 m isobath, and geostrophic velocity was rotated into along-shore and cross-shore components.
+(b) Along-shore current time series.
+(c) Lomb-Scargle periodogram of the along-shore current.
+(d) Cross-shore current time series.
+(e) Lomb-Scargle periodogram of the cross-shore current. In (b) and (d), shaded backgrounds indicate seasonal windows (Feb-Jun: yellow; Jun-Oct: cyan; Oct-Jan: gray), and vertical lines mark year boundaries. In (c) and (e), the dashed green line indicates the 99% significance level, and dashed red lines mark reference periods (90, 120, 180, and 365 days).

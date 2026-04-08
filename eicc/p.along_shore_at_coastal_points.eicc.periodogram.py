@@ -33,8 +33,6 @@ cmap1 = cmo.cm.diff
 d = 1.5
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
 
-sat_val = "ERS1+ERS2+ENV+SRL"
-sat_val = "TP+J1+J2+J3+S6A"
 sat_val = "S3A"
 
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
