@@ -56,7 +56,7 @@ rama_data_dir = "/home/srinivasu/allData/rama/cur/"
 guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 out_match_csv = "rama_guv_c_nearest_global_matches.ek.csv"
 EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd/"
-EKMAN_DEPTH = "10"
+EKMAN_DEPTH = "0"
 matched_rows_all = []
 
 df_all_list = []

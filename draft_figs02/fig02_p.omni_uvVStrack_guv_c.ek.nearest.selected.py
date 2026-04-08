@@ -90,7 +90,7 @@ SELECT_TRACK_SELF = '522'
 SELECT_TRACK_OTHER = '279'
 
 EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
-EKMAN_DEPTH = "15"
+EKMAN_DEPTH = "0"
 # TP+J1+J2+J3+S6A BD09 53 14
 # S3A BD10 522 279 
 
@@ -116,10 +116,10 @@ ds_omni = xr.open_dataset(omni_file)
 print(ds_omni)
 omni_u = ds_omni.u_current.interp(current_depth=dpth)
 # omni_u = omni_u.rolling(time=10, center=True).mean()
-omni_u = omni_u
+omni_u = omni_u.resample(time="1D").mean()
 omni_v = ds_omni.v_current.interp(current_depth=dpth)
 # omni_v = omni_v.rolling(time=10, center=True).mean()
-omni_v = omni_v
+omni_v = omni_v.resample(time="1D").mean()
 N = omni_v.count().item()
 
 df_selected = df_all[
@@ -140,6 +140,7 @@ track_number_self = str(row["track_self"])
 track_number_other = str(row["track_other"])
 lon1 = row["lons_inter"]
 lat1 = row["lats_inter"]
+# msla_u_at = aviso_u.interp(longitude=lon_omni, latitude=lat_omni)
 msla_u_at = aviso_u.interp(longitude=lon1, latitude=lat1)
 distance_km = row["distance_km"]
 angle_acute = row["angle_acute"]
@@ -227,6 +228,11 @@ ax1.axhline(0, color="k", linestyle="--", linewidth=0.5)
 
 corr = xs.pearson_r(gu_pair, omni_u_pair, dim="time", skipna=True)
 corr1 = corr.item()
+print(f"Correlation between gu and omni u: {corr1}")
+
+corr = xs.pearson_r(gu_ek_pair, omni_u_pair, dim="time", skipna=True)
+corr1 = corr.item()
+print(f"Correlation between gu and omni u: {corr1}")
 
 info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km:.2f} km"
 print(f"Correlation between gu and omni u: {corr1}")

@@ -14,8 +14,12 @@ from scipy.stats import linregress
 from tools_shapely import *
 from tools_xtrackm import *
 import sys
+from pathlib import Path
 
 # copilot --resume=d419a1e5-878f-477e-813b-3b06f3d9a50b
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 def build_unique_str(sat, row):
     track_self = track_to_str(row["track_self"])
@@ -117,6 +121,13 @@ for i, row in df_out.iterrows():
     trend_fit = xr.DataArray(
         fit_vals, coords=gs.coords, dims=gs.dims, name="trend_fit"
     )
+    baseline_speed = float(fit_vals[0])
+    delta_30y = float((trend_res.slope * 365.25) * 30.0)
+    pct_change_30y = (
+        (delta_30y / baseline_speed) * 100.0
+        if baseline_speed != 0.0
+        else np.nan
+    )
 
     point_data.append(
         dict(
@@ -131,6 +142,9 @@ for i, row in df_out.iterrows():
             times=times,
             slope_yr=trend_res.slope * 365.25,
             stderr_yr=trend_res.stderr * 365.25,
+            baseline_speed=baseline_speed,
+            delta_30y=delta_30y,
+            pct_change_30y=pct_change_30y,
             pvalue=trend_res.pvalue,
             significant=trend_res.pvalue < 0.05,
         )
@@ -240,10 +254,24 @@ for idx, entry in enumerate(point_data):
     )
     # Slope annotation: gray if not significant, colored if significant
     slope_color = color if entry["significant"] else "0.6"
+    print(
+        f"{entry['slope_yr']:+.4f} m/s/yr",
+        f"{entry['pct_change_30y']:+.2f}% over 30y",
+        entry["significant"],
+    )
     ax_map.text(
         entry["lon1"] + 0.18,
         entry["lat1"] - 0.45,
         f"{entry['slope_yr']:+.4f} m/s/yr",
+        fontsize=7,
+        color=slope_color,
+        transform=ccrs.PlateCarree(),
+        zorder=6,
+    )
+    ax_map.text(
+        entry["lon1"] + 0.18,
+        entry["lat1"] - 0.70,
+        f"{entry['pct_change_30y']:+.1f}%/30y",
         fontsize=7,
         color=slope_color,
         transform=ccrs.PlateCarree(),
@@ -386,8 +414,6 @@ for idx, entry in enumerate(point_data):
 #     fontweight="bold",
 #     y=1.002,
 # )
-out_png = f"speed_timeseries_allinone_{sat_val}.png"
-plt.savefig(out_png, dpi=150, bbox_inches="tight")
+plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
 plt.show()
 plt.close("all")
-print(f"Saved: {out_png}")

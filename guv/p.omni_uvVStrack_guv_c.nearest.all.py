@@ -28,12 +28,26 @@ def get_track_geometry(sat, track_number):
     return lons, lats, lon_equat, lat_equat, lon_coast, lat_coast, angle_deg
 
 
+def build_unique_str(sat, row):
+    track_self = track_to_str(row["track_self"])
+    track_other = track_to_str(row["track_other"])
+    return f"{sat}_{track_self}_{track_other}"
+
+
+def track_to_str(track):
+    track_f = float(track)
+    if track_f.is_integer():
+        return str(int(track_f))
+    return str(track)
+
+
 method = "loess"
 cmap1 = cmo.cm.diff
 d = 1.5
 height, width = 9, 9
 frac1 = "0.05"
 dpth = 15.0
+MSLA_MATCH_TOLERANCE = np.timedelta64(20, "D")
 
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")
 rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
@@ -41,10 +55,16 @@ rose_cut = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
 )
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/"
 guv_dir = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
-out_match_csv = "omni_guv_c_nearest_global_matches.csv"
-matched_rows_all = []
+out_match_csv = "omni_guv_c_nearest_global_matches.ek.csv"
 omni_data_dir = "/home/srinivasu/allData/MB_cleaned/raju_omni_clean"
-
+aviso_msla_uv_dir = "/home/srinivasu/allData/aviso/msla_uv/"
+ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u.nc")
+ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v.nc")
+print(ds_aviso_u)
+aviso_u = ds_aviso_u.u
+aviso_v = ds_aviso_v.v
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
+EKMAN_DEPTH = "0"
 # BD08_current_sst.nc
 
 df_all_list = []
@@ -52,7 +72,7 @@ for sat in sats_new:
     df_all_list.append(pd.read_csv(f"tracks_intersections_{sat}_1.csv"))
 df_all = pd.concat(df_all_list, ignore_index=True)
 
-
+matched_rows_all = []
 for omni_id in omni_d.keys():
     lon_omni, lat_omni = omni_d[omni_id]
     print(omni_id, lon_omni, lat_omni)
@@ -68,10 +88,10 @@ for omni_id in omni_d.keys():
     print(ds_omni)
     omni_u = ds_omni.u_current.interp(current_depth=dpth)
     # omni_u = omni_u.rolling(time=10, center=True).mean()
-    omni_u = omni_u
+    omni_u = omni_u.resample(time="1D").mean()
     omni_v = ds_omni.v_current.interp(current_depth=dpth)
     # omni_v = omni_v.rolling(time=10, center=True).mean()
-    omni_v = omni_v
+    omni_v = omni_v.resample(time="1D").mean()
     N = omni_v.count().item()
 
     # print(omni_v.count().item())
@@ -88,6 +108,12 @@ for omni_id in omni_d.keys():
         angle_acute = row["angle_acute"]
         angle_obtuse = row["angle_obtuse"]
 
+        unique_str = build_unique_str(sat, row)
+        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
+        ds_ek = xr.open_dataset(f_ek)
+        u_ek = ds_ek['u_at']
+        v_ek = ds_ek['v_at']
+
         if abs(lat1) < 5:
             continue
 
@@ -101,6 +127,12 @@ for omni_id in omni_d.keys():
             angle_acute,
             angle_obtuse,
         )
+        print((
+        f"\nSELECT_SAT = '{sat}'"
+        f"\nSELECT_OMNI_ID = '{omni_id}'"
+        f"\nSELECT_TRACK_SELF = '{track_number_self}'"
+        f"\nSELECT_TRACK_OTHER = '{track_number_other}'"
+        ))
 
         f_guv = f"{guv_dir}/guv_at_intersection_{sat}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
         if not os.path.exists(f_guv):
@@ -132,6 +164,7 @@ for omni_id in omni_d.keys():
 
         gu_cut = gu
         gv_cut = gv
+        msla_u_at = aviso_u.interp(longitude=lon1, latitude=lat1)
 
         # Collocate omni at track-gu timestamps; avoid sat-dependent smoothing.
         omni_u_match = omni_u.reindex(
@@ -139,14 +172,28 @@ for omni_id in omni_d.keys():
             method="nearest",
             tolerance=np.timedelta64(24, "h"),
         )
-        flat = (omni_u_match.diff("time") == 0).reindex(time=omni_u_match.time, fill_value=False)
-        omni_u_match = omni_u_match.where(~flat)
+        ek_u_match = u_ek.reindex(
+            time=gu_cut.time,
+            method="nearest",
+            tolerance=np.timedelta64(24, "h"),
+        )
+        msla_u_match = msla_u_at.reindex(
+            time=gu_cut.time,
+            method="nearest",
+            tolerance=MSLA_MATCH_TOLERANCE,
+        )
+        if int(msla_u_match.count()) == 0:
+            msla_u_match = msla_u_at.reindex(time=gu_cut.time, method="nearest")
+        # flat = (omni_u_match.diff("time") == 0).reindex(time=omni_u_match.time, fill_value=False)
+        # omni_u_match = omni_u_match.where(~flat)
         valid = np.isfinite(gu_cut) & np.isfinite(omni_u_match)
         gu_pair = gu_cut.where(valid)
         omni_u_pair = omni_u_match.where(valid)
+        ek_u_pair = ek_u_match.where(valid)
+        gu_ek_pair = gu_pair + ek_u_pair
 
-        df_pairs = xr.Dataset({"gu": gu_pair, "omni_u": omni_u_pair}).to_dataframe().reset_index()
-        df_pairs = df_pairs.dropna(subset=["gu", "omni_u"])
+        df_pairs = xr.Dataset({"gu": gu_pair, "omni_u": omni_u_pair, "u_ek": ek_u_pair}).to_dataframe().reset_index()
+        df_pairs = df_pairs.dropna(subset=["gu", "omni_u", "u_ek"])
         matched_pairs = len(df_pairs)
         if matched_pairs > 0:
             df_pairs["sat"] = sat
@@ -168,6 +215,7 @@ for omni_id in omni_d.keys():
                         "timestamp",
                         "gu",
                         "omni_u",
+                        "u_ek",
                     ]
                 ]
             )
@@ -181,6 +229,10 @@ for omni_id in omni_d.keys():
         ax1 = fig.add_subplot(2, 1, 2)
         omni_u_pair.plot(ax=ax1, color="r", linewidth=2, label="omni")
         gu_pair.plot(ax=ax1, color="k", linewidth=2, label="track")
+        # gu_ek_pair.plot(ax=ax1, color="b", linewidth=2, label="track+ekman")
+        msla_u_match.plot(ax=ax1, color="c", linewidth=2, label="msla")
+        ax1.set_xlim(pd.to_datetime(gu_cut.time.values[0]), pd.to_datetime(gu_cut.time.values[-1]))
+        ax1.set_ylabel("zonal velocity m/s")
 
         corr = xs.pearson_r(gu_pair, omni_u_pair, dim="time", skipna=True)
         corr1 = corr.item()

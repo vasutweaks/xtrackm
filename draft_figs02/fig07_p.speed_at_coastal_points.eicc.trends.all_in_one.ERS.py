@@ -14,8 +14,12 @@ from scipy.stats import linregress
 from tools_shapely import *
 from tools_xtrackm import *
 import sys
+from pathlib import Path
 
 # copilot --resume=d419a1e5-878f-477e-813b-3b06f3d9a50b
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 
 def build_unique_str(sat, row):
     track_self = track_to_str(row["track_self"])
@@ -387,8 +391,6 @@ for idx, entry in enumerate(point_data):
 #     fontweight="bold",
 #     y=1.002,
 # )
-out_png = f"speed_timeseries_allinone_{sat_val}.png"
-plt.savefig(out_png, dpi=150, bbox_inches="tight")
+plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
 plt.show()
 plt.close("all")
-print(f"Saved: {out_png}")
