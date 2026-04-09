@@ -1,0 +1,9 @@
+ ! NOAA/PMEL TMAP
+ ! FERRET v7.6 (optimized)
+ ! Linux 2.6.32-754.29.2.el6.x86_64 64-bit - 06/25/20
+ !  9-Apr-26 19:32     
+
+GO "$HOME/.ferret"
+use gc_at_HY2B_338_loess_0.05.nc
+sh da/f
+q

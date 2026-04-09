@@ -1,3 +1,45 @@
+utilizin functionlities from p.radar_uvVStrack_guv_c.at.intersections.py and p.intersection_candidates.allsats.py
+create python script p.radar_rotatedVStrack_gc_c.along.intersections.py to
+to read radar wise pickled file to read interesection tracks
+read gc file computed at ../guv/guv_at_intersections_loess/gc_at_{sat}_{track_number}_loess_0.05.nc
+extrack and rotate radar uv files
+compare with gc
+
+we need to redo this whole again. firstly gc files are located at 
+GC_DIR = f"../guv/gc_along_intersections_{METHOD}"
+These fields are not at intersection points, these gc are computed
+along the track. so these are a function of x (distance from coast) and time.
+We can equaivaltely take f_track for lons and lats.
+Now radar is a 3field (xyt), when we extract it along the traversing track
+it becomes 2d (time VS a new dimension along the extraction). This new
+dimenion can be x.
+sla_asn = track_dist_time_asn(ds_self, var_str="sla", units_in="m")
+We need to compare this with two dim gc fields. If we make a correlation
+along time, we get 1d corr variable. (which can be plotted as function of x)
+While plotting we have to do a side by side plot x-time plots (contourf of
+    xarray)
+
+
+Survery radar data fields and check the resolution
+along track resolution is ~7km
+What is the best way to extract radar fileds at intesecting part of the 
+intersection tracks.
+We will have to compare track derived cross track geostrophic currents with
+radar u, v rotated in the direction of cross track
+
+In the script c.intersection_candidates.allsats.py
+for each radar get time ranges, it is in ../lib/namesm.py
+get sats time limits, see ../lib/tools_xtrackm.py
+if there is no overlap between them omit them
+from being listed
+
+extend the script p.intersection_candidates.allsats.py to
+For each radar region
+1. Draw a Bay Of Bengal cartopy map
+2. Draw radar polygon regions
+3. plot the tracks passing through, with their tracknumbers annotated along the
+sloping line
+
 fix the time axis alignment of radar and gu in
 p.radar_uvVStrack_guv_c.at.intersections.py similar to
 p.rama_uvVStrack_guv_c.nearest.all.py
