@@ -6,11 +6,12 @@ import pandas as pd
 import xarray as xr
 
 SAT = "TP+J1+J2+J3+S6A"
+SAT = "TPN+J1N+J2N+J3N"
 CSV_NO_EK = f"drifter_ve_vs_gu_{SAT}.csv"
 CSV_W_EK = f"drifter_ve_vs_gu_ek_{SAT}.csv"
 OUT_PNG = f"scatter_drifter_ve_vs_gu_ww_ek_{SAT}.png"
 COAST_DIST_PATH = "~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc"
-PROXIMITY_DIST_M = 1000000.0
+PROXIMITY_DIST_M = 100_000.0
 MAX_ABS_TIME_DIFF_DAYS = None
 
 

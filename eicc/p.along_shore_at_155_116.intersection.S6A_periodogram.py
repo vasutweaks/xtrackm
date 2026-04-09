@@ -10,6 +10,7 @@ from scipy.signal import detrend
 from tools_xtrackm import *
 from tools_shapely import *
 import sys
+from c.isobath_based_slopes.one_func import isobath_heading_at_point
 
 
 def _load_isobath_heading_func():

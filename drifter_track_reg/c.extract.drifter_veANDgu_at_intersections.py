@@ -6,14 +6,17 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+method = "loess"
+frac1 = "0.05"
 SAT = "TP+J1+J2+J3+S6A"
+SAT = "TPN+J1N+J2N+J3N"
 DRIFTER_DIR = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 INTERSECTION_CSV = f"tracks_intersections_{SAT}_1.csv"
 CANDIDATE_PICKLE_DIR = "candidate_pickles"
-GUV_DIR = "/home/srinivasu/xtrackm/guv/guv_at_intersections"
+GUV_DIR = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
 OUTPUT_CSV = f"drifter_ve_vs_gu_{SAT}.csv"
-GUV_SUFFIX = "0.05"
-
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
+EKMAN_DEPTH = "0"
 
 def decode_id(raw_id):
     if isinstance(raw_id, (bytes, np.bytes_)):
@@ -61,7 +64,7 @@ def closest_obs_index(ds_drifter, lon0, lat0):
 
 
 def load_guv_series(unique_str):
-    guv_path = os.path.join(GUV_DIR, f"guv_at_intersection_{unique_str}_{GUV_SUFFIX}.nc")
+    guv_path = os.path.join(GUV_DIR, f"guv_at_intersection_{unique_str}_{method}_{frac1}.nc")
     if not os.path.exists(guv_path):
         return None
     with xr.open_dataset(guv_path) as ds_g:
@@ -80,6 +83,7 @@ def main():
     rows_out = []
 
     for _, row in inter_df.iterrows():
+
         unique_str = build_unique_str(SAT, row)
         lon_inter = float(row["lons_inter"])
         lat_inter = float(row["lats_inter"])
@@ -87,15 +91,23 @@ def main():
             continue
 
         pickle_path = os.path.join(CANDIDATE_PICKLE_DIR, f"{unique_str}.pkl")
+
+        f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
+        ds_ek = xr.open_dataset(f_ek)
+        u_ek = ds_ek['u_at']
+        v_ek = ds_ek['v_at']
         if not os.path.exists(pickle_path):
+            print(f"No pickle for {unique_str}")
             continue
         with open(pickle_path, "rb") as f:
             candidate_ids = pickle.load(f)
         if len(candidate_ids) == 0:
+            print(f"No candidates in pickle for {unique_str}")
             continue
 
         ds_guv = load_guv_series(unique_str)
         if ds_guv is None:
+            print(f"No GUV data for {unique_str}")
             continue
 
         for drifter_id in candidate_ids:
@@ -117,6 +129,8 @@ def main():
                 continue
 
             gu_interp = ds_guv["gu"].interp(time=drifter_time)
+            u_ek1 = u_ek.sel(time=drifter_time, method="nearest").values
+            v_ek1 = v_ek.sel(time=drifter_time, method="nearest").values
             gu_at_time = gu_interp.values
 
             # Always retain the nearest native GUV timestamp for temporal offset checks.
@@ -140,6 +154,7 @@ def main():
                     "lat_inter": lat_inter,
                     "drifter_id": drifter_id,
                     "gu": float(gu_at_time),
+                    "u_ek": float(u_ek1),
                     "drifter_ve": float(drifter_ve),
                     "drifter_time": str(drifter_time),
                     "gu_time": str(gu_time),

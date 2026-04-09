@@ -1,3 +1,7 @@
+Write a python script to make two subplot(rows), the top row contains figure
+from satellite_mission_time_spans_new.py and bottom row contains figure from
+p.spatio_temporal_valid_perc.bar.py
+
 context:
 Before any processing (including gc computation) the original all data is realinged from coast to equator (have a look at track_dist_time_asn from tools_xtrackm), this flipped coast-equator distance variable is called x.
 ∂η/∂x is always taken in the same physical direction (toward equator).

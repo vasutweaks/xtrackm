@@ -66,7 +66,7 @@ def build_drifter_meta(drifter_files, sat_tsta_o, sat_tend_o):
 
 data_loc = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 drifter_files = sorted(glob.glob(f"{data_loc}/drifter_6h_*.nc"))
-sat = "TP+J1+J2+J3+S6A"
+sat = "TPN+J1N+J2N+J3N"
 inter_df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
 sat_tsta_o, sat_tend_o = get_time_limits_np64(sat)
 dist_threshold = 0.30

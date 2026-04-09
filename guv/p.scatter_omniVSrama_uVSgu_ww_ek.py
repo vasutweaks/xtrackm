@@ -14,16 +14,19 @@ MIN_DISTANCE_KM = None
 MAX_DISTANCE_KM = 250.0
 
 
-def load_xy(csv_path, y_col, with_ekman=False):
-    df = pd.read_csv(csv_path)
-
+def filter_by_distance(df):
     dist = df["distance_km"].to_numpy(dtype=float)
     keep = np.isfinite(dist)
     if MIN_DISTANCE_KM is not None:
         keep &= dist >= float(MIN_DISTANCE_KM)
     if MAX_DISTANCE_KM is not None:
         keep &= dist <= float(MAX_DISTANCE_KM)
-    df = df.loc[keep].copy()
+    return df.loc[keep].copy()
+
+
+def load_xy(csv_path, y_col, with_ekman=False):
+    df = pd.read_csv(csv_path)
+    df = filter_by_distance(df)
 
     x = df["gu"].to_numpy(dtype=float)
     if with_ekman:
@@ -36,6 +39,52 @@ def load_xy(csv_path, y_col, with_ekman=False):
     y = y[valid]
 
     return x, y, len(df)
+
+
+def print_variance_decomposition(csv_path, label, total_col):
+    df = filter_by_distance(pd.read_csv(csv_path))
+    gu = df["gu"].to_numpy(dtype=float)
+    u_ek = df["u_ek"].to_numpy(dtype=float)
+    total_ref = df[total_col].to_numpy(dtype=float)
+    valid = np.isfinite(gu) & np.isfinite(u_ek) & np.isfinite(total_ref)
+    gu = gu[valid]
+    u_ek = u_ek[valid]
+    total_ref = total_ref[valid]
+
+    if gu.size < 2:
+        print(f"{label} variance decomposition: insufficient points")
+        return
+
+    total = gu + u_ek
+    var_total = np.var(total, ddof=0)
+    var_total_ref = np.var(total_ref, ddof=0)
+    var_gu = np.var(gu, ddof=0)
+    var_uek = np.var(u_ek, ddof=0)
+    cov_gu_uek = np.mean((gu - np.mean(gu)) * (u_ek - np.mean(u_ek)))
+    rhs = var_gu + var_uek + 2.0 * cov_gu_uek
+
+    if var_total_ref == 0.0:
+        n_var_gu = np.nan
+        n_var_uek = np.nan
+        n_2cov = np.nan
+    else:
+        n_var_gu = var_gu / var_total_ref
+        n_var_uek = var_uek / var_total_ref
+        n_2cov = (2.0 * cov_gu_uek) / var_total_ref
+
+    print(f"\n{label} variance decomposition (N={gu.size})")
+    print(f"Var({total_col}) [total ref]   = {var_total_ref:.8f}")
+    print(f"Var(gu + u_ek) [LHS]      = {var_total:.8f}")
+    print(f"Var(gu)                    = {var_gu:.8f}")
+    print(f"Var(u_ek)                  = {var_uek:.8f}")
+    print(f"Cov(gu, u_ek)              = {cov_gu_uek:.8f}")
+    print(f"Var(gu)+Var(u_ek)+2*Cov    = {rhs:.8f}")
+    print(f"Closure error (LHS - RHS)  = {var_total - rhs:.8e}")
+    print(f"Normalized by Var({total_col}):")
+    print(f"  Var(gu)/Var({total_col})   = {n_var_gu:.6f}")
+    print(f"  Var(u_ek)/Var({total_col}) = {n_var_uek:.6f}")
+    print(f"  2*Cov/Var({total_col})     = {n_2cov:.6f}")
+    print(f"  Sum normalized terms        = {n_var_gu + n_var_uek + n_2cov:.6f}")
 
 
 def add_panel(ax, x, y, title, ylabel, xlabel, extent=None):
@@ -186,6 +235,8 @@ def main():
 
     print(f"Rows after distance filter | RAMA no-ek: {n_rama_no}, RAMA ek: {n_rama_ek}")
     print(f"Rows after distance filter | OMNI no-ek: {n_omni_no}, OMNI ek: {n_omni_ek}")
+    print_variance_decomposition(RAMA_EK_CSV, "RAMA (with Ekman file)", "rama_u")
+    print_variance_decomposition(OMNI_EK_CSV, "OMNI (with Ekman file)", "omni_u")
     print(f"Saved {OUT_PNG}")
 
 

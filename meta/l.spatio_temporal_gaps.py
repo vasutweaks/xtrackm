@@ -7,6 +7,7 @@ import pandas as pd
 import xarray as xr
 # import funcformatter
 from tools_xtrackm import sats_new, track_dist_time_asn
+from geopy import distance
 # copilot --resume=ec9cb701-6d76-436d-a10f-d288254df66d
 rows = []
 
@@ -17,6 +18,7 @@ for sat in sats_new[:]:
         track_number = ds.Pass
         lons_track = ds.lon.values
         lats_track = ds.lat.values
+        track_len = distance.distance((lats_track[0], lons_track[0]), (lats_track[-1], lons_track[-1])).km
         if len(lons_track) == 0:
             print(f, "zero length")
             continue
@@ -41,7 +43,8 @@ for sat in sats_new[:]:
             "perc_valid_x": round(perc_valid_x, 2),
             "perc_valid_time": round(perc_valid_time, 2),
             "perc_valid_xt": round(perc_valid_xt, 2),
-            "lon_equat": lon_equat
+            "lon_equat": lon_equat,
+            "track_len": track_len
         })
 
         # counts = sla_asn.count(dim="time")
