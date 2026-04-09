@@ -87,6 +87,26 @@ def print_variance_decomposition(csv_path, label, total_col):
     print(f"  Sum normalized terms        = {n_var_gu + n_var_uek + n_2cov:.6f}")
 
 
+def rmse(x, y):
+    if x.size == 0 or y.size == 0:
+        return np.nan
+    return float(np.sqrt(np.mean((y - x) ** 2)))
+
+
+def print_rmse_change(label, x_before, y_before, x_after, y_after):
+    rmse_before = rmse(x_before, y_before)
+    rmse_after = rmse(x_after, y_after)
+    delta = rmse_after - rmse_before
+    pct = np.nan
+    if np.isfinite(rmse_before) and rmse_before != 0.0:
+        pct = 100.0 * delta / rmse_before
+
+    print(f"\n{label} RMSE change (y vs x)")
+    print(f"RMSE before Ekman = {rmse_before:.4f} m/s")
+    print(f"RMSE after Ekman  = {rmse_after:.4f} m/s")
+    print(f"Change (after-before) = {delta:+.4f} m/s ({pct:+.2f}%)")
+
+
 def add_panel(ax, x, y, title, ylabel, xlabel, extent=None):
     if x.size < 3:
         ax.text(
@@ -235,6 +255,8 @@ def main():
 
     print(f"Rows after distance filter | RAMA no-ek: {n_rama_no}, RAMA ek: {n_rama_ek}")
     print(f"Rows after distance filter | OMNI no-ek: {n_omni_no}, OMNI ek: {n_omni_ek}")
+    print_rmse_change("RAMA", x_rama_no, y_rama_no, x_rama_ek, y_rama_ek)
+    print_rmse_change("OMNI", x_omni_no, y_omni_no, x_omni_ek, y_omni_ek)
     print_variance_decomposition(RAMA_EK_CSV, "RAMA (with Ekman file)", "rama_u")
     print_variance_decomposition(OMNI_EK_CSV, "OMNI (with Ekman file)", "omni_u")
     print(f"Saved {OUT_PNG}")

@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-SAT = "TP+J1+J2+J3+S6A"
 SAT = "TPN+J1N+J2N+J3N"
+SAT = "TP+J1+J2+J3+S6A"
 CSV_NO_EK = f"drifter_ve_vs_gu_{SAT}.csv"
 CSV_W_EK = f"drifter_ve_vs_gu_ek_{SAT}.csv"
 OUT_PNG = f"scatter_drifter_ve_vs_gu_ww_ek_{SAT}.png"
@@ -92,6 +92,40 @@ def prepare_xy_with_ek(df):
     return x[valid], y[valid]
 
 
+def print_rmse_and_variance_stats(df_no_ek, df_w_ek):
+    x_no_ek, y_no_ek = prepare_xy(df_no_ek, "gu")
+    x_w_ek, y_w_ek = prepare_xy_with_ek(df_w_ek)
+
+    rmse_no_ek = np.sqrt(np.mean((y_no_ek - x_no_ek) ** 2))
+    rmse_w_ek = np.sqrt(np.mean((y_w_ek - x_w_ek) ** 2))
+    print(f"RMSE before Ekman correction (drifter_ve vs gu): {rmse_no_ek:.6f} m/s")
+    print(f"RMSE after Ekman correction  (drifter_ve vs gu+u_ek): {rmse_w_ek:.6f} m/s")
+
+    gu = df_w_ek["gu"].to_numpy(dtype=float)
+    u_ek = df_w_ek["u_ek"].to_numpy(dtype=float)
+    drifter = df_w_ek["drifter_ve"].to_numpy(dtype=float)
+    valid = np.isfinite(gu) & np.isfinite(u_ek) & np.isfinite(drifter)
+    gu = gu[valid]
+    u_ek = u_ek[valid]
+    drifter = drifter[valid]
+
+    var_drifter = np.var(drifter, ddof=0)
+    if var_drifter <= 0.0:
+        print("Variance stats skipped: drifter_ve variance is zero or invalid.")
+        return
+
+    var_gu = np.var(gu, ddof=0)
+    var_u_ek = np.var(u_ek, ddof=0)
+    var_gu_plus_uek = np.var(gu + u_ek, ddof=0)
+
+    print(
+        "Relative variance out of drifter variance: "
+        f"gu={100.0 * var_gu / var_drifter:.2f}%, "
+        f"u_ek={100.0 * var_u_ek / var_drifter:.2f}%, "
+        f"(gu+u_ek)={100.0 * var_gu_plus_uek / var_drifter:.2f}%"
+    )
+
+
 def plot_panel(ax, x, y, panel_title, x_label, y_label):
     slope, intercept, r, stderr = fit_and_stats(x, y)
     hb = ax.hexbin(x, y, gridsize=55, cmap="viridis", mincnt=1)
@@ -153,6 +187,8 @@ def main():
             f"MAX_ABS_TIME_DIFF_DAYS={MAX_ABS_TIME_DIFF_DAYS}"
         )
         return
+
+    print_rmse_and_variance_stats(df_no_ek, df_w_ek)
 
     all_vals = np.concatenate([x_no_ek, y_no_ek, x_w_ek, y_w_ek])
     vmin = np.nanmin(all_vals)
