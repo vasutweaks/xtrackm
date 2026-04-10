@@ -252,7 +252,7 @@ def main():
     ts4_f, yhat4, fit4, _ = build_series(tau_eq, mask_2d=ocean_mask, remove_clim=True)
 
     # Figure layout: left map, right 4-row time series
-    fig = plt.figure(figsize=(16, 10), dpi=160, constrained_layout=False)
+    fig = plt.figure(figsize=(16, 10), constrained_layout=False)
     gs = fig.add_gridspec(4, 2, width_ratios=[1.05, 1.7], wspace=0.18, hspace=0.0)
 
     ax_map = fig.add_subplot(gs[:, 0], projection=ccrs.PlateCarree())
@@ -308,9 +308,10 @@ def main():
     plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
     if matplotlib.get_backend().lower() != "agg":
         plt.show()
+    plt.show()
     plt.close(fig)
 
-    print(f"Saved figure: {OUT_FIG}")
+    print(f"Saved figure: {png_file}")
     print("Trend statistics:")
     print(f"(a) stderr={fit1.stderr:.6e}, p-value={fit1.pvalue:.6e}")
     print(f"(b) stderr={fit2.stderr:.6e}, p-value={fit2.pvalue:.6e}")

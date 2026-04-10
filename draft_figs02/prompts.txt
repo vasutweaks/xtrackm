@@ -1,6 +1,22 @@
-With the context from Notebooklm and draft under the preparation and figures pdf, explain the figure attached in detail. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections. Corroborate the explanation with other studies with references. The figure's caption is as follows
-a) Scatter plot of drifters' zonal velocities versus altimetry derived velocities within 100km inshore of the coast for the satellite mission TP+J1+J2+J3+S6A. b) shows scatter plot with altimetry derived velocities corrected with ekman zonal velocities. The colorbar shows density of points in the scatter plot in terms of count. A redline passing through the points indicates linear fit and white dashed line represents perfect fit as a reference. The number of points, correlations and standard errors are show in boxes in the upper left corner.
+With the context from Notebooklm and draft under the preparation and figures pdf, explain the attached figure and its signficance (to the current study) in detail. Extend the draft in this direction. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections. Corroborate the explanation with other studies with references. The figure's caption is as follows
+
+Regional context and low-pass filtered variability of Bay of Bengal and equatorial Indian Ocean forcing/response. Left panel shows the analysis masks over the Indian Ocean: equatorial band (5°S-5°N, green hatch), Bay of Bengal gyre region (blue hatch), and Bay of Bengal along-shore region (red hatch). Right panels (a-d) show monthly area-averaged time series after applying a 500-day low-pass filter, with linear trend lines (black dashed): (a) Ekman pumping over the Bay of Bengal gyre mask, (b) sea-level anomaly over the Bay of Bengal gyre mask, (c) windstress magnitude over the Bay of Bengal along-shore mask, and (d) windstress magnitude over the equatorial band. Spatial means are cosine-latitude weighted, and Bay of Bengal masks are interpolated to each dataset grid before averaging.
+
+
+Having established the robustness of the coastal altimetry derived currents in the coastal region, We wanted to study the coastal processes where it is best suited.
+We report multidecadal weakening of East India Coastal Current's strength
+with novel coastal altimetry dataset. We have chose multi-mission reference
+track ERS1+ERS2+ENV+SRL since it has both longest temporal coverage and wide spatial coverage. We have chosen 6 intersection points that fall roughly fall on the continental slope. Speed is computed from geostrophic zonal and meridional velocities at each location which filtered with a 500day low pass butterworth filter remove all inter-annual and seasonal signals.
 
 I am trying to automatize the generation of the doc figures_v2.1.docx with
 figures in order along with captions(captions/*.txt) with the script make_figure_docx.py.
 I am changing the figure numbers and sometimes removing some figures.
+
+Make following modification to following plotting script
+fig05_p.radar_rotatedVStrack_gc_c.ek.along.intersections.selected.one.py
+1. add a), b), c) and d) labels to the four subplots
+2. On the lowest subplot in the right column, make the left y axis thick blue, and right y-axis thick red (along with ticklabels).
+move legend to the right bottom
+3. remove all titles along with suptitle
+4. add "OR" labels inside the radar polygon
+

@@ -228,6 +228,7 @@ ax_map.plot(
 )
 
 # Plot each point with its assigned color and letter label
+changes = []
 for idx, entry in enumerate(point_data):
     color = POINT_COLORS[idx]
     label = POINT_LABELS[idx]
@@ -254,7 +255,8 @@ for idx, entry in enumerate(point_data):
     )
     # Slope annotation: gray if not significant, colored if significant
     slope_color = color if entry["significant"] else "0.6"
-    print(
+    changes.append(entry["pct_change_30y"])
+    print(f"{label}",
         f"{entry['slope_yr']:+.4f} m/s/yr",
         f"{entry['pct_change_30y']:+.2f}% over 30y",
         entry["significant"],
@@ -414,6 +416,7 @@ for idx, entry in enumerate(point_data):
 #     fontweight="bold",
 #     y=1.002,
 # )
+print(f"mean decadal weakening is {np.mean(changes)}")
 plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
 plt.show()
 plt.close("all")

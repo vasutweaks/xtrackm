@@ -1,3 +1,8 @@
+If I select a combination of radar_str, sat and track_number, I should be 
+able to get a single plot for that specific combination.
+refactor the following script to this purpose
+p.radar_rotatedVStrack_gc_c.ek.along.intersections.selected.py
+
 access all csv files at ./radar_rotatedVStrack_gc_along_intersections/radar_rotatedVStrack_gc_along_summary_*.csv
 1. loop over radar strings, concat ek files and normal files seperately
 2. draw scatter distance_to_coast vs corr

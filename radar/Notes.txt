@@ -1,3 +1,25 @@
+Selected track, radar_str, sat tuples
+TN ERS1+ERS2+ENV+SRL 23
+TN ERS1+ERS2+ENV+SRL 868
+TN S3A 137
+TN S3A 608
+TN S3B 137
+TN TP+J1+J2+J3+S6A 155 --
+TN TPN+J1N+J2N+J3N 40
+AP S3A 608
+AP S3A 722
+AP TP+J1+J2+J3+S6A 155
+AP TPN+J1N+J2N+J3N 155
+OR ERS1+ERS2+ENV+SRL 137
+OR ERS1+ERS2+ENV+SRL 595 --
+OR ERS1+ERS2+ENV+SRL 610
+OR HY2A 95
+OR S3A 165
+OR S3A 180 ---
+OR S3A 294 -----
+OR TPN+J1N+J2N+J3N 192
+
+
 We can write per intersection metrics version (for 2x2 bar plot) and/or
 variable pool version for scatter plot.
 
