@@ -1,3 +1,66 @@
+access all csv files at ./radar_rotatedVStrack_gc_along_intersections/radar_rotatedVStrack_gc_along_summary_*.csv
+1. loop over radar strings, concat ek files and normal files seperately
+2. draw scatter distance_to_coast vs corr
+one for normal and other ek (two column subplots)
+
+The functionality of p.radar_rotatedVStrack_gc_c.ek.along.intersections.py
+should be exact copy of p.radar_rotatedVStrack_gc_c.along.intersections.py
+The only difference MUST be gc+ek variable
+1. Where is p value masking?
+2. Why did you remove vertically stacked plot like in the original script
+3. I don't nead per transect .csv file.
+
+Now we have to do the major thing:
+1. We have to use the extracted at ekman_along_intersections,
+  very similar in format with radar extractions
+2. rotate them like rotation of radar extractions 
+3. Add them to along track gc (make variable gc_ek)
+4. compute metrics and save csv files with _ek extension
+implement this in p.radar_rotatedVStrack_gc_c.ek.along.intersections.py
+5. plot corr x series before and after ekman corretion for each transect
+implimnet this in the following script
+p.radar_rotatedVStrack_gc_c.ek.along.intersections.py
+
+No need of other masks other than p value mask
+I removed them. No need save netcdf file I remove them.
+don't do plotting if perc valid points of corr_x is less than 5%
+We need to save local angle also to .csv files
+
+saving corr_mean (along x) is not very usefull. instead
+save whole corr x series (same with rmse and bias)
+The csv header should be
+radar_str, sat, track_number, x, dist_to_coast, corr_at_x, rmse_at_x, bias_x
+x, dist_to_coast are whole arrays
+skip rows where p value is not less than 0.05
+Modify accordingly
+
+if I select a combination of radar_str, sat and track_number I should be 
+able to get a single plot for that specific combination.
+impliment this in the following copy
+p.radar_rotatedVStrack_gc_c.ek.along.intersections.selected.py
+
+In the script p.radar_rotatedVStrack_gc_c.along.intersections.py,
+flip radar and gc transect plot so that distance (x) becomes x-axis and 
+time become y-axis
+let radar, gc transect plots and correltion line plot stack vertically
+so that all share same x-axis
+The cartopy bob plot with radar be on the left side second two (first column
+  second row)
+
+let radar, xVStime and gc xVStime plot s
+modify following script 
+/home/srinivasu/xtrackm/radar/c.extract_ccmpv31.along.intersections.py to
+extract ccmp_v31 windfield at ~/ccmp31/ccmp_v31_daily_iod_all_years_bob.nc
+along the radar intersection exactly the way radar fields are extracted.
+
+In the script c.extract_radar.along.intersections.py we need to add
+distance to nearest coast at each lon, lat of the track and save it.
+ds_track has variable called dist_to_coast_gshhg, just reverse it (to make
+    if coast to off) and save it.
+
+1. use following dataset
+~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc to extract
+
 split the script in to p.radar_rotatedVStrack_gc_c.along.intersections.py in
 to two:
 1. c.extract_radar.along.intersections.py to do the extractions and save them

@@ -27,11 +27,9 @@ def extract_radar_uv_2d(u_radar, v_radar, lons_coast_to_off, lats_coast_to_off, 
 def get_intersection_endpoints(lons_coast_to_off, lats_coast_to_off, polygon, lon_coast, lat_coast):
     linestring = sg.LineString(list(zip(lons_coast_to_off, lats_coast_to_off)))
     inter = linestring.intersection(polygon)
-
     # Handle common line-like and multi-part intersections robustly.
     if inter.is_empty:
         return None
-
     if hasattr(inter, "geoms"):
         # Pick longest line-like geometry.
         line_geoms = [g for g in inter.geoms if g.geom_type in ("LineString", "LinearRing")]
@@ -42,7 +40,6 @@ def get_intersection_endpoints(lons_coast_to_off, lats_coast_to_off, polygon, lo
         inter_line = inter
     else:
         return None
-
     lon_x1, lat_x1 = inter_line.coords[0]
     lon_x2, lat_x2 = inter_line.coords[-1]
     x1_m = distance.distance((lat_coast, lon_coast), (lat_x1, lon_x1)).m
@@ -89,6 +86,7 @@ def main():
                     xvals = sla_asn.x.values
                     lons_coast_to_off = ds_track.lon.values[::-1]
                     lats_coast_to_off = ds_track.lat.values[::-1]
+                    dist_to_coast_coast_to_off = ds_track.dist_to_coast_gshhg.values[::-1]
 
                 if len(lons_coast_to_off) < 2:
                     continue
@@ -105,7 +103,8 @@ def main():
                 u_2d, v_2d = extract_radar_uv_2d(
                     u_radar, v_radar, lons_coast_to_off, lats_coast_to_off, xvals
                 )
-
+                # whick points along the track are inside polygon and outside 
+                # polygon as a function of x
                 mask_in_polygon = xr.DataArray(
                     np.array(
                         [polygon.covers(Point(lo, la)) for lo, la in zip(lons_coast_to_off, lats_coast_to_off)],
@@ -115,7 +114,6 @@ def main():
                     dims=["x"],
                     name="mask_in_polygon",
                 )
-
                 ds_out = xr.Dataset(
                     {
                         "radar_u": u_2d,
@@ -123,6 +121,12 @@ def main():
                         "mask_in_polygon": mask_in_polygon,
                         "lon_track": xr.DataArray(lons_coast_to_off, coords={"x": xvals}, dims=["x"]),
                         "lat_track": xr.DataArray(lats_coast_to_off, coords={"x": xvals}, dims=["x"]),
+                        "dist_to_coast_gshhg_track": xr.DataArray(
+                            dist_to_coast_coast_to_off,
+                            coords={"x": xvals},
+                            dims=["x"],
+                            attrs={"description": "Distance to coast along track (coast to offshore order)"},
+                        ),
                     }
                 )
                 ds_out.attrs.update(
@@ -138,7 +142,6 @@ def main():
                         "x2_m": float(x2_m),
                     }
                 )
-
                 f_out = f"{OUT_DIR}/radar_along_{radar_str}_{sat}_{tno}.nc"
                 ds_out.to_netcdf(f_out)
                 n_saved += 1

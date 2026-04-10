@@ -15,9 +15,6 @@ EXTRACTED_DIR = "radar_along_intersections"
 OUT_DIR = "radar_rotatedVStrack_gc_along_intersections"
 BOB_REG = (78.0, 95.0, 4.0, 24.0)
 
-MIN_OVERLAP_TIME_PER_X = 8
-MIN_X_WITH_GOOD_OVERLAP = 5
-
 
 def rotate_radar_to_cross(radar_u, radar_v, lons_track, lats_track):
     ln = len(lons_track)
@@ -30,6 +27,16 @@ def rotate_radar_to_cross(radar_u, radar_v, lons_track, lats_track):
     radar_cross = (np.cos(theta_cross) * radar_u) + (np.sin(theta_cross) * radar_v)
     radar_cross.name = "radar_cross"
     return radar_cross
+
+
+def local_angle_series_deg(xvals, lons_track, lats_track):
+    ln = len(lons_track)
+    ioff = max(1, min(5, ln // 10))
+    angles_deg = [
+        local_angle(lons_track, lats_track, ii, ioff=ioff, degrees=True)
+        for ii in range(ln)
+    ]
+    return xr.DataArray(np.array(angles_deg), coords={"x": xvals}, dims=["x"])
 
 
 def plot_2x2(
@@ -56,11 +63,18 @@ def plot_2x2(
     radar_plot = radar_valid.assign_coords(x=radar_valid.x / 1000.0)
     corr_plot = corr_x_masked.assign_coords(x=corr_x_masked.x / 1000.0)
 
-    fig = plt.figure(figsize=(14, 10))
-    ax0 = fig.add_subplot(2, 2, 1, projection=ccrs.PlateCarree())
-    ax1 = fig.add_subplot(2, 2, 2)
-    ax2 = fig.add_subplot(2, 2, 3)
-    ax3 = fig.add_subplot(2, 2, 4)
+    fig = plt.figure(figsize=(14, 11))
+    gs = fig.add_gridspec(3, 2, width_ratios=[1.0, 1.8], hspace=0.22, wspace=0.2)
+
+    # Keep map at first-column second-row (middle-left), per request.
+    ax_blank_top = fig.add_subplot(gs[0, 0])
+    ax_blank_bot = fig.add_subplot(gs[2, 0])
+    ax0 = fig.add_subplot(gs[1, 0], projection=ccrs.PlateCarree())
+    ax1 = fig.add_subplot(gs[0, 1])
+    ax2 = fig.add_subplot(gs[1, 1], sharex=ax1)
+    ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
+    ax_blank_top.axis("off")
+    ax_blank_bot.axis("off")
 
     decorate_axis(ax0, f"{radar_str} in Bay of Bengal", *BOB_REG, step=2)
     ax0.grid(alpha=0.3, linestyle="--")
@@ -90,23 +104,49 @@ def plot_2x2(
         bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=0.2),
     )
 
-    ax0.plot([lon_x1, lon_x2], [lat_x1, lat_x2], "o", color="magenta", markersize=5, transform=ccrs.PlateCarree())
+    ax0.plot([lon_x1, lon_x2], [lat_x1, lat_x2], ".", color="magenta", markersize=5, transform=ccrs.PlateCarree())
     ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
     ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
 
-    gc_plot.plot(ax=ax1, x="time", y="x", cmap="RdBu_r", vmin=-1.0, vmax=1.0, add_labels=False)
-    ax1.set_title("GC(x,time)")
-    ax1.set_ylabel("x from coast (km)")
-    ax1.set_xlabel("time")
+    cf1 = gc_plot.plot(
+        ax=ax1,
+        x="x",
+        y="time",
+        cmap="RdBu_r",
+        vmin=-1.0,
+        vmax=1.0,
+        add_labels=False,
+        add_colorbar=False,
+    )
+    ax1.set_title("GC(time,x)")
+    ax1.set_ylabel("time")
+    ax1.set_xlabel("")
+    ax1.grid(alpha=0.3, linestyle="--")
     if overlap_start is not None and overlap_end is not None:
-        ax1.set_xlim(overlap_start, overlap_end)
+        ax1.set_ylim(overlap_start, overlap_end)
 
-    radar_plot.plot(ax=ax2, x="time", y="x", cmap="RdBu_r", vmin=-1.0, vmax=1.0, add_labels=False)
-    ax2.set_title("Radar cross(x,time)")
-    ax2.set_ylabel("")
-    ax2.set_xlabel("time")
+    radar_plot.plot(
+        ax=ax2,
+        x="x",
+        y="time",
+        cmap="RdBu_r",
+        vmin=-1.0,
+        vmax=1.0,
+        add_labels=False,
+        add_colorbar=False,
+    )
+    ax2.set_title("Radar cross(time,x)")
+    ax2.set_ylabel("time")
+    ax2.set_xlabel("")
+    ax2.grid(alpha=0.3, linestyle="--")
     if overlap_start is not None and overlap_end is not None:
-        ax2.set_xlim(overlap_start, overlap_end)
+        ax2.set_ylim(overlap_start, overlap_end)
+
+    cax = ax1.inset_axes([0.0, 1.05, 1.0, 0.06])
+    cb = fig.colorbar(cf1, cax=cax, orientation="horizontal")
+    cb.set_label("m/s")
+    cax.xaxis.set_ticks_position("top")
+    cax.xaxis.set_label_position("top")
 
     corr_plot.plot(ax=ax3, color="k", linewidth=1.5)
     ax3.axhline(0.0, color="gray", linestyle="--", linewidth=1.0)
@@ -119,7 +159,7 @@ def plot_2x2(
     fig.suptitle(f"{radar_str} | {sat} track {tno}")
     fig.tight_layout()
     fig.savefig(f_plot, dpi=170, bbox_inches="tight")
-    plt.show()
+    # plt.show()
     plt.close(fig)
 
 
@@ -165,7 +205,7 @@ def main():
                 with xr.open_dataset(f_ex) as ds_ex:
                     radar_u = ds_ex.radar_u.load()
                     radar_v = ds_ex.radar_v.load()
-                    mask_in_polygon = ds_ex.mask_in_polygon.load()
+                    dist_to_coast_track = ds_ex.dist_to_coast_gshhg_track.load()
                     lons_track = ds_ex.lon_track.values
                     lats_track = ds_ex.lat_track.values
                     lon_x1 = float(ds_ex.attrs["lon_x1"])
@@ -179,90 +219,91 @@ def main():
                     gc = ds_gc.gc.load()
 
                 radar_cross = rotate_radar_to_cross(radar_u, radar_v, lons_track, lats_track)
-                radar_cross = radar_cross.where(mask_in_polygon)
 
                 x_lo = min(x1_m, x2_m)
                 x_hi = max(x1_m, x2_m)
 
                 gc_cut = gc.sel(x=slice(x_lo, x_hi))
                 radar_cut = radar_cross.interp(x=gc_cut.x, method="nearest")
+                dist_to_coast_cut = dist_to_coast_track.interp(x=gc_cut.x, method="nearest")
+                angle_deg_cut = local_angle_series_deg(
+                    radar_u.x.values, lons_track, lats_track
+                ).interp(x=gc_cut.x, method="nearest")
                 radar_cut = radar_cut.reindex(
                     time=gc_cut.time,
                     method="nearest",
                     tolerance=np.timedelta64(24, "h"),
                 )
-
                 valid = np.isfinite(gc_cut) & np.isfinite(radar_cut)
                 gc_valid = gc_cut.where(valid)
                 radar_valid = radar_cut.where(valid)
 
-                n_valid_x = valid.sum(dim="time")
                 corr_x = xs.pearson_r(radar_valid, gc_valid, dim="time", skipna=True)
                 pval_x = xs.pearson_r_p_value(radar_valid, gc_valid, dim="time", skipna=True)
                 rmse_x = xs.rmse(radar_valid, gc_valid, dim="time", skipna=True)
                 bias_x = (radar_valid - gc_valid).mean(dim="time", skipna=True)
 
-                overlap_mask = n_valid_x >= MIN_OVERLAP_TIME_PER_X
-                sig_mask = overlap_mask & (pval_x < 0.05)
+                sig_mask = pval_x < 0.05
                 corr_x_masked = corr_x.where(sig_mask)
                 pval_x_masked = pval_x.where(sig_mask)
                 rmse_x_masked = rmse_x.where(sig_mask)
                 bias_x_masked = bias_x.where(sig_mask)
 
-                n_good_x = int(overlap_mask.sum().item())
                 n_sig_x = int(sig_mask.sum().item())
-                if n_sig_x >= MIN_X_WITH_GOOD_OVERLAP:
-                    corr_x_mean = corr_x_masked.mean(dim="x", skipna=True).item()
-                    rmse_x_mean = rmse_x_masked.mean(dim="x", skipna=True).item()
-                    bias_x_mean = bias_x_masked.mean(dim="x", skipna=True).item()
+                keep = (
+                    np.isfinite(pval_x.values)
+                    & (pval_x.values < 0.05)
+                    & np.isfinite(corr_x.values)
+                    & np.isfinite(rmse_x.values)
+                    & np.isfinite(bias_x.values)
+                )
+                for xx, dd, aa, cc, rr, bb in zip(
+                    gc_cut.x.values[keep],
+                    dist_to_coast_cut.values[keep],
+                    angle_deg_cut.values[keep],
+                    corr_x.values[keep],
+                    rmse_x.values[keep],
+                    bias_x.values[keep],
+                ):
+                    rows.append(
+                        {
+                            "radar_str": radar_str,
+                            "sat": sat,
+                            "track_number": tno,
+                            "x": xx,
+                            "dist_to_coast": dd,
+                            "local_angle_deg": aa,
+                            "corr_at_x": cc,
+                            "rmse_at_x": rr,
+                            "bias_x": bb,
+                        }
+                    )
+
+                n_corr_valid = int(np.isfinite(corr_x_masked.values).sum())
+                pct_corr_valid = 100.0 * n_corr_valid / corr_x_masked.size
+                if pct_corr_valid >= 5.0:
+                    f_plot = f"{plot_dir}/gc_vs_radar_xt_{sat}_{tno}.png"
+                    plot_2x2(
+                        gc_valid,
+                        radar_valid,
+                        corr_x_masked,
+                        radar_str,
+                        sat,
+                        tno,
+                        polygon,
+                        lons_track,
+                        lats_track,
+                        lon_x1,
+                        lat_x1,
+                        lon_x2,
+                        lat_x2,
+                        f_plot,
+                    )
                 else:
-                    corr_x_mean = np.nan
-                    rmse_x_mean = np.nan
-                    bias_x_mean = np.nan
-
-                rows.append(
-                    {
-                        "radar": radar_str,
-                        "sat": sat,
-                        "track_number": tno,
-                        "n_x_good_overlap": n_good_x,
-                        "n_x_significant_p_lt_0p05": n_sig_x,
-                        "corr_x_mean": corr_x_mean,
-                        "rmse_x_mean": rmse_x_mean,
-                        "bias_x_mean": bias_x_mean,
-                    }
-                )
-
-                ds_out = xr.Dataset(
-                    {
-                        "gc": gc_valid,
-                        "radar_cross": radar_valid,
-                        "corr_x": corr_x_masked,
-                        "pval_x": pval_x_masked,
-                        "rmse_x": rmse_x_masked,
-                        "bias_x": bias_x_masked,
-                        "n_valid_x": n_valid_x,
-                    }
-                )
-                ds_out.to_netcdf(f"{metric_dir}/radar_gc_xstats_{sat}_{tno}.nc")
-
-                f_plot = f"{plot_dir}/gc_vs_radar_xt_{sat}_{tno}.png"
-                plot_2x2(
-                    gc_valid,
-                    radar_valid,
-                    corr_x_masked,
-                    radar_str,
-                    sat,
-                    tno,
-                    polygon,
-                    lons_track,
-                    lats_track,
-                    lon_x1,
-                    lat_x1,
-                    lon_x2,
-                    lat_x2,
-                    f_plot,
-                )
+                    print(
+                        f"{radar_str} {sat} {tno}: skip plot, "
+                        f"valid corr_x={pct_corr_valid:.2f}% < 5%"
+                    )
                 if n_sig_x > 0:
                     corr_sig = corr_x.where(sig_mask).dropna(dim="x")
                     pval_sig = pval_x.where(sig_mask).dropna(dim="x")
@@ -274,8 +315,23 @@ def main():
                             f"{radar_str} {sat} {tno}: "
                             f"x={xx:.1f} km corr={cc:.3f} p={pp:.3f}"
                         )
+                else:
+                    print(f"{radar_str} {sat} {tno}: no x points with p<0.05")
 
-        df_out = pd.DataFrame(rows)
+        df_out = pd.DataFrame(
+            rows,
+            columns=[
+                "radar_str",
+                "sat",
+                "track_number",
+                "x",
+                "dist_to_coast",
+                "local_angle_deg",
+                "corr_at_x",
+                "rmse_at_x",
+                "bias_x",
+            ],
+        )
         f_sum = f"{OUT_DIR}/radar_rotatedVStrack_gc_along_summary_{radar_str}.csv"
         df_out.to_csv(f_sum, index=False)
         print(f"saved {f_sum} rows={len(df_out)}")
