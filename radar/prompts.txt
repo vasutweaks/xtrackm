@@ -1,3 +1,10 @@
+split the script in to p.radar_rotatedVStrack_gc_c.along.intersections.py in
+to two:
+1. c.extract_radar.along.intersections.py to do the extractions and save them
+to netcdf files with strings radar_str, sat, track_number
+2. p.radar_rotatedVStrack_gc_c.along.intersections.py to read the extracted
+radar files and rotate the fields and compare with gc along
+
 utilizin functionlities from p.radar_uvVStrack_guv_c.at.intersections.py and p.intersection_candidates.allsats.py
 create python script p.radar_rotatedVStrack_gc_c.along.intersections.py to
 to read radar wise pickled file to read interesection tracks

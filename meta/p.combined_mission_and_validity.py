@@ -7,7 +7,6 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 from namesm import sats_new
 # codex resume 019d70fe-d37c-77c3-bdff-8f2a524c80e7
-
 def plot_mission_timeline(ax):
     missions = pd.read_csv("data_coverage_df.csv")
     colors = ["red", "green", "blue", "purple"]
@@ -70,15 +69,17 @@ def plot_mission_timeline(ax):
 
 
 def plot_valid_perc(bottom_spec):
-    subgs = bottom_spec.subgridspec(2, 1, height_ratios=[3, 1], hspace=0.25)
+    subgs = bottom_spec.subgridspec(1, 2, width_ratios=[4.2, 1.8], wspace=0.0)
     ax = plt.subplot(subgs[0])
-    ax_bar = plt.subplot(subgs[1])
+    ax_bar = plt.subplot(subgs[1], sharey=ax)
 
     df_all = pd.read_csv("spatio_temporal_valid_perc.csv")
     cmap = plt.get_cmap("tab10")
     bar_labels = []
     bar_values = []
     bar_colors = []
+    legend_handles = []
+    legend_labels = []
 
     for i, sat_name in enumerate(sats_new):
         df = df_all[df_all["sat"] == sat_name].sort_values("track_len")
@@ -91,10 +92,12 @@ def plot_valid_perc(bottom_spec):
         color = cmap(i % cmap.N)
         mean_perc = y.mean()
 
-        ax.plot(x, y, label=sat_name, color=color, linewidth=2.8)
+        line, = ax.plot(x, y, label=sat_name, color=color, linewidth=2.8)
         bar_labels.append(sat_name)
         bar_values.append(mean_perc)
         bar_colors.append(color)
+        legend_handles.append(line)
+        legend_labels.append(sat_name)
 
         middle_idx = len(df) // 2
         if sat_name == "S3A":
@@ -111,8 +114,8 @@ def plot_valid_perc(bottom_spec):
         )
 
     ax.set_xlabel("track number")
-    ax.set_ylabel("min % valid")
-    ax.legend()
+    ax.set_ylabel("mean valid points (%)")
+    ax.grid(True, color="lightgray", linewidth=0.7, alpha=0.7)
     ax.text(0.01, 0.97, "b)", transform=ax.transAxes, va="top", ha="left", fontsize=13, fontweight="bold")
 
     bar_data = sorted(zip(bar_values, bar_labels, bar_colors), key=lambda t: t[0])
@@ -121,15 +124,18 @@ def plot_valid_perc(bottom_spec):
     sorted_colors = [c for _, _, c in bar_data]
 
     ax_bar.bar(sorted_labels, sorted_values, color=sorted_colors)
-    ax_bar.set_ylabel("mean % valid")
     ax_bar.set_xlabel("satellite")
-    ax_bar.tick_params(axis="x", rotation=45)
+    ax_bar.tick_params(axis="y", labelleft=False)
+    ax_bar.set_xticks([])
+    ax_bar.grid(True, color="lightgray", linewidth=0.7, alpha=0.7)
     ax_bar.text(0.01, 0.97, "c)", transform=ax_bar.transAxes, va="top", ha="left", fontsize=13, fontweight="bold")
+
+    ax.legend(legend_handles, legend_labels, loc="lower right", fontsize=9, ncol=2, frameon=False)
 
 
 def main():
     fig = plt.figure(figsize=(13, 14))
-    gs = fig.add_gridspec(2, 1, height_ratios=[1, 1.2], hspace=0.28)
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.5, 1.0], hspace=0.28)
 
     ax_top = fig.add_subplot(gs[0])
     plot_mission_timeline(ax_top)

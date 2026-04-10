@@ -31,7 +31,7 @@ for sat in sats_new[:]:
 
         n_x = len(sla_asn.x)
         n_time = len(sla_asn.time)
-        n_xt = n_x * n_time
+        n_xt = sla_asn.size
 
         # median % valid in x-direction (across time steps)
         perc_valid_x = float(100 * (sla_asn.count(dim="x") / n_x).median())
@@ -84,7 +84,7 @@ for sat in sats_new[:]:
     ax.plot(x, y1, label=f"{sat} x", linewidth=2.8)
     ax.plot(x, y2, label=f"{sat} time", linewidth=2.8)
     plt.scatter(x, y2, label=f"{sat} time", marker="x", s=20)
-    plt.show()
+    # plt.show()
     plt.close("all")
 
 out_csv = "spatio_temporal_valid_perc.csv"

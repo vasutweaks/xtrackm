@@ -14,15 +14,12 @@ bar_values = []
 bar_colors = []
 
 for i, sat_name in enumerate(sats_new):
-    # df = df_all[df_all["sat"] == sat_name].sort_values("perc_valid_xt")
-    df = df_all[df_all["sat"] == sat_name].sort_values("track_len")
-    df = df.sort_values("perc_valid_xt")
-    # df = df_all[df_all["sat"] == sat_name].sort_values("lon_equat")
+    df = df_all[df_all["sat"] == sat_name].sort_values("perc_full_time")
     if df.empty:
         continue
 
     x = range(len(df))
-    y = df["perc_valid_xt"]
+    y = df["perc_full_time"]
     color = cmap(i % cmap.N)
     mean_perc = y.mean()
 
