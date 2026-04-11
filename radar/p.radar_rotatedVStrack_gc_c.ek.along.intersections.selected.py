@@ -71,14 +71,14 @@ def plot_2x2(
     fig = plt.figure(figsize=(14, 11))
     gs = fig.add_gridspec(3, 2, width_ratios=[1.0, 1.8], hspace=0.22, wspace=0.2)
 
-    ax_blank_top = fig.add_subplot(gs[0, 0])
-    ax_blank_bot = fig.add_subplot(gs[2, 0])
-    ax0 = fig.add_subplot(gs[1, 0], projection=ccrs.PlateCarree())
+    # ax_blank_top = fig.add_subplot(gs[0, 0])
+    # ax_blank_bot = fig.add_subplot(gs[2, 0])
+    ax0 = fig.add_subplot(gs[:, 0], projection=ccrs.PlateCarree())
     ax1 = fig.add_subplot(gs[0, 1])
     ax2 = fig.add_subplot(gs[1, 1], sharex=ax1)
     ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
-    ax_blank_top.axis("off")
-    ax_blank_bot.axis("off")
+    # ax_blank_top.axis("off")
+    # ax_blank_bot.axis("off")
 
     decorate_axis(ax0, f"{radar_str} in Bay of Bengal", *BOB_REG, step=2)
     ax0.grid(alpha=0.3, linestyle="--")
@@ -112,7 +112,7 @@ def plot_2x2(
     ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
     ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
 
-    cf1 = gc_plot.plot(
+    cf1 = gc_plot.plot.contourf(
         ax=ax1,
         x="x",
         y="time",
@@ -129,7 +129,7 @@ def plot_2x2(
     if overlap_start is not None and overlap_end is not None:
         ax1.set_ylim(overlap_start, overlap_end)
 
-    radar_plot.plot(
+    radar_plot.plot.contourf(
         ax=ax2,
         x="x",
         y="time",

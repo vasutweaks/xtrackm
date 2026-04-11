@@ -9,7 +9,7 @@ RADARS = ("TN", "AP", "OR")
 OUT_DIR = "ekman_along_intersections"
 
 ekman_PATH_PRIMARY = "/media/srinivasu/bkup1tb/allData_archive/ccmp31/ekman_velocities_0m_all_years_daily_cd.nc"
-ekman_PATH_FALLBACK = ""
+ekman_PATH_FALLBACK = "~/allData/ccmp31/ekman_velocities_0m_all_years_daily_cd.nc"
 
 
 def extract_ekman_uv_2d(uwnd, vwnd, lons_coast_to_off, lats_coast_to_off, xvals):

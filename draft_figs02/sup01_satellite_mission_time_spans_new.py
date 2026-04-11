@@ -139,7 +139,7 @@ def plot_valid_perc(bottom_spec):
 
 def main():
     fig = plt.figure(figsize=(13, 14))
-    gs = fig.add_gridspec(2, 1, height_ratios=[1.5, 1.0], hspace=0.28)
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.5, 1.0], hspace=0.14)
 
     ax_top = fig.add_subplot(gs[0])
     plot_mission_timeline(ax_top)

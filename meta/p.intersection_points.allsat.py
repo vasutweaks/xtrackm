@@ -13,6 +13,8 @@ cmap1 = ListedColormap(["white"])
 d = 1.5
 height, width = 9, 9
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
+rama_loc = "/home/srinivasu/allData/rama/"
+var_str = "cur"
 
 df_all_list = []
 for sat in sats_new:
@@ -63,6 +65,16 @@ for i, sat in enumerate(satellites):
         transform=ccrs.PlateCarree(),
     )
 
+for id, (lon_rama, lat_rama) in rama_d.items():
+    if lat_rama < 5:
+        continue
+    ax2.plot(
+        lon_rama,
+        lat_rama,
+        c="r",
+        marker="x",
+        markersize=10,
+    )
 # edgecolors='black',
 ax2.legend(title="Satellite", loc="upper right")
 plt.title("Intersection Points of Tracks in North Indian Ocean")

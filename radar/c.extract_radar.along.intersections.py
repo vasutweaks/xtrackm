@@ -15,8 +15,10 @@ def extract_radar_uv_2d(u_radar, v_radar, lons_coast_to_off, lats_coast_to_off, 
     u_list = []
     v_list = []
     for lon, lat in zip(lons_coast_to_off, lats_coast_to_off):
-        u_at = u_radar.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
-        v_at = v_radar.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
+        # u_at = u_radar.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
+        u_at = u_radar.interp(longitude=lon, latitude=lat)
+        # v_at = v_radar.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
+        v_at = v_radar.interp(longitude=lon, latitude=lat)
         u_list.append(u_at)
         v_list.append(v_at)
     u_2d = xr.concat(u_list, dim="x").assign_coords(x=xvals)

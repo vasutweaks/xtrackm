@@ -41,6 +41,12 @@ def track_to_str(track):
     return str(track)
 
 
+def filter_rama_uv_72h(rama_u, rama_v):
+    rama_u_filt = butter_lowpass_1d(rama_u, cutoff_days=3, order=4)
+    rama_v_filt = butter_lowpass_1d(rama_v, cutoff_days=3, order=4)
+    return rama_u_filt, rama_v_filt
+
+
 method = "loess"
 cmap1 = cmo.cm.diff
 d = 1.5
@@ -92,6 +98,7 @@ for omni_id in omni_d.keys():
     omni_v = ds_omni.v_current.interp(current_depth=dpth)
     # omni_v = omni_v.rolling(time=10, center=True).mean()
     omni_v = omni_v.resample(time="1D").mean()
+    omni_u, omni_v = filter_rama_uv_72h(omni_u, omni_v)
     N = omni_v.count().item()
 
     # print(omni_v.count().item())
@@ -113,6 +120,7 @@ for omni_id in omni_d.keys():
         ds_ek = xr.open_dataset(f_ek)
         u_ek = ds_ek['u_at']
         v_ek = ds_ek['v_at']
+        u_ek, v_ek = filter_rama_uv_72h(u_ek, v_ek)
 
         if abs(lat1) < 5:
             continue
@@ -167,21 +175,23 @@ for omni_id in omni_d.keys():
         msla_u_at = aviso_u.interp(longitude=lon1, latitude=lat1)
 
         # Collocate omni at track-gu timestamps; avoid sat-dependent smoothing.
-        omni_u_match = omni_u.reindex(
-            time=gu_cut.time,
-            method="nearest",
-            tolerance=np.timedelta64(24, "h"),
-        )
-        ek_u_match = u_ek.reindex(
-            time=gu_cut.time,
-            method="nearest",
-            tolerance=np.timedelta64(24, "h"),
-        )
+        # omni_u_match = omni_u.reindex(
+        #     time=gu_cut.time,
+        #     method="nearest",
+        #     tolerance=np.timedelta64(24, "h"),
+        # )
+        # ek_u_match = u_ek.reindex(
+        #     time=gu_cut.time,
+        #     method="nearest",
+        #     tolerance=np.timedelta64(24, "h"),
+        # )
         msla_u_match = msla_u_at.reindex(
             time=gu_cut.time,
             method="nearest",
             tolerance=MSLA_MATCH_TOLERANCE,
         )
+        omni_u_match = omni_u.interp(time=gu_cut.time)
+        ek_u_match = u_ek.interp(time=gu_cut.time)
         if int(msla_u_match.count()) == 0:
             msla_u_match = msla_u_at.reindex(time=gu_cut.time, method="nearest")
         # flat = (omni_u_match.diff("time") == 0).reindex(time=omni_u_match.time, fill_value=False)
@@ -229,7 +239,7 @@ for omni_id in omni_d.keys():
         ax1 = fig.add_subplot(2, 1, 2)
         omni_u_pair.plot(ax=ax1, color="r", linewidth=2, label="omni")
         gu_pair.plot(ax=ax1, color="k", linewidth=2, label="track")
-        gu_ek_pair.plot(ax=ax1, color="b", linewidth=2, label="track+ekman")
+        # gu_ek_pair.plot(ax=ax1, color="b", linewidth=2, label="track+ekman")
         msla_u_match.plot(ax=ax1, color="c", linewidth=2, label="msla")
         ax1.set_xlim(pd.to_datetime(gu_cut.time.values[0]), pd.to_datetime(gu_cut.time.values[-1]))
         ax1.set_ylabel("zonal velocity m/s")

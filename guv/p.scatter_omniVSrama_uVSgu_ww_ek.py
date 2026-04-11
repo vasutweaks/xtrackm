@@ -4,9 +4,7 @@ import pandas as pd
 
 # codex resume 019cd8ab-eee9-72e0-9952-b9e4a8bf1b11
 
-RAMA_NO_EK_CSV = "rama_guv_c_nearest_global_matches.csv"
 RAMA_EK_CSV = "rama_guv_c_nearest_global_matches.ek.csv"
-OMNI_NO_EK_CSV = "omni_guv_c_nearest_global_matches.csv"
 OMNI_EK_CSV = "omni_guv_c_nearest_global_matches.ek.csv"
 
 OUT_PNG = "scatter_omniVSrama_uVSgu_ww_ek.png"
@@ -181,9 +179,9 @@ def main():
     x_label_ek = "Altimetry gu + u_ek (m/s)"
     none = ""
 
-    x_rama_no, y_rama_no, n_rama_no = load_xy(RAMA_NO_EK_CSV, "rama_u", with_ekman=False)
+    x_rama_no, y_rama_no, n_rama_no = load_xy(RAMA_EK_CSV, "rama_u", with_ekman=False)
     x_rama_ek, y_rama_ek, n_rama_ek = load_xy(RAMA_EK_CSV, "rama_u", with_ekman=True)
-    x_omni_no, y_omni_no, n_omni_no = load_xy(OMNI_NO_EK_CSV, "omni_u", with_ekman=False)
+    x_omni_no, y_omni_no, n_omni_no = load_xy(OMNI_EK_CSV, "omni_u", with_ekman=False)
     x_omni_ek, y_omni_ek, n_omni_ek = load_xy(OMNI_EK_CSV, "omni_u", with_ekman=True)
     all_x = np.concatenate([x_rama_no, x_rama_ek, x_omni_no, x_omni_ek])
     all_y = np.concatenate([y_rama_no, y_rama_ek, y_omni_no, y_omni_ek])

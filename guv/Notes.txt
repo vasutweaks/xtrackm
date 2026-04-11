@@ -1,5 +1,20 @@
+only p.rama|omni*ek*.py files are kept
+
+0.48, 0.66
+0.51, 0.58
 We can write per intersection metrics version (for 2x2 bar plot) and/or
 variable pool version for scatter plot.
+
+rama -----------
+0.468, 0.488, 0.483
+0.622, 0.657, .662
+omni -----------
+0.442
+rama/omni comparisons improvemnt list
+1. filter 72 hour stuff
+1. use interp instead of reindex in time
+2. selected df[10] filter out > 50km
+
 
 We might have to use .reindex between gc_self and gc_other
 

@@ -1,3 +1,6 @@
+Update the script p.omni_uvVStrack_guv_c.nearest.all.new.py to
+1. pass omni_u and omni_v through a 72 hour low pass butter worth filter (write a small function)
+2. 
 Write a python function using xarray to do a mad filter on 2 dimension
 gc variable which applies both on x and time dimensions.
 This is to be used in c.gc_at_intersection_points_loess_0.05.py

@@ -203,12 +203,36 @@ def plot_region_map(ax, gyre_mask, along_mask):
     ax.set_title("Indian Ocean Regions")
 
 
-def plot_ts_panel(ax, ts_f, yhat, fit, ylabel, line_color="k"):
+def plot_ts_panel(ax, ts_f, yhat, fit, ylabel, line_color="k", pos="left"):
     ax.plot(ts_f.time.values, ts_f.values, color=line_color, lw=1.3, label="500-day low-pass")
     ax.plot(ts_f.time.values, yhat, "k--", lw=1.8, label="Linear trend")
     ax.axhline(0.0, color="0.4", lw=0.8, ls="--")
     ax.grid(True, alpha=0.3, linestyle="--")
     ax.set_ylabel(ylabel, fontsize=8)
+    # trend_txt = f"Trend = {fit.slope:.3e} /yr   Std. err = {fit.stderr:.3e}"
+    trend_txt = f"Trend = {fit.slope:.3e} /yr"
+    if pos == "left":
+        ax.text(
+            0.01,
+            0.02,
+            trend_txt,
+            transform=ax.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=14,
+            bbox=dict(facecolor="white", edgecolor="black", alpha=0.75, pad=1.5),
+        )
+    elif pos == "right":
+        ax.text(
+            0.69,
+            0.02,
+            trend_txt,
+            transform=ax.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=14,
+            bbox=dict(facecolor="white", edgecolor="black", alpha=0.75, pad=1.5),
+        )
     # ax.legend(loc="upper right", fontsize=8)
 
 
@@ -269,6 +293,7 @@ def main():
         fit1,
         ylabel="Ekman pumping (m s$^{-1}$)",
         line_color="tab:blue",
+        pos="right",
     )
     plot_ts_panel(
         ax2,
@@ -277,6 +302,7 @@ def main():
         fit2,
         ylabel="SLA (m)",
         line_color="tab:blue",
+        pos="right",
     )
     plot_ts_panel(
         ax3,
@@ -285,6 +311,7 @@ def main():
         fit3,
         ylabel="Windstress (N m$^{-2}$)",
         line_color="tab:red",
+        pos="left",
     )
     plot_ts_panel(
         ax4,
@@ -293,6 +320,7 @@ def main():
         fit4,
         ylabel="Windstress (N m$^{-2}$)",
         line_color="tab:green",
+        pos="left",
     )
     ax1.text(0.01, 0.96, "a)", transform=ax1.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")
     ax2.text(0.01, 0.96, "b)", transform=ax2.transAxes, ha="left", va="top", fontsize=11, fontweight="bold")

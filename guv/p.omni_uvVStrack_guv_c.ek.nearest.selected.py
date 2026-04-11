@@ -9,7 +9,27 @@ import xarray as xr
 import xskillscore as xs
 from geopy import distance
 from tools_xtrackm import *
+from pathlib import Path
+import sys
+
 # codex resume 019cc947-b006-7d82-8941-d68e330c388a
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
+
+cmap1 = cmo.cm.diff
+d = 1.5
+dse = xr.open_dataset("~/allData/topo/etopo5.cdf")  # open etopo dataset
+aviso_msla_uv_dir = "/home/srinivasu/sealevel/data/msla_uv/"
+aviso_msla_uv_dir = "/home/srinivasu/allData/aviso/msla_uv/"
+ds_aviso_u = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_u.nc")
+ds_aviso_v = xr.open_dataset(f"{aviso_msla_uv_dir}/allyear_dt_global_allsat_msla_v.nc")
+print(ds_aviso_u)
+aviso_u = ds_aviso_u.u
+aviso_v = ds_aviso_v.v
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
+method = "loess"
 
 @lru_cache(maxsize=None)
 def get_track_geometry(sat, track_number):
@@ -28,7 +48,6 @@ def get_track_geometry(sat, track_number):
     return lons, lats, lon_equat, lat_equat, lon_coast, lat_coast, angle_deg
 
 
-
 def build_unique_str(sat, row):
     track_self = track_to_str(row["track_self"])
     track_other = track_to_str(row["track_other"])
@@ -42,13 +61,17 @@ def track_to_str(track):
     return str(track)
 
 
-
 cmap1 = cmo.cm.diff
 d = 1.5
 dpth = 15
 height, width = 9, 9
 frac1 = "0.05"
-method = "loess"
+
+
+def filter_rama_uv_72h(rama_u, rama_v):
+    rama_u_filt = butter_lowpass_1d(rama_u, cutoff_days=3, order=4)
+    rama_v_filt = butter_lowpass_1d(rama_v, cutoff_days=3, order=4)
+    return rama_u_filt, rama_v_filt
 
 
 dse = xr.open_dataset("~/allData/topo/etopo5.cdf")
@@ -65,14 +88,15 @@ matched_rows_all = []
 # SELECT_TRACK_OTHER = "14"
 SELECT_SAT = 'S3A'
 SELECT_OMNI_ID = 'BD10'
-SELECT_TRACK_SELF = '522'
-SELECT_TRACK_OTHER = '279'
-SELECT_SAT = 'S3A'
-SELECT_OMNI_ID = 'BD10'
 SELECT_TRACK_SELF = '636'
 SELECT_TRACK_OTHER = '393'
+SELECT_SAT = 'S3A'
+SELECT_OMNI_ID = 'BD10'
+SELECT_TRACK_SELF = '522'
+SELECT_TRACK_OTHER = '279'
 
-EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections"
+EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
+EKMAN_DEPTH = "0"
 # TP+J1+J2+J3+S6A BD09 53 14
 # S3A BD10 522 279 
 
@@ -82,7 +106,7 @@ for sat in sats_new:
 df_all = pd.concat(df_all_list, ignore_index=True)
 
 
-lat_omni, lon_omni = omni_d[SELECT_OMNI_ID]
+lon_omni, lat_omni = omni_d[SELECT_OMNI_ID]
 omni_file = f"{omni_data_dir}/{SELECT_OMNI_ID}_current_sst.nc"
 print(omni_file)
 if not os.path.exists(omni_file):
@@ -98,10 +122,11 @@ ds_omni = xr.open_dataset(omni_file)
 print(ds_omni)
 omni_u = ds_omni.u_current.interp(current_depth=dpth)
 # omni_u = omni_u.rolling(time=10, center=True).mean()
-omni_u = omni_u
+omni_u = omni_u.resample(time="1D").mean()
 omni_v = ds_omni.v_current.interp(current_depth=dpth)
 # omni_v = omni_v.rolling(time=10, center=True).mean()
-omni_v = omni_v
+omni_v = omni_v.resample(time="1D").mean()
+omni_u, omni_v = filter_rama_uv_72h(omni_u, omni_v)
 N = omni_v.count().item()
 
 df_selected = df_all[
@@ -113,7 +138,7 @@ if df_selected.empty:
     raise("selected sat/track combination not found in intersections file")
 lons = df_selected["lons_inter"].to_numpy(dtype=float)
 lats = df_selected["lats_inter"].to_numpy(dtype=float)
-distances = [distance.distance((lat, lon), (lat_omni, lon_omni)).km for lon, lat in zip(lons, lats)]
+distances = [distance.distance((lat, lon), (lat_omni, lon_omni)).km for lat, lon in zip(lats, lons)]
 df_selected["distance_km"] = distances
 row = df_selected.nsmallest(1, "distance_km").iloc[0]
 
@@ -122,11 +147,13 @@ track_number_self = str(row["track_self"])
 track_number_other = str(row["track_other"])
 lon1 = row["lons_inter"]
 lat1 = row["lats_inter"]
+# msla_u_at = aviso_u.interp(longitude=lon_omni, latitude=lat_omni)
+msla_u_at = aviso_u.interp(longitude=lon1, latitude=lat1)
 distance_km = row["distance_km"]
 angle_acute = row["angle_acute"]
 angle_obtuse = row["angle_obtuse"]
 unique_str = build_unique_str(sat, row)
-f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_at_intersections.nc"
+f_ek = f"{EKMAN_DIR}/{unique_str}_ekman_{EKMAN_DEPTH}m_at_intersections_cd.nc"
 ds_ek = xr.open_dataset(f_ek)
 u_ek = ds_ek['u_at']
 v_ek = ds_ek['v_at']
@@ -173,7 +200,6 @@ with xr.open_dataset(f_guv) as ds_guv:
 gu_cut = gu
 gv_cut = gv
 
-# gu_cut_6 = gu.rolling(x=6, center=True).mean()
 # Collocate omni at track-gu timestamps; avoid sat-dependent smoothing.
 omni_u_match = omni_u.reindex(
     time=gu_cut.time,
@@ -187,7 +213,6 @@ ek_u_match = u_ek.reindex(
 )
 valid = np.isfinite(gu_cut) & np.isfinite(omni_u_match)
 gu_pair = gu_cut.where(valid)
-# gu_6_pair = gu_cut_6.where(valid)
 omni_u_pair = omni_u_match.where(valid)
 ek_u_pair = ek_u_match.where(valid)
 
@@ -203,14 +228,20 @@ ax2 = fig.add_subplot(2, 1, 1, projection=ccrs.PlateCarree())
 ax1 = fig.add_subplot(2, 1, 2)
 omni_u_pair.plot(ax=ax1, color="r", linewidth=2, label="omni")
 gu_pair.plot(ax=ax1, color="k", linewidth=2, label="track")
-# gu_6_pair.plot(ax=ax1, color="g", linewidth=2, label="track x 6 smooth")
 gu_ek_pair.plot(ax=ax1, color="b", linewidth=2, label="track+ekman")
+msla_u_at.plot(ax=ax1, color="c", linewidth=2, label="msla u")
+ax1.set_xlim(omni_u_pair.time.min(), omni_u_pair.time.max())
+ax1.axhline(0, color="k", linestyle="--", linewidth=0.5)
 
 corr = xs.pearson_r(gu_pair, omni_u_pair, dim="time", skipna=True)
 corr1 = corr.item()
+print(f"Correlation between gu and omni u: {corr1}")
+
+corr = xs.pearson_r(gu_ek_pair, omni_u_pair, dim="time", skipna=True)
+corr1 = corr.item()
+print(f"Correlation between gu and omni u: {corr1}")
 
 info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km:.2f} km"
-print(f"Correlation between gu and omni u: {corr1}")
 plt.text(
     0.25,
     0.90,
@@ -219,6 +250,16 @@ plt.text(
     fontsize=12,
     fontweight="bold",
 )
+ax1.text(
+    0.02,
+    0.80,
+    f"b)",
+    transform=ax1.transAxes,
+    fontsize=14,
+    fontweight="bold",
+    color="k",
+)
+ax1.set_ylabel("zonal current (m/s)")
 plt.legend()
 
 rose_cut.plot(ax=ax2, add_colorbar=False, add_labels=False, cmap=cmap1)
@@ -245,7 +286,24 @@ ax2.plot(
     markeredgecolor="black",
     markeredgewidth=2,
 )
-plt.text(lon_omni, lat_omni, f"{SELECT_OMNI_ID}", fontsize=10, color="k")
+ax2.text(
+    0.05,
+    0.80,
+    f"a)",
+    transform=ax2.transAxes,
+    fontsize=14,
+    fontweight="bold",
+    color="k",
+)
+ax2.text(
+    lon_omni-0.5,
+    lat_omni,
+    f"{SELECT_OMNI_ID}",
+    transform=ccrs.PlateCarree(),
+    fontsize=10,
+    color="r",
+    ha="right",
+)
 ax2.scatter(
     lons_track_self, lats_track_self, marker=".", color="c", s=4
 )
@@ -262,8 +320,8 @@ lonm, latm = get_point_at_distance(
 )
 info = f"{sat} {track_number_self} {track_number_other} {distance_km:.2f} km"
 plt.text(
-    0.55,
-    0.90,
+    0.49,
+    0.92,
     info,
     transform=ax2.transAxes,
     fontsize=10,
@@ -296,6 +354,9 @@ if is_within_region(lonm, latm, *TRACKS_REG):
         color="w",
     )
 
+# plt.savefig("p.omni_uvVStrack_guv_c.ek.nearest.selected.png")
+# ln_sf(f"p.omni_uvVStrack_guv_c.ek.nearest.selected.png", png_file)
+plt.savefig(f"{png_file}", dpi=300)
 plt.show()
 plt.close("all")
 

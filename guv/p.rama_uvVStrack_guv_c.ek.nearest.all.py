@@ -41,6 +41,12 @@ def track_to_str(track):
     return str(track)
 
 
+def filter_rama_uv_72h(rama_u, rama_v):
+    rama_u_filt = butter_lowpass_1d(rama_u, cutoff_days=3, order=4)
+    rama_v_filt = butter_lowpass_1d(rama_v, cutoff_days=3, order=4)
+    return rama_u_filt, rama_v_filt
+
+
 cmap1 = cmo.cm.diff
 d = 1.5
 height, width = 9, 9
@@ -73,8 +79,9 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
     print(rama_id, lon_rama, lat_rama)
     with xr.open_dataset(f"{rama_data_dir}/cur{rama_id}_dy.cdf") as ds_rama:
         # print(ds_rama)
-        rama_u = 0.01 * ds_rama.U_320.isel(depth=0, drop=True)
-        rama_v = 0.01 * ds_rama.V_321.isel(depth=0, drop=True)
+        rama_u = 0.01 * ds_rama.U_320.isel(depth=0, lon=0, lat=0, drop=True)
+        rama_v = 0.01 * ds_rama.V_321.isel(depth=0, lon=0, lat=0, drop=True)
+    rama_u, rama_v = filter_rama_uv_72h(rama_u, rama_v)
 
     # print(rama_v.count().item())
     df_4 = find_n_closest_points(df_all, lon_rama, lat_rama, n=4)
@@ -95,6 +102,7 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
         ds_ek = xr.open_dataset(f_ek)
         u_ek = ds_ek['u_at']
         v_ek = ds_ek['v_at']
+        u_ek, v_ek = filter_rama_uv_72h(u_ek, v_ek)
 
         if abs(lat1) < 5:
             continue
@@ -148,16 +156,18 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
         gv_cut = gv
 
         # Collocate RAMA at track-gu timestamps; avoid sat-dependent smoothing.
-        rama_u_match = rama_u.reindex(
-            time=gu_cut.time,
-            method="nearest",
-            tolerance=np.timedelta64(24, "h"),
-        )
-        ek_u_match = u_ek.reindex(
-            time=gu_cut.time,
-            method="nearest",
-            tolerance=np.timedelta64(24, "h"),
-        )
+        # rama_u_match = rama_u.reindex(
+        #     time=gu_cut.time,
+        #     method="nearest",
+        #     tolerance=np.timedelta64(24, "h"),
+        # )
+        rama_u_match = rama_u.interp(time=gu_cut.time)
+        # ek_u_match = u_ek.reindex(
+        #     time=gu_cut.time,
+        #     method="nearest",
+        #     tolerance=np.timedelta64(24, "h"),
+        # )
+        ek_u_match = u_ek.interp(time=gu_cut.time)
         valid = np.isfinite(gu_cut) & np.isfinite(rama_u_match)
         gu_pair = gu_cut.where(valid)
         rama_u_pair = rama_u_match.where(valid)
