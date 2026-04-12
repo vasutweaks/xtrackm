@@ -20,7 +20,7 @@ ALIGNMENT_MAP = {
     "justify": WD_ALIGN_PARAGRAPH.JUSTIFY,
 }
 
-doc_name = "figures_v2.1.docx"
+doc_name = "figures_v2.2.docx"
 if os.path.exists(doc_name):
     os.remove(doc_name)
 
