@@ -84,7 +84,7 @@ for sat in sats_new:
         fontsize=14,
         fontweight="bold",
     )
-    # plt.show()
+    plt.show()
     # sys.exit()
     # OMNI buoy locations
     ax1.scatter(

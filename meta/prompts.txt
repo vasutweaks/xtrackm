@@ -1,3 +1,17 @@
+I want to add number of intersections to data_coverage_df.csv
+as column in the script data_coverage_df.py
+we can get the number of intersections points from the len df of 
+tracks_intersections_*_1.csv
+Also do you find any other issues with data_coverage_df.csv
+
+debug/extend script l.slopes_at_coastal_points_allsats.py
+I want to compute slope angle at all coastal points of the tracks and plot
+them at each point. I also want to see tangent sigment at the the coastal
+point
+
+Taking functionlity/flow from
+p.tracks.with.all_obs_locs_allsat_with_track_numbers.negative.py
+Write a python script to compute 
 Write a python script to make two subplot(rows), the top row contains figure
 from satellite_mission_time_spans_new.py and bottom row contains figure from
 p.spatio_temporal_valid_perc.bar.py

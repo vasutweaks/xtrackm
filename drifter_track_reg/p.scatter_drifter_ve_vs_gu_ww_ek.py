@@ -7,7 +7,6 @@ import xarray as xr
 
 SAT = "TPN+J1N+J2N+J3N"
 SAT = "TP+J1+J2+J3+S6A"
-CSV_NO_EK = f"drifter_ve_vs_gu_{SAT}.csv"
 CSV_W_EK = f"drifter_ve_vs_gu_ek_{SAT}.csv"
 OUT_PNG = f"scatter_drifter_ve_vs_gu_ww_ek_{SAT}.png"
 COAST_DIST_PATH = "~/allData/topo/GMT_intermediate_coast_distance_01d_track_reg.nc"
@@ -199,7 +198,7 @@ def plot_panel(ax, x, y, panel_title, x_label, y_label):
 
 def main():
     none = ""
-    df_no_ek = load_filtered_df(CSV_NO_EK, "without_ek")
+    df_no_ek = load_filtered_df(CSV_W_EK, "without_ek")
     df_w_ek = load_filtered_df(CSV_W_EK, "with_ek")
     print_r2_ekman_gain(CSV_W_EK, "drifter_ve", "drifter")
 

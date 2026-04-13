@@ -57,6 +57,8 @@ def plot_2x2(
     lat_x2,
     f_plot,
 ):
+    levels = (-0.3,0.3)
+    colors = ('b', 'r')
     sat_tsta, sat_tend = get_time_limits_o(sat)
     radar_tsta, radar_tend = radar_times[radar_str]
     overlap_start, overlap_end = overlap_dates(radar_tsta, radar_tend, sat_tsta, sat_tend)
@@ -117,10 +119,19 @@ def plot_2x2(
         x="x",
         y="time",
         cmap="RdBu_r",
-        vmin=-1.0,
-        vmax=1.0,
+        vmin=-1.2,
+        vmax=1.2,
         add_labels=False,
         add_colorbar=False,
+    )
+    gc_plot.plot.contour(
+        ax=ax1,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dotted',
+        linewidths=0.5
     )
     ax1.set_title("GC(time,x)")
     ax1.set_ylabel("time")
@@ -134,10 +145,19 @@ def plot_2x2(
         x="x",
         y="time",
         cmap="RdBu_r",
-        vmin=-1.0,
-        vmax=1.0,
+        vmin=-1.2,
+        vmax=1.2,
         add_labels=False,
         add_colorbar=False,
+    )
+    radar_plot.plot.contour(
+        ax=ax2,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dashed',
+        linewidths=0.5
     )
     ax2.set_title("Radar cross(time,x)")
     ax2.set_ylabel("time")
@@ -215,8 +235,8 @@ def main():
     print(f"Selection: radar={radar_str}, sat={sat}, track={tno}")
 
     polygon = gpd.read_file(f"polygon_shapefile_around_{radar_str}.shp").geometry.iloc[0]
-    plot_dir = f"{OUT_DIR}/plots_{radar_str}_ek"
-    metric_dir = f"{OUT_DIR}/metrics_{radar_str}_ek"
+    plot_dir = f"{OUT_DIR}/plots_ek"
+    metric_dir = f"{OUT_DIR}/metrics_ek"
     os.makedirs(plot_dir, exist_ok=True)
     os.makedirs(metric_dir, exist_ok=True)
 

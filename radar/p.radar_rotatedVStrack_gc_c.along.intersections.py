@@ -4,29 +4,28 @@ import pickle
 import xarray as xr
 import xskillscore as xs
 from tools_xtrackm import *
-
 # codex resume 019d7247-c5e4-7662-bdec-18a975f1646b
-
 METHOD = "loess"
 FRAC1 = "0.05"
 RADARS = ("TN", "AP", "OR")
 GC_DIR = f"../guv/gc_along_{METHOD}"
 EXTRACTED_DIR = "radar_along_intersections"
+EKMAN_DIR = "ekman_along_intersections"
 OUT_DIR = "radar_rotatedVStrack_gc_along_intersections"
 BOB_REG = (78.0, 95.0, 4.0, 24.0)
 
 
-def rotate_radar_to_cross(radar_u, radar_v, lons_track, lats_track):
+def rotate_to_cross(u_field, v_field, lons_track, lats_track):
     ln = len(lons_track)
     ioff = max(1, min(5, ln // 10))
     angles = []
     for ii in range(ln):
         theta_tangent = local_angle(lons_track, lats_track, ii, ioff=ioff, degrees=False)
         angles.append(theta_tangent + (np.pi / 2.0))
-    theta_cross = xr.DataArray(np.array(angles), coords={"x": radar_u.x.values}, dims=["x"])
-    radar_cross = (np.cos(theta_cross) * radar_u) + (np.sin(theta_cross) * radar_v)
-    radar_cross.name = "radar_cross"
-    return radar_cross
+    theta_cross = xr.DataArray(np.array(angles), coords={"x": u_field.x.values}, dims=["x"])
+    cross = (np.cos(theta_cross) * u_field) + (np.sin(theta_cross) * v_field)
+    cross.name = "cross"
+    return cross
 
 
 def local_angle_series_deg(xvals, lons_track, lats_track):
@@ -40,9 +39,12 @@ def local_angle_series_deg(xvals, lons_track, lats_track):
 
 
 def plot_2x2(
-    gc_valid,
-    radar_valid,
+    gc_ek_valid,
+    radar_ek_valid,
     corr_x_masked,
+    corr_ek_x_masked,
+    rmse_x_masked,
+    rmse_ek_x_masked,
     radar_str,
     sat,
     tno,
@@ -53,28 +55,40 @@ def plot_2x2(
     lat_x1,
     lon_x2,
     lat_x2,
+    x1_m,
     f_plot,
 ):
+    levels = (-0.3,0.3)
+    colors = ('b', 'r')
     sat_tsta, sat_tend = get_time_limits_o(sat)
     radar_tsta, radar_tend = radar_times[radar_str]
     overlap_start, overlap_end = overlap_dates(radar_tsta, radar_tend, sat_tsta, sat_tend)
 
-    gc_plot = gc_valid.assign_coords(x=gc_valid.x / 1000.0)
-    radar_plot = radar_valid.assign_coords(x=radar_valid.x / 1000.0)
-    corr_plot = corr_x_masked.assign_coords(x=corr_x_masked.x / 1000.0)
+    # gc_plot = gc_ek_valid.assign_coords(x=gc_ek_valid.x / 1000.0)
+    # radar_plot = radar_ek_valid.assign_coords(x=radar_ek_valid.x / 1000.0)
+    # corr_plot = corr_x_masked.assign_coords(x=corr_x_masked.x / 1000.0)
+    # corr_ek_plot = corr_ek_x_masked.assign_coords(x=corr_ek_x_masked.x / 1000.0)
+    # rmse_plot = rmse_x_masked.assign_coords(x=rmse_x_masked.x / 1000.0)
+    # rmse_ek_plot = rmse_ek_x_masked.assign_coords(x=rmse_ek_x_masked.x / 1000.0)
+
+    gc_plot = gc_ek_valid.assign_coords(x=(gc_ek_valid.x - x1_m) / 1000.0)
+    radar_plot = radar_ek_valid.assign_coords(x=(radar_ek_valid.x - x1_m) / 1000.0)
+    corr_plot = corr_x_masked.assign_coords(x=(corr_x_masked.x - x1_m) / 1000.0)
+    corr_ek_plot = corr_ek_x_masked.assign_coords(x=(corr_ek_x_masked.x - x1_m) / 1000.0)
+    rmse_plot = rmse_x_masked.assign_coords(x=(rmse_x_masked.x - x1_m) / 1000.0)
+    rmse_ek_plot = rmse_ek_x_masked.assign_coords(x=(rmse_ek_x_masked.x - x1_m) / 1000.0)
 
     fig = plt.figure(figsize=(14, 11))
     gs = fig.add_gridspec(3, 2, width_ratios=[1.0, 1.8], hspace=0.22, wspace=0.2)
 
-    # Keep map at first-column second-row (middle-left), per request.
-    ax_blank_top = fig.add_subplot(gs[0, 0])
-    ax_blank_bot = fig.add_subplot(gs[2, 0])
-    ax0 = fig.add_subplot(gs[1, 0], projection=ccrs.PlateCarree())
+    # ax_blank_top = fig.add_subplot(gs[0, 0])
+    # ax_blank_bot = fig.add_subplot(gs[2, 0])
+    ax0 = fig.add_subplot(gs[:, 0], projection=ccrs.PlateCarree())
     ax1 = fig.add_subplot(gs[0, 1])
     ax2 = fig.add_subplot(gs[1, 1], sharex=ax1)
     ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
-    ax_blank_top.axis("off")
-    ax_blank_bot.axis("off")
+    # ax_blank_top.axis("off")
+    # ax_blank_bot.axis("off")
 
     decorate_axis(ax0, f"{radar_str} in Bay of Bengal", *BOB_REG, step=2)
     ax0.grid(alpha=0.3, linestyle="--")
@@ -108,7 +122,7 @@ def plot_2x2(
     ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
     ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
 
-    cf1 = gc_plot.plot(
+    cf1 = gc_plot.plot.contourf(
         ax=ax1,
         x="x",
         y="time",
@@ -118,6 +132,15 @@ def plot_2x2(
         add_labels=False,
         add_colorbar=False,
     )
+    gc_plot.plot.contour(
+        ax=ax1,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dotted',
+        linewidths=0.5
+    )
     ax1.set_title("GC(time,x)")
     ax1.set_ylabel("time")
     ax1.set_xlabel("")
@@ -125,7 +148,7 @@ def plot_2x2(
     if overlap_start is not None and overlap_end is not None:
         ax1.set_ylim(overlap_start, overlap_end)
 
-    radar_plot.plot(
+    radar_plot.plot.contourf(
         ax=ax2,
         x="x",
         y="time",
@@ -134,6 +157,15 @@ def plot_2x2(
         vmax=1.0,
         add_labels=False,
         add_colorbar=False,
+    )
+    radar_plot.plot.contour(
+        ax=ax2,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dashed',
+        linewidths=0.5
     )
     ax2.set_title("Radar cross(time,x)")
     ax2.set_ylabel("time")
@@ -148,17 +180,27 @@ def plot_2x2(
     cax.xaxis.set_ticks_position("top")
     cax.xaxis.set_label_position("top")
 
-    corr_plot.plot(ax=ax3, color="k", linewidth=1.5)
+    corr_plot.plot(ax=ax3, color="k", linewidth=1.5, label="no ekman")
+    corr_ek_plot.plot(ax=ax3, color="b", linewidth=1.5, label="with ekman")
     ax3.axhline(0.0, color="gray", linestyle="--", linewidth=1.0)
     ax3.set_ylim(-1.0, 1.0)
     ax3.set_xlabel("x from coast (km)")
     ax3.set_ylabel("corr(time)")
     ax3.set_title("corr vs x")
     ax3.grid(alpha=0.3, linestyle="--")
+    ax3.legend()
 
+    ax3_r = ax3.twinx()
+    rmse_plot.plot(ax=ax3_r, color="tab:olive", linewidth=1.3, label="rmse no ekman")
+    rmse_ek_plot.plot(ax=ax3_r, color="tab:red", linewidth=1.3, label="rmse with ekman")
+    ax3_r.set_ylabel("rmse (m/s)")
+
+    lines_l, labels_l = ax3.get_legend_handles_labels()
+    lines_r, labels_r = ax3_r.get_legend_handles_labels()
+    ax3.legend(lines_l + lines_r, labels_l + labels_r, loc="best")
     fig.suptitle(f"{radar_str} | {sat} track {tno}")
     fig.tight_layout()
-    fig.savefig(f_plot, dpi=170, bbox_inches="tight")
+    # fig.savefig(f_plot, dpi=300, bbox_inches="tight")
     # plt.show()
     plt.close(fig)
 
@@ -167,6 +209,7 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     print(f"Using GC_DIR: {GC_DIR}")
     print(f"Using EXTRACTED_DIR: {EXTRACTED_DIR}")
+    print(f"Using EKMAN_DIR: {EKMAN_DIR}")
 
     for radar_str in RADARS:
         polygon = gpd.read_file(f"polygon_shapefile_around_{radar_str}.shp").geometry.iloc[0]
@@ -178,8 +221,8 @@ def main():
         with open(f_tracks, "rb") as f:
             tracks_dict = pickle.load(f)
 
-        plot_dir = f"{OUT_DIR}/plots_{radar_str}"
-        metric_dir = f"{OUT_DIR}/metrics_{radar_str}"
+        plot_dir = f"{OUT_DIR}/plots_ek"
+        metric_dir = f"{OUT_DIR}/metrics_ek"
         os.makedirs(plot_dir, exist_ok=True)
         os.makedirs(metric_dir, exist_ok=True)
 
@@ -195,6 +238,11 @@ def main():
                 f_ex = f"{EXTRACTED_DIR}/radar_along_{radar_str}_{sat}_{tno}.nc"
                 if not os.path.exists(f_ex):
                     print(f"missing extracted radar file: {f_ex}")
+                    continue
+
+                f_ek = f"{EKMAN_DIR}/ekman_along_{radar_str}_{sat}_{tno}.nc"
+                if not os.path.exists(f_ek):
+                    print(f"missing extracted ekman file: {f_ek}")
                     continue
 
                 f_gc = f"{GC_DIR}/gc_along_{sat}_{tno}_{METHOD}_{FRAC1}.nc"
@@ -215,25 +263,36 @@ def main():
                     x1_m = float(ds_ex.attrs["x1_m"])
                     x2_m = float(ds_ex.attrs["x2_m"])
 
+                with xr.open_dataset(f_ek) as ds_ek:
+                    ek_u = ds_ek.ekman_u.load()
+                    ek_v = ds_ek.ekman_v.load()
+
                 with xr.open_dataset(f_gc) as ds_gc:
                     gc = ds_gc.gc.load()
 
-                radar_cross = rotate_radar_to_cross(radar_u, radar_v, lons_track, lats_track)
+                radar_cross = rotate_to_cross(radar_u, radar_v, lons_track, lats_track)
+                ekman_cross = rotate_to_cross(ek_u, ek_v, lons_track, lats_track)
 
                 x_lo = min(x1_m, x2_m)
                 x_hi = max(x1_m, x2_m)
 
                 gc_cut = gc.sel(x=slice(x_lo, x_hi))
                 radar_cut = radar_cross.interp(x=gc_cut.x, method="nearest")
+                ekman_cut = ekman_cross.interp(x=gc_cut.x, method="nearest")
+                gc_ek_cut = gc_cut + ekman_cut
+
                 dist_to_coast_cut = dist_to_coast_track.interp(x=gc_cut.x, method="nearest")
                 angle_deg_cut = local_angle_series_deg(
                     radar_u.x.values, lons_track, lats_track
                 ).interp(x=gc_cut.x, method="nearest")
+
                 radar_cut = radar_cut.reindex(
                     time=gc_cut.time,
                     method="nearest",
                     tolerance=np.timedelta64(24, "h"),
                 )
+                gc_ek_cut = gc_ek_cut.reindex(time=gc_cut.time)
+
                 valid = np.isfinite(gc_cut) & np.isfinite(radar_cut)
                 gc_valid = gc_cut.where(valid)
                 radar_valid = radar_cut.where(valid)
@@ -248,6 +307,21 @@ def main():
                 pval_x_masked = pval_x.where(sig_mask)
                 rmse_x_masked = rmse_x.where(sig_mask)
                 bias_x_masked = bias_x.where(sig_mask)
+
+                valid_ek = np.isfinite(gc_ek_cut) & np.isfinite(radar_cut)
+                gc_ek_valid = gc_ek_cut.where(valid_ek)
+                radar_ek_valid = radar_cut.where(valid_ek)
+
+                corr_ek_x = xs.pearson_r(radar_ek_valid, gc_ek_valid, dim="time", skipna=True)
+                pval_ek_x = xs.pearson_r_p_value(radar_ek_valid, gc_ek_valid, dim="time", skipna=True)
+                rmse_ek_x = xs.rmse(radar_ek_valid, gc_ek_valid, dim="time", skipna=True)
+                bias_ek_x = (radar_ek_valid - gc_ek_valid).mean(dim="time", skipna=True)
+
+                sig_ek_mask = pval_ek_x < 0.05
+                corr_ek_x_masked = corr_ek_x.where(sig_ek_mask)
+                pval_ek_x_masked = pval_ek_x.where(sig_ek_mask)
+                rmse_ek_x_masked = rmse_ek_x.where(sig_ek_mask)
+                bias_ek_x_masked = bias_ek_x.where(sig_ek_mask)
 
                 n_sig_x = int(sig_mask.sum().item())
                 keep = (
@@ -279,14 +353,17 @@ def main():
                         }
                     )
 
-                n_corr_valid = int(np.isfinite(corr_x_masked.values).sum())
-                pct_corr_valid = 100.0 * n_corr_valid / corr_x_masked.size
+                n_corr_valid = int(np.isfinite(corr_ek_x_masked.values).sum())
+                pct_corr_valid = 100.0 * n_corr_valid / corr_ek_x_masked.size
                 if pct_corr_valid >= 5.0:
-                    f_plot = f"{plot_dir}/gc_vs_radar_xt_{sat}_{tno}.png"
+                    f_plot = f"{plot_dir}/gc_vs_{radar_str}_xt_{sat}_{tno}.png"
                     plot_2x2(
-                        gc_valid,
-                        radar_valid,
+                        gc_ek_valid,
+                        radar_ek_valid,
                         corr_x_masked,
+                        corr_ek_x_masked,
+                        rmse_x_masked,
+                        rmse_ek_x_masked,
                         radar_str,
                         sat,
                         tno,
@@ -297,6 +374,7 @@ def main():
                         lat_x1,
                         lon_x2,
                         lat_x2,
+                        x1_m,
                         f_plot,
                     )
                 else:
@@ -304,15 +382,16 @@ def main():
                         f"{radar_str} {sat} {tno}: skip plot, "
                         f"valid corr_x={pct_corr_valid:.2f}% < 5%"
                     )
+
                 if n_sig_x > 0:
-                    corr_sig = corr_x.where(sig_mask).dropna(dim="x")
-                    pval_sig = pval_x.where(sig_mask).dropna(dim="x")
+                    corr_sig = corr_ek_x.where(sig_ek_mask).dropna(dim="x")
+                    pval_sig = pval_ek_x.where(sig_ek_mask).dropna(dim="x")
                     x_sig_km = (corr_sig.x.values / 1000.0).tolist()
                     c_sig = corr_sig.values.tolist()
                     p_sig = pval_sig.values.tolist()
                     for xx, cc, pp in zip(x_sig_km, c_sig, p_sig):
                         print(
-                            f"{radar_str} {sat} {tno}: "
+                            f"{radar_str} {sat} {tno} (gc+ek): "
                             f"x={xx:.1f} km corr={cc:.3f} p={pp:.3f}"
                         )
                 else:

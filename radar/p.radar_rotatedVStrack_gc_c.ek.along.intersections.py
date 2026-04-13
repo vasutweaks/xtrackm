@@ -43,6 +43,8 @@ def plot_2x2(
     radar_ek_valid,
     corr_x_masked,
     corr_ek_x_masked,
+    rmse_x_masked,
+    rmse_ek_x_masked,
     radar_str,
     sat,
     tno,
@@ -53,28 +55,40 @@ def plot_2x2(
     lat_x1,
     lon_x2,
     lat_x2,
+    x1_m,
     f_plot,
 ):
+    levels = (-0.3,0.3)
+    colors = ('b', 'r')
     sat_tsta, sat_tend = get_time_limits_o(sat)
     radar_tsta, radar_tend = radar_times[radar_str]
     overlap_start, overlap_end = overlap_dates(radar_tsta, radar_tend, sat_tsta, sat_tend)
 
-    gc_plot = gc_ek_valid.assign_coords(x=gc_ek_valid.x / 1000.0)
-    radar_plot = radar_ek_valid.assign_coords(x=radar_ek_valid.x / 1000.0)
-    corr_plot = corr_x_masked.assign_coords(x=corr_x_masked.x / 1000.0)
-    corr_ek_plot = corr_ek_x_masked.assign_coords(x=corr_ek_x_masked.x / 1000.0)
+    # gc_plot = gc_ek_valid.assign_coords(x=gc_ek_valid.x / 1000.0)
+    # radar_plot = radar_ek_valid.assign_coords(x=radar_ek_valid.x / 1000.0)
+    # corr_plot = corr_x_masked.assign_coords(x=corr_x_masked.x / 1000.0)
+    # corr_ek_plot = corr_ek_x_masked.assign_coords(x=corr_ek_x_masked.x / 1000.0)
+    # rmse_plot = rmse_x_masked.assign_coords(x=rmse_x_masked.x / 1000.0)
+    # rmse_ek_plot = rmse_ek_x_masked.assign_coords(x=rmse_ek_x_masked.x / 1000.0)
+
+    gc_plot = gc_ek_valid.assign_coords(x=(gc_ek_valid.x - x1_m) / 1000.0)
+    radar_plot = radar_ek_valid.assign_coords(x=(radar_ek_valid.x - x1_m) / 1000.0)
+    corr_plot = corr_x_masked.assign_coords(x=(corr_x_masked.x - x1_m) / 1000.0)
+    corr_ek_plot = corr_ek_x_masked.assign_coords(x=(corr_ek_x_masked.x - x1_m) / 1000.0)
+    rmse_plot = rmse_x_masked.assign_coords(x=(rmse_x_masked.x - x1_m) / 1000.0)
+    rmse_ek_plot = rmse_ek_x_masked.assign_coords(x=(rmse_ek_x_masked.x - x1_m) / 1000.0)
 
     fig = plt.figure(figsize=(14, 11))
     gs = fig.add_gridspec(3, 2, width_ratios=[1.0, 1.8], hspace=0.22, wspace=0.2)
 
-    ax_blank_top = fig.add_subplot(gs[0, 0])
-    ax_blank_bot = fig.add_subplot(gs[2, 0])
-    ax0 = fig.add_subplot(gs[1, 0], projection=ccrs.PlateCarree())
+    # ax_blank_top = fig.add_subplot(gs[0, 0])
+    # ax_blank_bot = fig.add_subplot(gs[2, 0])
+    ax0 = fig.add_subplot(gs[:, 0], projection=ccrs.PlateCarree())
     ax1 = fig.add_subplot(gs[0, 1])
     ax2 = fig.add_subplot(gs[1, 1], sharex=ax1)
     ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
-    ax_blank_top.axis("off")
-    ax_blank_bot.axis("off")
+    # ax_blank_top.axis("off")
+    # ax_blank_bot.axis("off")
 
     decorate_axis(ax0, f"{radar_str} in Bay of Bengal", *BOB_REG, step=2)
     ax0.grid(alpha=0.3, linestyle="--")
@@ -108,7 +122,7 @@ def plot_2x2(
     ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
     ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
 
-    cf1 = gc_plot.plot(
+    cf1 = gc_plot.plot.contourf(
         ax=ax1,
         x="x",
         y="time",
@@ -118,6 +132,15 @@ def plot_2x2(
         add_labels=False,
         add_colorbar=False,
     )
+    gc_plot.plot.contour(
+        ax=ax1,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dotted',
+        linewidths=0.5
+    )
     ax1.set_title("GC(time,x)")
     ax1.set_ylabel("time")
     ax1.set_xlabel("")
@@ -125,7 +148,7 @@ def plot_2x2(
     if overlap_start is not None and overlap_end is not None:
         ax1.set_ylim(overlap_start, overlap_end)
 
-    radar_plot.plot(
+    radar_plot.plot.contourf(
         ax=ax2,
         x="x",
         y="time",
@@ -134,6 +157,15 @@ def plot_2x2(
         vmax=1.0,
         add_labels=False,
         add_colorbar=False,
+    )
+    radar_plot.plot.contour(
+        ax=ax2,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dashed',
+        linewidths=0.5
     )
     ax2.set_title("Radar cross(time,x)")
     ax2.set_ylabel("time")
@@ -158,10 +190,18 @@ def plot_2x2(
     ax3.grid(alpha=0.3, linestyle="--")
     ax3.legend()
 
+    ax3_r = ax3.twinx()
+    rmse_plot.plot(ax=ax3_r, color="tab:olive", linewidth=1.3, label="rmse no ekman")
+    rmse_ek_plot.plot(ax=ax3_r, color="tab:red", linewidth=1.3, label="rmse with ekman")
+    ax3_r.set_ylabel("rmse (m/s)")
+
+    lines_l, labels_l = ax3.get_legend_handles_labels()
+    lines_r, labels_r = ax3_r.get_legend_handles_labels()
+    ax3.legend(lines_l + lines_r, labels_l + labels_r, loc="best")
     fig.suptitle(f"{radar_str} | {sat} track {tno}")
     fig.tight_layout()
-    fig.savefig(f_plot, dpi=170, bbox_inches="tight")
-    plt.show()
+    fig.savefig(f_plot, dpi=300, bbox_inches="tight")
+    # plt.show()
     plt.close(fig)
 
 
@@ -181,8 +221,8 @@ def main():
         with open(f_tracks, "rb") as f:
             tracks_dict = pickle.load(f)
 
-        plot_dir = f"{OUT_DIR}/plots_{radar_str}_ek"
-        metric_dir = f"{OUT_DIR}/metrics_{radar_str}_ek"
+        plot_dir = f"{OUT_DIR}/plots_ek"
+        metric_dir = f"{OUT_DIR}/metrics_ek"
         os.makedirs(plot_dir, exist_ok=True)
         os.makedirs(metric_dir, exist_ok=True)
 
@@ -317,12 +357,14 @@ def main():
                 n_corr_valid = int(np.isfinite(corr_ek_x_masked.values).sum())
                 pct_corr_valid = 100.0 * n_corr_valid / corr_ek_x_masked.size
                 if pct_corr_valid >= 5.0:
-                    f_plot = f"{plot_dir}/gc_vs_radar_xt_{sat}_{tno}_ek.png"
+                    f_plot = f"{plot_dir}/gc_vs_{radar_str}_xt_{sat}_{tno}_ek.png"
                     plot_2x2(
                         gc_ek_valid,
                         radar_ek_valid,
                         corr_x_masked,
                         corr_ek_x_masked,
+                        rmse_x_masked,
+                        rmse_ek_x_masked,
                         radar_str,
                         sat,
                         tno,
@@ -333,6 +375,7 @@ def main():
                         lat_x1,
                         lon_x2,
                         lat_x2,
+                        x1_m,
                         f_plot,
                     )
                 else:
@@ -364,9 +407,9 @@ def main():
                 "x",
                 "dist_to_coast",
                 "local_angle_deg",
-                "corr_at_x",
-                "rmse_at_x",
-                "bias_x",
+                "corr_at_x_ek",
+                "rmse_at_x_ek",
+                "bias_x_ek",
             ],
         )
         f_sum = f"{OUT_DIR}/radar_rotatedVStrack_gc_along_summary_{radar_str}_ek.csv"

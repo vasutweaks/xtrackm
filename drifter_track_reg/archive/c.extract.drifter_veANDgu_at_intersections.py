@@ -5,17 +5,26 @@ from glob import glob
 import numpy as np
 import pandas as pd
 import xarray as xr
+from tools_xtrackm import butter_lowpass_1d
 
 method = "loess"
 frac1 = "0.05"
+SAT = "TPN+J1N+J2N+J3N"
 SAT = "TP+J1+J2+J3+S6A"
 DRIFTER_DIR = "/home/srinivasu/allData/drifter_track_reg/netcdf_all/"
 INTERSECTION_CSV = f"tracks_intersections_{SAT}_1.csv"
 CANDIDATE_PICKLE_DIR = "candidate_pickles"
 GUV_DIR = f"/home/srinivasu/xtrackm/guv/guv_at_intersections_{method}"
-OUTPUT_CSV = f"drifter_ve_vs_gu_ek_{SAT}.csv"
+OUTPUT_CSV = f"drifter_ve_vs_gu_{SAT}.csv"
 EKMAN_DIR = "/home/srinivasu/xtrackm/ekman/ekman_at_intersections_cd"
 EKMAN_DEPTH = "0"
+
+
+def filter_rama_uv_72h(rama_u, rama_v):
+    rama_u_filt = butter_lowpass_1d(rama_u, cutoff_days=3, order=4)
+    rama_v_filt = butter_lowpass_1d(rama_v, cutoff_days=3, order=4)
+    return rama_u_filt, rama_v_filt
+
 
 def decode_id(raw_id):
     if isinstance(raw_id, (bytes, np.bytes_)):
@@ -47,7 +56,7 @@ def build_drifter_index(drifter_files):
 
 def load_drifter_dataset(fd):
     with xr.open_dataset(fd, drop_variables=["WMO"]) as ds_d:
-        ds_drifter = ds_d[["longitude", "latitude", "time", "ve"]].isel(traj=0).load()
+        ds_drifter = ds_d[["longitude", "latitude", "time", "ve", "vn"]].isel(traj=0).load()
     return ds_drifter
 
 
@@ -95,6 +104,7 @@ def main():
         ds_ek = xr.open_dataset(f_ek)
         u_ek = ds_ek['u_at']
         v_ek = ds_ek['v_at']
+        u_ek, v_ek = filter_rama_uv_72h(u_ek, v_ek)
         if not os.path.exists(pickle_path):
             print(f"No pickle for {unique_str}")
             continue
@@ -123,7 +133,10 @@ def main():
                 continue
 
             drifter_time = ds_drifter["time"].isel(obs=close_idx).values
-            drifter_ve = ds_drifter["ve"].isel(obs=close_idx).values
+            ve = ds_drifter["ve"]
+            vn = ds_drifter["vn"]
+            ve, vn = filter_rama_uv_72h(ve, vn)
+            drifter_ve = ve.isel(obs=close_idx).values
             if np.isnat(drifter_time) or not np.isfinite(drifter_ve):
                 continue
 

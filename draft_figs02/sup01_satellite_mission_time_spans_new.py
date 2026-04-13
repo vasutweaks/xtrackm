@@ -13,7 +13,7 @@ png_file = script.with_suffix(".png")
 # codex resume 019d70fe-d37c-77c3-bdff-8f2a524c80e7
 def plot_mission_timeline(ax):
     missions = pd.read_csv("data_coverage_df.csv")
-    colors = ["red", "green", "blue", "purple"]
+    colors = ["red", "green", "blue", "purple", "darkorange"]
     date_format = "%Y-%m-%d"
 
     min_start_date = min(pd.to_datetime(missions["first_date"]))
@@ -22,10 +22,10 @@ def plot_mission_timeline(ax):
     max_end_date1 = max_end_date + relativedelta(years=1)
 
     for index, row in missions.iterrows():
-        sat, track_nos, start_date, end_date, tfreq, xfreq = row.loc[
-            ["sat", "trackn", "first_date", "last_date", "tfreq", "xfreq"]
+        sat, track_nos, n_intersections, start_date, end_date, tfreq, xfreq = row.loc[
+            ["sat", "trackn", "n_intersections", "first_date", "last_date", "tfreq", "xfreq"]
         ]
-        words = [sat, str(track_nos), str(tfreq), str(round(xfreq, 1))]
+        words = [sat, str(track_nos), str(tfreq), str(round(xfreq, 1)), str(int(n_intersections))]
         start_date_o = datetime.strptime(start_date, date_format)
         end_date_o = datetime.strptime(end_date, date_format)
         duration = end_date_o - start_date_o
@@ -37,7 +37,7 @@ def plot_mission_timeline(ax):
             edgecolor="black",
         )
 
-        current_start_time = start_date_o + duration / 4
+        current_start_time = start_date_o + duration / 4 - duration * 0.1
         for k, word in enumerate(words):
             ax.text(
                 current_start_time,
@@ -69,7 +69,8 @@ def plot_mission_timeline(ax):
     tracks = mpatches.Patch(color="green", label="no. of tracks")
     tfreq = mpatches.Patch(color="blue", label="temporal frequency")
     xfreq = mpatches.Patch(color="purple", label="spatial resolution")
-    ax.legend(handles=[satellite, tracks, tfreq, xfreq], loc="upper right")
+    n_inter = mpatches.Patch(color="darkorange", label="no. of intersections")
+    ax.legend(handles=[satellite, tracks, tfreq, xfreq, n_inter], loc="upper right")
 
 
 def plot_valid_perc(bottom_spec):
