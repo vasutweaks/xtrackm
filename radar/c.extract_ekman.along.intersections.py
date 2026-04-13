@@ -8,16 +8,18 @@ from tools_xtrackm import *
 RADARS = ("TN", "AP", "OR")
 OUT_DIR = "ekman_along_intersections"
 
-ekman_PATH_PRIMARY = "/media/srinivasu/bkup1tb/allData_archive/ccmp31/ekman_velocities_0m_all_years_daily_cd.nc"
-ekman_PATH_FALLBACK = "~/allData/ccmp31/ekman_velocities_0m_all_years_daily_cd.nc"
-
+ekman_PATH_PRIMARY = "/media/srinivasu/bkup1tb/allData_archive/ccmp31/ekman_velocities_0m_all_years_daily_cd_bob.nc"
+# ekman_PATH_FALLBACK = "~/allData/ccmp31/ekman_velocities_0m_all_years_daily_cd_bob.nc"
+ekman_PATH_FALLBACK = "/home/srinivasu/allData/ccmp31/ekman_velocities_0m_all_years_daily_cd_bob.nc"
 
 def extract_ekman_uv_2d(uwnd, vwnd, lons_coast_to_off, lats_coast_to_off, xvals):
     u_list = []
     v_list = []
     for lon, lat in zip(lons_coast_to_off, lats_coast_to_off):
-        u_at = uwnd.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
-        v_at = vwnd.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
+        # u_at = uwnd.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
+        # v_at = vwnd.sel(longitude=lon, latitude=lat, method="nearest", drop=True)
+        u_at = uwnd.interp(longitude=lon, latitude=lat)
+        v_at = vwnd.interp(longitude=lon, latitude=lat)
         u_list.append(u_at)
         v_list.append(v_at)
     u_2d = xr.concat(u_list, dim="x").assign_coords(x=xvals)
@@ -59,8 +61,11 @@ def main():
     with xr.open_dataset(ekman_path) as ds_ekman:
         uwnd = ds_ekman.u_ekman.load()
         vwnd = ds_ekman.v_ekman.load()
+        # uwnd = ds_ekman.u_ekman.sel(longitude=slice(78,100), latitude=slice(5,23))
+        # vwnd = ds_ekman.v_ekman.sel(longitude=slice(78,100), latitude=slice(5,23))
 
     for radar_str in RADARS:
+        print(radar_str, "-------------")
         polygon = gpd.read_file(f"polygon_shapefile_around_{radar_str}.shp").geometry.iloc[0]
 
         f_tracks = f"tracks_passing_{radar_str}.pkl"
@@ -96,6 +101,7 @@ def main():
                 if inter_data is None:
                     continue
                 lon_x1, lat_x1, lon_x2, lat_x2, x1_m, x2_m = inter_data
+                print(f"extracting ekman for {tno} ")
 
                 u_2d, v_2d = extract_ekman_uv_2d(
                     uwnd, vwnd, lons_coast_to_off, lats_coast_to_off, xvals

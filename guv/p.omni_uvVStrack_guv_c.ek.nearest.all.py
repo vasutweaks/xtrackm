@@ -185,13 +185,13 @@ for omni_id in omni_d.keys():
         #     method="nearest",
         #     tolerance=np.timedelta64(24, "h"),
         # )
+        omni_u_match = omni_u.interp(time=gu_cut.time)
+        ek_u_match = u_ek.interp(time=gu_cut.time)
         msla_u_match = msla_u_at.reindex(
             time=gu_cut.time,
             method="nearest",
             tolerance=MSLA_MATCH_TOLERANCE,
         )
-        omni_u_match = omni_u.interp(time=gu_cut.time)
-        ek_u_match = u_ek.interp(time=gu_cut.time)
         if int(msla_u_match.count()) == 0:
             msla_u_match = msla_u_at.reindex(time=gu_cut.time, method="nearest")
         # flat = (omni_u_match.diff("time") == 0).reindex(time=omni_u_match.time, fill_value=False)

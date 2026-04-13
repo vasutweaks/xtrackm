@@ -85,6 +85,31 @@ def print_variance_decomposition(csv_path, label, total_col):
     print(f"  Sum normalized terms        = {n_var_gu + n_var_uek + n_2cov:.6f}")
 
 
+def print_r2_ekman_gain(csv_path, obs_col, label):
+    df = filter_by_distance(pd.read_csv(csv_path))
+    gu = df["gu"].to_numpy(dtype=float)
+    u_ek = df["u_ek"].to_numpy(dtype=float)
+    obs = df[obs_col].to_numpy(dtype=float)
+
+    valid = np.isfinite(gu) & np.isfinite(u_ek) & np.isfinite(obs)
+    gu = gu[valid]
+    u_ek = u_ek[valid]
+    obs = obs[valid]
+
+    if gu.size < 3:
+        print(f"{label} R² gain: insufficient points")
+        return
+
+    r2_gu = np.corrcoef(gu, obs)[0, 1] ** 2
+    r2_gu_ek = np.corrcoef(gu + u_ek, obs)[0, 1] ** 2
+    delta_pct = (r2_gu_ek - r2_gu) * 100.0
+
+    print(f"\n{label} R² gain from adding u_ek (N={gu.size})")
+    print(f"  R²(gu only)      = {r2_gu:.4f}  ({r2_gu * 100:.2f}%)")
+    print(f"  R²(gu + u_ek)    = {r2_gu_ek:.4f}  ({r2_gu_ek * 100:.2f}%)")
+    print(f"  Variance explained increase = {delta_pct:+.2f} percentage points")
+
+
 def rmse(x, y):
     if x.size == 0 or y.size == 0:
         return np.nan
@@ -255,8 +280,10 @@ def main():
     print(f"Rows after distance filter | OMNI no-ek: {n_omni_no}, OMNI ek: {n_omni_ek}")
     print_rmse_change("RAMA", x_rama_no, y_rama_no, x_rama_ek, y_rama_ek)
     print_rmse_change("OMNI", x_omni_no, y_omni_no, x_omni_ek, y_omni_ek)
-    print_variance_decomposition(RAMA_EK_CSV, "RAMA (with Ekman file)", "rama_u")
-    print_variance_decomposition(OMNI_EK_CSV, "OMNI (with Ekman file)", "omni_u")
+    print_r2_ekman_gain(RAMA_EK_CSV, "rama_u", "RAMA")
+    print_r2_ekman_gain(OMNI_EK_CSV, "omni_u", "OMNI")
+    # print_variance_decomposition(RAMA_EK_CSV, "RAMA (with Ekman file)", "rama_u")
+    # print_variance_decomposition(OMNI_EK_CSV, "OMNI (with Ekman file)", "omni_u")
     print(f"Saved {OUT_PNG}")
 
 

@@ -1,3 +1,11 @@
+Write a small function to the script p.scatter_omniVSrama_uVSgu_ww_ek.py
+1. find R square with gu only
+2. find R square with gu + u_ek
+print the difference as percentage in the variance explained increase after 
+adding u_ek
+
+Objective is to print the relative variance explained by u_ek
+
 Update the script p.omni_uvVStrack_guv_c.nearest.all.new.py to
 1. pass omni_u and omni_v through a 72 hour low pass butter worth filter (write a small function)
 2. 

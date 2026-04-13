@@ -161,12 +161,12 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
         #     method="nearest",
         #     tolerance=np.timedelta64(24, "h"),
         # )
-        rama_u_match = rama_u.interp(time=gu_cut.time)
         # ek_u_match = u_ek.reindex(
         #     time=gu_cut.time,
         #     method="nearest",
         #     tolerance=np.timedelta64(24, "h"),
         # )
+        rama_u_match = rama_u.interp(time=gu_cut.time)
         ek_u_match = u_ek.interp(time=gu_cut.time)
         valid = np.isfinite(gu_cut) & np.isfinite(rama_u_match)
         gu_pair = gu_cut.where(valid)
