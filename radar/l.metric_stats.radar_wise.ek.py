@@ -7,6 +7,21 @@ import pandas as pd
 BASE_DIR = "radar_rotatedVStrack_gc_along_intersections"
 RADARS = ("TN", "AP", "OR")
 OUT_PNG = f"{BASE_DIR}/scatter_dist_to_coast_vs_rmse_normal_ek.png"
+META_DIR = "/home/srinivasu/xtrackm/meta"
+
+
+def select_heading_angle(sat, track_number, meta_dir=META_DIR):
+    f = os.path.join(meta_dir, f"slopes_coastal_{sat}.csv")
+    if not os.path.exists(f):
+        raise FileNotFoundError(f"Missing slope file: {f}")
+
+    df = pd.read_csv(f)
+    track_number = int(track_number)
+    row = df[(df["sat"] == sat) & (df["track_number"] == track_number)]
+    if row.empty:
+        raise ValueError(f"No heading angle found for sat={sat}, track_number={track_number}")
+
+    return float(row.iloc[0]["heading_deg"])
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 6), sharex=True, sharey=True)
 

@@ -130,6 +130,26 @@ def print_rmse_change(label, x_before, y_before, x_after, y_after):
     print(f"Change (after-before) = {delta:+.4f} m/s ({pct:+.2f}%)")
 
 
+def bias(x, y):
+    if x.size == 0 or y.size == 0:
+        return np.nan
+    return float(np.mean(y - x))
+
+
+def print_bias_change(label, x_before, y_before, x_after, y_after):
+    bias_before = bias(x_before, y_before)
+    bias_after = bias(x_after, y_after)
+    delta = bias_after - bias_before
+    pct = np.nan
+    if np.isfinite(bias_before) and bias_before != 0.0:
+        pct = 100.0 * delta / bias_before
+
+    print(f"\n{label} bias change (y - x)")
+    print(f"Bias before Ekman = {bias_before:+.4f} m/s")
+    print(f"Bias after Ekman  = {bias_after:+.4f} m/s")
+    print(f"Change (after-before) = {delta:+.4f} m/s ({pct:+.2f}%)")
+
+
 def add_panel(ax, x, y, title, ylabel, xlabel, extent=None):
     if x.size < 3:
         ax.text(
@@ -280,6 +300,8 @@ def main():
     print(f"Rows after distance filter | OMNI no-ek: {n_omni_no}, OMNI ek: {n_omni_ek}")
     print_rmse_change("RAMA", x_rama_no, y_rama_no, x_rama_ek, y_rama_ek)
     print_rmse_change("OMNI", x_omni_no, y_omni_no, x_omni_ek, y_omni_ek)
+    print_bias_change("RAMA", x_rama_no, y_rama_no, x_rama_ek, y_rama_ek)
+    print_bias_change("OMNI", x_omni_no, y_omni_no, x_omni_ek, y_omni_ek)
     print_r2_ekman_gain(RAMA_EK_CSV, "rama_u", "RAMA")
     print_r2_ekman_gain(OMNI_EK_CSV, "omni_u", "OMNI")
     # print_variance_decomposition(RAMA_EK_CSV, "RAMA (with Ekman file)", "rama_u")

@@ -1,5 +1,9 @@
 With the context from Notebooklm and draft under the preparation and figures pdf, explain the attached figure and its signficance (to the current study) in detail. Extend the draft in this direction. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections. Corroborate the explanation with other studies with references. The figure's caption is as follows
 
+With the context from Notebooklm and draft under the preparation and attached script used to calculate the ekman velocities with variable
+drag coefficient and dynamic eddy coefficient, write a short description
+of usage of variable drag coefficient and dynamic eddy coefficient (along with piece wise latex formula).Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections. Corroborate the explanation with other studies with references. 
+
 With the context from Notebooklm and draft under the preparation and figures pdf (attached), expand the last section of introduction. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections and prepare for the next sections. Corroborate with other studies with references. 
 
 With the context from Notebooklm and draft under the preparation and figures pdf, explain the attached figure and its signficance (to the current study) in detail. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the drifter analysis section. Corroborate the explanation with other studies with references. The figure's caption is as follows

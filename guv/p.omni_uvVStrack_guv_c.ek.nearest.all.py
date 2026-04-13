@@ -87,7 +87,7 @@ for omni_id in omni_d.keys():
     if not os.path.exists(omni_file):
         print(f"File not found: {omni_file}")
         continue
-    if abs(lat_omni) < 5:
+    if lat_omni < 5:
         continue
 
     ds_omni = xr.open_dataset(omni_file)
@@ -122,7 +122,7 @@ for omni_id in omni_d.keys():
         v_ek = ds_ek['v_at']
         u_ek, v_ek = filter_rama_uv_72h(u_ek, v_ek)
 
-        if abs(lat1) < 5:
+        if lat1 < 5:
             continue
 
         print(

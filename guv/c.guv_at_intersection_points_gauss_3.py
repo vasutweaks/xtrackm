@@ -27,7 +27,7 @@ for sat in sats_new[:]:
         angle_obtuse = r["angle_obtuse"]
         lon1 = lons_inter1
         lat1 = lats_inter1
-        if abs(lat1) < 2:
+        if abs(lat1) < 5:
             continue
         # print(
         #     sat,

@@ -348,9 +348,9 @@ def main():
                             "x": xx,
                             "dist_to_coast": dd,
                             "local_angle_deg": aa,
-                            "corr_at_x": cc,
-                            "rmse_at_x": rr,
-                            "bias_x": bb,
+                            "corr_at_x_ek": cc,
+                            "rmse_at_x_ek": rr,
+                            "bias_x_ek": bb,
                         }
                     )
 

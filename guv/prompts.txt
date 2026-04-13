@@ -1,3 +1,7 @@
+Extend the script p.rama_uvVStrack_guv_c.ek.nearest.all_map.py to
+plot four nearest points of df_4 around the each rama point
+It should be done on the basemap of /home/srinivasu/xtrackm/meta/p.intersection_points.allsat.py
+
 Write a small function to the script p.scatter_omniVSrama_uVSgu_ww_ek.py
 1. find R square with gu only
 2. find R square with gu + u_ek

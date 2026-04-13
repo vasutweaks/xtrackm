@@ -71,7 +71,7 @@ for sat in sats_new:
 df_all = pd.concat(df_all_list, ignore_index=True)
 
 for rama_id, (lon_rama, lat_rama) in rama_d.items():
-    if abs(lat_rama) < 5:
+    if lat_rama < 5:
         continue
     rama_file = f"{rama_data_dir}/cur{rama_id}_dy.cdf"
     if not os.path.exists(rama_file):
@@ -104,7 +104,7 @@ for rama_id, (lon_rama, lat_rama) in rama_d.items():
         v_ek = ds_ek['v_at']
         u_ek, v_ek = filter_rama_uv_72h(u_ek, v_ek)
 
-        if abs(lat1) < 5:
+        if lat1 < 5:
             continue
 
         print(

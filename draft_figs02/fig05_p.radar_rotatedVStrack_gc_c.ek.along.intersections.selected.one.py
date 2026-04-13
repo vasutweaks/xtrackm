@@ -62,6 +62,8 @@ def plot_2x2(
     lat_x2,
     f_plot,
 ):
+    levels = (-0.3,0.3)
+    colors = ('b', 'r')
     sat_tsta, sat_tend = get_time_limits_o(sat)
     radar_tsta, radar_tend = radar_times[radar_str]
     overlap_start, overlap_end = overlap_dates(radar_tsta, radar_tend, sat_tsta, sat_tend)
@@ -130,7 +132,7 @@ def plot_2x2(
     # ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
     # ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
 
-    cf1 = gc_plot.plot(
+    cf1 = gc_plot.plot.contourf(
         ax=ax1,
         x="x",
         y="time",
@@ -140,13 +142,22 @@ def plot_2x2(
         add_labels=False,
         add_colorbar=False,
     )
+    gc_plot.plot.contour(
+        ax=ax1,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dotted',
+        linewidths=0.5
+    )
     ax1.set_ylabel("time")
     ax1.set_xlabel("")
     ax1.grid(alpha=0.3, linestyle="--")
     if overlap_start is not None and overlap_end is not None:
         ax1.set_ylim(overlap_start, overlap_end)
 
-    radar_plot.plot(
+    radar_plot.plot.contourf(
         ax=ax2,
         x="x",
         y="time",
@@ -155,6 +166,15 @@ def plot_2x2(
         vmax=1.0,
         add_labels=False,
         add_colorbar=False,
+    )
+    radar_plot.plot.contour(
+        ax=ax2,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dashed',
+        linewidths=0.5
     )
     ax2.set_ylabel("time")
     ax2.set_xlabel("")
@@ -209,6 +229,7 @@ def plot_2x2(
 radar_str = "OR"
 sat = "S3A"
 tno = "294"
+tno = "165"
 
 os.makedirs(OUT_DIR, exist_ok=True)
 print(f"Using GC_DIR: {GC_DIR}")
