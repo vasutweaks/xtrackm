@@ -188,13 +188,14 @@ def plot_2x2(
     cax.xaxis.set_ticks_position("top")
     cax.xaxis.set_label_position("top")
 
-    corr_plot.plot(ax=ax3, color="c", linewidth=1.5, label="no ekman", marker='x')
-    corr_ek_plot.plot(ax=ax3, color="b", linewidth=1.5, label="with ekman")
+    corr_plot.plot(ax=ax3, color="c", linewidth=1.5, label="corr no ekman", marker='x')
+    corr_ek_plot.plot(ax=ax3, color="b", linewidth=1.5, label="corr with ekman")
     ax3.axhline(0.0, color="gray", linestyle="--", linewidth=1.0)
     ax3.set_ylim(-1.0, 1.0)
     ax3.set_xlabel("x from coast (km)")
     ax3.set_ylabel("corr(time)")
     ax3.grid(alpha=0.3, linestyle="--")
+    ax3.axhline(0.7, color="tab:blue", linestyle="--", linewidth=0.5)
 
     ax3_r = ax3.twinx()
     rmse_plot.plot(ax=ax3_r, color="orange", linewidth=1.3, label="rmse no ekman", marker="x")
@@ -209,16 +210,17 @@ def plot_2x2(
     ax3_r.spines["right"].set_color("tab:red")
     ax3_r.spines["right"].set_linewidth(2.5)
     ax3_r.yaxis.label.set_color("tab:red")
+    ax3_r.axhline(0.3, color="tab:red", linestyle="--", linewidth=0.5)
     ax3_r.tick_params(axis="y", colors="tab:red", width=2.0)
 
     lines_l, labels_l = ax3.get_legend_handles_labels()
     lines_r, labels_r = ax3_r.get_legend_handles_labels()
     ax3.legend(lines_l + lines_r, labels_l + labels_r, loc="lower right")
 
-    ax0.text(0.02, 0.98, "a)", transform=ax0.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
-    ax1.text(0.02, 0.98, "b)", transform=ax1.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
-    ax2.text(0.02, 0.98, "c)", transform=ax2.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
-    ax3.text(0.02, 0.98, "d)", transform=ax3.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax0.text(0.95, 0.98, "a)", transform=ax0.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax1.text(0.95, 0.98, "b)", transform=ax1.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax2.text(0.95, 0.98, "c)", transform=ax2.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax3.text(0.95, 0.98, "d)", transform=ax3.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
 
     fig.tight_layout()
     fig.savefig(f_plot, dpi=300, bbox_inches="tight")

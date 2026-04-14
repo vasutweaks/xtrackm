@@ -4,6 +4,7 @@ import pickle
 import xarray as xr
 import xskillscore as xs
 from tools_xtrackm import *
+import sys
 
 RADARS = ("TN", "AP", "OR")
 IN_DIR = "radar_rotatedVStrack_gc_along_intersections"
@@ -14,13 +15,11 @@ def select_heading_angle(sat, track_number, meta_dir=META_DIR):
     f = os.path.join(meta_dir, f"slopes_coastal_{sat}.csv")
     if not os.path.exists(f):
         raise FileNotFoundError(f"Missing slope file: {f}")
-
     df = pd.read_csv(f)
     track_number = int(track_number)
     row = df[(df["sat"] == sat) & (df["track_number"] == track_number)]
     if row.empty:
         raise ValueError(f"No heading angle found for sat={sat}, track_number={track_number}")
-
     return float(row.iloc[0]["heading_deg"])
 
 
@@ -45,6 +44,25 @@ def print_rsq_diff(corr, corr_ek):
     print(f"{r_mean}, {r_mean_ek}, {100*diff}")
 
 
+def print_corr_diff(corr, corr_ek):
+    r_mean = corr.mean()
+    r_mean_ek = corr_ek.mean()
+    diff = r_mean_ek - r_mean
+    print(f"{r_mean}, {r_mean_ek}, {diff}")
+
+
+def print_rmse_diff(rmse, rmse_ek):
+    diff = rmse - rmse_ek
+    diff_mean = diff.mean()
+    print(f"{rmse.mean()}, {rmse_ek.mean()}, {diff_mean}")
+
+
+def print_bias_diff(bias, bias_ek):
+    diff = bias - bias_ek
+    diff_mean = diff.mean()
+    print(f"{bias.mean()}, {bias_ek.mean()}, {diff_mean}")
+
+
 dfs = []
 dfs_ek = []
 for rstr in RADARS:
@@ -54,7 +72,16 @@ for rstr in RADARS:
     df_ek = pd.read_csv(f_ek)
     corr = df["corr_at_x"]
     corr_ek = df_ek["corr_at_x_ek"]
-    print_rsq_diff(corr, corr_ek)
+    rmse = df["rmse_at_x"]
+    rmse_ek = df_ek["rmse_at_x_ek"]
+    bias = df["bias_x"]
+    bias_ek = df_ek["bias_x_ek"]
+    # print(f"{rstr}: ---------------")
+    # print(f"{corr.mean()}, {corr_ek.mean()}")
+    # print_rsq_diff(corr, corr_ek)
+    print_corr_diff(corr, corr_ek)
+    # print_rmse_diff(rmse, rmse_ek)
+    # print_bias_diff(bias, bias_ek)
     dfs.append(df)
     dfs_ek.append(df_ek)
 
@@ -69,9 +96,20 @@ df_all_ek["angle_track_minus_coast_deg"] = (
     (df_all_ek["local_angle_deg"] - df_all_ek["heading_deg"] + 180) % 360
 ) - 180
 
+print("across all radars: ---------------")
+corr = df_all["corr_at_x"]
+corr_ek = df_all_ek["corr_at_x_ek"]
+print_corr_diff(corr, corr_ek)
+print_rsq_diff(corr, corr_ek)
+rmse = df_all["rmse_at_x"]
+rmse_ek = df_all_ek["rmse_at_x_ek"]
+print_rmse_diff(rmse, rmse_ek)
+
+sys.exit()
 print("all radars: ---------------")
 df_filt = df_all[df_all["dist_to_coast"] > 100_000]
 df_filt_ek = df_all_ek[df_all_ek["dist_to_coast"] > 100_000]
 corr = df_filt["corr_at_x"]
 corr_ek = df_filt_ek["corr_at_x_ek"]
 print_rsq_diff(corr, corr_ek)
+print_rmse_diff(rmse, rmse_ek)
