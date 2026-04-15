@@ -73,7 +73,8 @@ for sat in sats_new[:]:
             lons_track_other, lats_track_other, ii_other, ioff=ioff
         )
         a2_d = math.degrees(a2)
-        print(f"heading angle {sat}: a1 = {a1_d:.2f}, a2 = {a2_d:.2f}")
+        # print(f"heading angle {sat}: a1 = {a1_d:.2f}, a2 = {a2_d:.2f}")
+        print(f"intersection angle {sat}: a1 = {angle_acute:.2f}, a2 = {angle_obtuse:.2f}")
         gc_self = compute_geostrophy_gc(ds_self, sla_self_smooth)
         gc_other = compute_geostrophy_gc(ds_other, sla_other_smooth)
         gc_self_at = gc_self.sel(
@@ -103,10 +104,10 @@ for sat in sats_new[:]:
         ds_out_other = xr.Dataset({"gc_other": gc_other_at_filt})
         filename = f"{out_dir}/guv_at_intersection_{sat1}_{track_number_self}_{track_number_other}_{method}_{frac1}.nc"
         print(f"saving to {filename}")
-        ds_out.to_netcdf(filename)
-        ds_out_self.to_netcdf(
-            f"{out_dir}/gc_at_{sat1}_{track_number_self}_{method}_{frac1}.nc"
-        )
-        ds_out_other.to_netcdf(
-            f"{out_dir}/gc_at_{sat1}_{track_number_other}_{method}_{frac1}.nc"
-        )
+        # ds_out.to_netcdf(filename)
+        # ds_out_self.to_netcdf(
+        #     f"{out_dir}/gc_at_{sat1}_{track_number_self}_{method}_{frac1}.nc"
+        # )
+        # ds_out_other.to_netcdf(
+        #     f"{out_dir}/gc_at_{sat1}_{track_number_other}_{method}_{frac1}.nc"
+        # )

@@ -146,6 +146,7 @@ ax_std.set_xlabel("Distance (km)")
 ax_std.set_ylabel("STD (m)")
 ax_std.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
 ax_std.axvline(x=50e3, color="gray", linewidth=0.5, linestyle="--")
+ax_std.axvline(x=100e3, color="gray", linewidth=0.5, linestyle="--")
 ax_std.text(
     0.02,
     0.5,
@@ -158,6 +159,7 @@ ax_std.text(
 )
 ax_std.set_xlim(-50e3,1000e3)
 ax_std.set_ylim(0.05, 0.25)
+ax_std.set_xticks([0, 50e3, 100e3, 200e3, 400e3, 600e3, 800e3, 1000e3])
 ax_std.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
 ax_std.grid(alpha=0.3, linestyle="--", linewidth=0.5)
 ax_std.legend(ncol=2, fontsize=8)
@@ -220,6 +222,7 @@ ax_vp.set_xlabel("GSHHG Distance from coast (km)")
 ax_vp.set_ylabel("Percentage Valid Points")
 ax_vp.axvline(x=0, color="k", linewidth=0.5, linestyle="--")
 ax_vp.axvline(x=50e3, color="gray", linewidth=0.5, linestyle="--")
+ax_vp.axvline(x=100e3, color="gray", linewidth=0.5, linestyle="--")
 ax_vp.text(
     0.02,
     0.5,
@@ -231,6 +234,7 @@ ax_vp.text(
     rotation=90,
 )
 ax_vp.set_xlim(-50e3, 1000e3)
+ax_vp.set_xticks([0, 50e3, 100e3, 200e3, 400e3, 600e3, 800e3, 1000e3])
 ax_vp.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x / 1000:g}"))
 ax_vp.grid(alpha=0.3, linestyle="--", linewidth=0.5)
 ax_vp.legend(ncol=2, fontsize=8)

@@ -118,7 +118,7 @@ def plot_valid_perc(bottom_spec):
             color=color,
         )
 
-    ax.set_xlabel("track number")
+    ax.set_xlabel("index")
     ax.set_ylabel("mean valid points (%)")
     ax.grid(True, color="lightgray", linewidth=0.7, alpha=0.7)
     ax.text(0.01, 0.97, "b)", transform=ax.transAxes, va="top", ha="left", fontsize=13, fontweight="bold")

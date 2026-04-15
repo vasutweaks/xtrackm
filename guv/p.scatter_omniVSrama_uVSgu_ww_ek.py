@@ -304,6 +304,7 @@ def main():
     print_bias_change("OMNI", x_omni_no, y_omni_no, x_omni_ek, y_omni_ek)
     print_r2_ekman_gain(RAMA_EK_CSV, "rama_u", "RAMA")
     print_r2_ekman_gain(OMNI_EK_CSV, "omni_u", "OMNI")
+    print(bias(x_rama_no, y_rama_no))
     # print_variance_decomposition(RAMA_EK_CSV, "RAMA (with Ekman file)", "rama_u")
     # print_variance_decomposition(OMNI_EK_CSV, "OMNI (with Ekman file)", "omni_u")
     print(f"Saved {OUT_PNG}")

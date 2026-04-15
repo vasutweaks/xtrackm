@@ -5,6 +5,8 @@ import xskillscore as xs
 from tools_xtrackm import *
 from pathlib import Path
 import sys
+from pathlib import Path
+import sys
 
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
@@ -223,7 +225,8 @@ def plot_2x2(
     ax3.text(0.95, 0.98, "d)", transform=ax3.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
 
     fig.tight_layout()
-    fig.savefig(f_plot, dpi=300, bbox_inches="tight")
+    # fig.savefig(f_plot, dpi=300, bbox_inches="tight")
+    plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
     plt.show()
     plt.close(fig)
 
