@@ -15,11 +15,16 @@ SAT = "TP+J1+J2+J3+S6A"
 # Example: [("gauss", "3"), ("loess", "0.05"), ("odo", "56")]
 METHOD_PARA_PAIRS: list[tuple[str, str]] = [
     ("loess", "0.05"),
-    ("xsmooth", "0.05"),
+    ("loess", "0.2"),
+    ("odo", "56"),
+    ("odo", "78"),
+    ("gauss", "3"),
+    ("gauss", "6"),
+    ("box", "12"),
 ]
 
 # Column to compare across files.
-METRIC = "corr_u"
+METRIC = "corr_v"
 
 # Column used to align rows across CSVs.
 KEY_COL = "unique_str"
@@ -75,6 +80,22 @@ def companion_msla_std_metric(metric: str) -> str | None:
     if metric == "rmse_v":
         return "std_msla_v"
     return None
+
+
+def print_metric_means_for_pairs(
+    csv_paths: list[Path],
+    labels: list[str],
+    metric: str,
+) -> None:
+    print(f"\nMean {metric} for METHOD_PARA_PAIRS:")
+    for path, label in zip(csv_paths, labels):
+        df = pd.read_csv(path)
+        if metric not in df.columns:
+            raise KeyError(f"{path}: missing metric column '{metric}'")
+        values = pd.to_numeric(df[metric], errors="coerce")
+        mean_val = float(values.mean(skipna=True))
+        n_valid = int(values.notna().sum())
+        print(f"  {label:<14} mean={mean_val:.6f}  n_valid={n_valid}")
 
 
 def plot_line_common_only(
@@ -175,6 +196,11 @@ def main() -> None:
         )
 
     print(f"Using files: {[str(p) for p in csv_paths]}")
+    print_metric_means_for_pairs(
+        csv_paths=csv_paths,
+        labels=labels,
+        metric=METRIC,
+    )
     line_output = str(Path(OUTPUT_PNG).with_name(f"{Path(OUTPUT_PNG).stem}_line.png"))
     plot_line_common_only(
         aligned_df=aligned_df,

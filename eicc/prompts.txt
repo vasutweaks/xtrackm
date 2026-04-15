@@ -1,3 +1,9 @@
+Write a python script to estimate the leadlag correlation between
+speed (at all A-G) points from p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py
+and equatorial stress from plot_indian_ocean_regions_and_timeseries_pumping.py
+Find the delta time at which max correlation occurs.
+implement this in l.lead_lag_corr.eqVSspeed.py
+
 Adjus the script p.along_shore_at_155_116.intersection.S6A_periodogram.py to
 use the coast heading angle from c.isobath_based_slopes.one_func.py
 
