@@ -42,6 +42,7 @@ yticks = [0, 5, 15, 30]
 tiles = GoogleTiles(style="satellite")
 
 dse = xr.open_dataset("/home/srinivasu/allData/topo/etopo5.cdf")  # open etopo dataset
+rose = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(ETOPO05_Y=slice(*TRACKS_REG[2:]))
 for sat in sats_new:
     tracks_n = get_total_tracks(sat)
     tsta, tend = get_time_limits(sat)
@@ -52,26 +53,25 @@ for sat in sats_new:
         figsize=(width, height),
         layout="constrained",
     )
-    dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(ETOPO05_Y=slice(
-        *NIO[2:])).plot(ax=ax1,
-                        add_colorbar=False,
+    rose.plot(ax=ax1, add_colorbar=False,
                         add_labels=False,
                         cmap=cmap1)
-    decorate_axis(ax1, "", *NIO)
+    decorate_axis(ax1, "", *TRACKS_REG, step=5)
     ax1.grid()
     info = f"MISSION: {sat} from {tsta} to {tend} with {tracks_n} tracks"
     plt.text(
-        0.15,
+        0.65,
         0.95,
         info,
         transform=ax1.transAxes,
-        fontsize=14,
+        fontsize=10,
         fontweight="bold",
+        ha="center",
+        va="center",
+        color="w",
     )
-    for f in sorted(
-            glob.glob(
-                f"/home/srinivasu/xtrackm/data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"
-            )):
+    files = sorted(glob.glob(f"../data/{sat}_lon_ordered/ctoh.sla.ref.{sat}.nindian.*.nc"))
+    for f in files:
         ds = xr.open_dataset(f, decode_times=False)
         track_number = ds.Pass
         print(ds)
@@ -103,7 +103,7 @@ for sat in sats_new:
                     s=track_number,
                     fontsize=10,
                     rotation=angle,
-                    color="r",
+                    color="b",
                 )
         else:
             angle = np.rad2deg(np.arctan(m))
@@ -121,13 +121,23 @@ for sat in sats_new:
                     s=track_number,
                     fontsize=10,
                     rotation=angle,
-                    color="b",
+                    color="r",
                 )
+    df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
+    ax1.scatter(
+        df["lons_inter"],
+        df["lats_inter"],
+        label=f"Satellite {sat}",
+        s=18,
+        transform=ccrs.PlateCarree(),
+        color="g",
+    )
     plt.savefig(
         f"pngs_tracks/tracks_{sat}.{zone}.with_track_numbers.ascending.png",
         bbox_inches="tight",
     )
     plt.show()
     plt.close("all")
+    break
 
 dse.close()
