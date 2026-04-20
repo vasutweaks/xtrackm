@@ -236,7 +236,7 @@ print(f"Correlation between gu and omni u: {corr1}")
 
 info = f"intersection point ({lon1:.2f}, {lat1:.2f}) {sat} {distance_km:.2f} km"
 print(f"Correlation between gu and omni u: {corr1}")
-plt.text(
+ax1.text(
     0.25,
     0.90,
     info,
@@ -313,7 +313,7 @@ lonm, latm = get_point_at_distance(
     d,
 )
 info = f"{sat} {track_number_self} {track_number_other} {distance_km:.2f} km"
-plt.text(
+ax2.text(
     0.49,
     0.92,
     info,
@@ -322,7 +322,7 @@ plt.text(
     fontweight="bold",
 )
 if is_within_region(lonm, latm, *TRACKS_REG):
-    plt.text(
+    ax2.text(
         lonm,
         latm,
         s=track_number_self,
@@ -339,7 +339,7 @@ lonm, latm = get_point_at_distance(
     d,
 )
 if is_within_region(lonm, latm, *TRACKS_REG):
-    plt.text(
+    ax2.text(
         lonm,
         latm,
         s=track_number_other,
@@ -350,7 +350,7 @@ if is_within_region(lonm, latm, *TRACKS_REG):
 
 # plt.savefig("p.omni_uvVStrack_guv_c.ek.nearest.selected.png")
 # ln_sf(f"p.omni_uvVStrack_guv_c.ek.nearest.selected.png", png_file)
-plt.savefig(f"{png_file}", dpi=300)
+plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
 plt.show()
 plt.close("all")
 

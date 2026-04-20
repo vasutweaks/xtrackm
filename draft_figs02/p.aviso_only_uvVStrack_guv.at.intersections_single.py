@@ -8,6 +8,9 @@ import xarray as xr
 from tools_xtrackm import *
 import xskillscore as xs
 import sys
+from pathlib import Path
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
 # from rich.traceback import install
 # install(show_locals=True, suppress=["site-packages"])
 
@@ -249,14 +252,8 @@ for i in range(ln):
             rotation=angle_other,
             color="k",
         )
-    plt.savefig(
-        f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
-    )
-    ln_sf(
-        f"guv_timeseries_{sat1}_{track_number_self}_{track_number_other}.png",
-        "fig03.png",
-    )
-    # plt.show()
+    plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
+    plt.show()
     plt.close("all")
     # ds_aviso_u.close()
 dse.close()

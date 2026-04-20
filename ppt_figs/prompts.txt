@@ -1,0 +1,34 @@
+With the context from Notebooklm and draft and figures pdf of version 2.2, identify the major and minor issues with the draft.
+
+With the context from Notebooklm and draft and figures pdf of version 2.2, write a brief abstract for this draft.
+
+With the context from Notebooklm and draft under the preparation and figures pdf, explain the attached figure and its signficance (to the current study) in detail. Extend the draft in this direction. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections. Corroborate the explanation with other studies with references. The figure's caption is as follows
+
+With the context from Notebooklm and draft under the preparation and attached script used to calculate the ekman velocities with variable
+drag coefficient and dynamic eddy coefficient, write a short description
+of usage of variable drag coefficient and dynamic eddy coefficient (along with piece wise latex formula).Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections. Corroborate the explanation with other studies with references. 
+
+With the context from Notebooklm and draft under the preparation and figures pdf (attached), expand the last section of introduction. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the previous sections and prepare for the next sections. Corroborate with other studies with references. 
+
+With the context from Notebooklm and draft under the preparation and figures pdf, explain the attached figure and its signficance (to the current study) in detail. Write it in a form that can be added to the draft as is. Also it should follow the narrative flow of the drifter analysis section. Corroborate the explanation with other studies with references. The figure's caption is as follows
+
+Comparison of along-track cross-track velocity structure for the selected OR radar–altimeter intersection (track 294, S3A). (a) Map of the Bay of Bengal showing the selected Odisha radar region (OR) as polygon (shaded), satellite track segment, and intersection limits, with distance x measured from coast. (b) Time–distance section of geostrophic current plus Ekman component, (GC+E_k). (c) Time–distance section of radar-derived velocity(rotated to cross track direction). (d) Skill metrics versus offshore distance: correlation (left axis; blue) and RMSE (right axis; red), each shown for cases without Ekman correction and with Ekman correction (legend). Only statistically significant correlations ((p<0.05)) are retained.
+
+
+Having established the robustness of the coastal altimetry derived currents in the coastal region, We wanted to study the coastal processes where it is best suited.
+We report multidecadal weakening of East India Coastal Current's strength
+with novel coastal altimetry dataset. We have chose multi-mission reference
+track ERS1+ERS2+ENV+SRL since it has both longest temporal coverage and wide spatial coverage. We have chosen 6 intersection points that fall roughly fall on the continental slope. Speed is computed from geostrophic zonal and meridional velocities at each location which filtered with a 500day low pass butterworth filter remove all inter-annual and seasonal signals.
+
+I am trying to automatize the generation of the doc figures_v2.1.docx with
+figures in order along with captions(captions/*.txt) with the script make_figure_docx.py.
+I am changing the figure numbers and sometimes removing some figures.
+
+Make following modification to following plotting script
+fig05_p.radar_rotatedVStrack_gc_c.ek.along.intersections.selected.one.py
+1. add a), b), c) and d) labels to the four subplots
+2. On the lowest subplot in the right column, make the left y axis thick blue, and right y-axis thick red (along with ticklabels).
+move legend to the right bottom
+3. remove all titles along with suptitle
+4. add "OR" labels inside the radar polygon
+

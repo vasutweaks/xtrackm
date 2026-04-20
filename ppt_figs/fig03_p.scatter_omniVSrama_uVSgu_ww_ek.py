@@ -216,7 +216,7 @@ def main():
         cbar_bottom.set_label("Count")
 
     # fig.savefig(OUT_PNG, dpi=180)
-    plt.savefig(f"{png_file}", dpi=300)
+    plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
     plt.show()
     plt.close(fig)
 
