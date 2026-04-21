@@ -62,11 +62,16 @@ xticks = [45, 60, 75, 90, 105]
 yticks = [0, 5, 15, 30]
 tiles = GoogleTiles(style="satellite")
 
+dse = xr.open_dataset(
+    "/home/srinivasu/allData/topo/etopo5.cdf"
+)  # open etopo dataset
+rose = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
+    ETOPO05_Y=slice(*TRACKS_REG[2:])
+)
 sats_new = ["TPN+J1N+J2N+J3N"]
 for sat in sats_new:
     tracks_n = get_total_tracks(sat)
     tsta, tend = get_time_limits(sat)
-    dse = xr.open_dataset("/home/srinivasu/allData/topo/etopo5.cdf")  # open etopo dataset
     fig, ax1 = plt.subplots(
         1,
         1,
@@ -74,9 +79,7 @@ for sat in sats_new:
         figsize=(width, height),
         layout="constrained",
     )
-    dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
-        ETOPO05_Y=slice(*TRACKS_REG[2:])
-    ).plot(ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap1)
+    rose.plot(ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap1)
     decorate_axis(ax1, "", *TRACKS_REG, step=5)
     ax1.grid()
     info = f"MISSION: {sat} from {tsta} to {tend} with {tracks_n} tracks"
@@ -98,6 +101,7 @@ for sat in sats_new:
         s=82,
         edgecolor="black",
         label="OMNI buoys",
+        zorder=12,
     )
     # OMNI buoy names
     ln = len(lons_omni)
@@ -109,28 +113,8 @@ for sat in sats_new:
             fontsize=10,
             ha="right",
             fontweight="bold",
+            zorder=13,
         )
-    # PSMSL tide gauge locations
-    ax1.scatter(
-        lons_psmsl,
-        lats_psmsl,
-        marker="o",
-        c="magenta",
-        s=42,
-        edgecolor="black",
-        label="PSMSL buoys",
-    )
-    # COASTAL buoy locations
-    ax1.scatter(
-        lons_coast,
-        lats_coast,
-        marker="*",
-        c="red",
-        s=122,
-        edgecolor="black",
-        label="COASTAL buoys",
-    )
-     # RAMA buoy locations
     ax1.scatter(
         lons_rama,
         lats_rama,
@@ -139,33 +123,79 @@ for sat in sats_new:
         s=182,
         edgecolor="black",
         label="RAMA buoys",
+        zorder=12,
     )
+    df = pd.read_csv(f"tracks_intersections_{sat}_1.csv")
+    ax1.scatter(
+        df["lons_inter"],
+        df["lats_inter"],
+        label=f"Satellite {sat}",
+        s=18,
+        transform=ccrs.PlateCarree(),
+        color="g",
+        zorder=11,
+    )
+    # PSMSL tide gauge locations
+    # ax1.scatter(
+    #     lons_psmsl,
+    #     lats_psmsl,
+    #     marker="o",
+    #     c="magenta",
+    #     s=42,
+    #     edgecolor="black",
+    #     label="PSMSL buoys",
+    # )
+    # COASTAL buoy locations
+    # ax1.scatter(
+    #     lons_coast,
+    #     lats_coast,
+    #     marker="*",
+    #     c="red",
+    #     s=122,
+    #     edgecolor="black",
+    #     label="COASTAL buoys",
+    # )
+    # RAMA buoy locations
     plt.legend()
-    for f in sorted(glob.glob(f"/home/srinivasu/xtrackm/data/ctoh.sla.ref.{sat}.nindian.*.nc")):
+    files = sorted(
+        glob.glob(
+            f"/home/srinivasu/xtrackm/data/{sat}/ctoh.sla.ref.{sat}.nindian.*.nc"
+        )
+    )
+    if len(files) == 0:
+        print("No files found. Check DATA_DIR / pattern.")
+    for f in files:
         ds = xr.open_dataset(f, decode_times=False)
-        track_number = ds.pass_number
+        track_number = ds.Pass
         print(ds)
-        sla = ds.sla
-        sla1 = sla.isel(cycles_numbers=0)
         lons_track = ds.lon.values
         lats_track = ds.lat.values
-        if len(lons_track) == 0:
+        if len(lons_track) < 6:
             continue
         lonm = lons_track.mean()
         latm = lats_track.mean()
         m = (lats_track[-1] - lats_track[0]) / (lons_track[-1] - lons_track[0])
-        dx = 1.5
+        dx = 0.5
         dy = m * dx
         lonm3 = lonm - dx
         latm3 = latm - dy
-        # lonm3 =  lonm - 1.0
-        # latm3 =  latm - 1.0
-        # lonm3 =  lon[0]
-        # latm3 =  lat[0]
+        ii = len(lons_track) // 2
         angle = np.rad2deg(np.arctan(m))
+        angle = local_angle(lons_track, lats_track, ii, ioff=3, degrees=True)
         # if m < 0:
         if True:
-            ax1.scatter(lons_track, lats_track, c=sla1, cmap=cmap_r, linewidths=0.1, s=10)
+            line_track = sg.LineString(
+                [(lons_track[0], lats_track[0]), (lons_track[-1], lats_track[-1])]
+            )
+            ax1.add_geometries(
+                [line_track],
+                crs=ccrs.PlateCarree(),
+                edgecolor="k",
+                facecolor="none",
+                linewidth=0.8,
+                alpha=0.7,
+                zorder=3,
+            )
             if is_within_region(lonm, latm, *TRACKS_REG):
                 plt.text(
                     lonm,
