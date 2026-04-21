@@ -32,10 +32,14 @@ NIO = (60.0, 100.0, -5.0, 30.0)
 height, width = 9, 14
 
 df = read_tide_meta()
-df_nio = region_selected(df, *NIO)
+df_nio = region_selected(df, *TRACKS_REG)
 lons_psmsl = df_nio["longitude"]
 lats_psmsl = df_nio["latitude"]
 pd.set_option("display.max_rows", None)
+
+lons_rama = [value[0] for value in rama_d.values()]
+lats_rama = [value[1] for value in rama_d.values()]
+rama_buoys = list(rama_d.keys())
 
 df_coast = pd.read_excel(
     "/home/srinivasu/allData/coastal/CoastalADCPMeta_correction.xlsx",
@@ -58,7 +62,7 @@ xticks = [45, 60, 75, 90, 105]
 yticks = [0, 5, 15, 30]
 tiles = GoogleTiles(style="satellite")
 
-sats = ["TP+J1+J2+J3"]
+sats_new = ["TPN+J1N+J2N+J3N"]
 for sat in sats_new:
     tracks_n = get_total_tracks(sat)
     tsta, tend = get_time_limits(sat)
@@ -70,10 +74,10 @@ for sat in sats_new:
         figsize=(width, height),
         layout="constrained",
     )
-    dse.ROSE.sel(ETOPO05_X=slice(*NIO[:2])).sel(
-        ETOPO05_Y=slice(*NIO[2:])
+    dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
+        ETOPO05_Y=slice(*TRACKS_REG[2:])
     ).plot(ax=ax1, add_colorbar=False, add_labels=False, cmap=cmap1)
-    decorate_axis(ax1, "", *NIO)
+    decorate_axis(ax1, "", *TRACKS_REG, step=5)
     ax1.grid()
     info = f"MISSION: {sat} from {tsta} to {tend} with {tracks_n} tracks"
     plt.text(
@@ -84,7 +88,6 @@ for sat in sats_new:
         fontsize=14,
         fontweight="bold",
     )
-    plt.show()
     # sys.exit()
     # OMNI buoy locations
     ax1.scatter(
@@ -127,8 +130,18 @@ for sat in sats_new:
         edgecolor="black",
         label="COASTAL buoys",
     )
+     # RAMA buoy locations
+    ax1.scatter(
+        lons_rama,
+        lats_rama,
+        marker="*",
+        c="y",
+        s=182,
+        edgecolor="black",
+        label="RAMA buoys",
+    )
     plt.legend()
-    for f in sorted(glob.glob(f"/home/srinivasu/slnew/xtrackd/data/ctoh.sla.ref.{sat}.nindian.*.nc")):
+    for f in sorted(glob.glob(f"/home/srinivasu/xtrackm/data/ctoh.sla.ref.{sat}.nindian.*.nc")):
         ds = xr.open_dataset(f, decode_times=False)
         track_number = ds.pass_number
         print(ds)
@@ -150,9 +163,10 @@ for sat in sats_new:
         # lonm3 =  lon[0]
         # latm3 =  lat[0]
         angle = np.rad2deg(np.arctan(m))
-        if m < 0:
-            ax1.scatter(lons_track, lats_track, c=sla1, cmap=cmap_r, linewidths=0.0, s=10)
-            if is_within_region(lonm, latm, *NIO):
+        # if m < 0:
+        if True:
+            ax1.scatter(lons_track, lats_track, c=sla1, cmap=cmap_r, linewidths=0.1, s=10)
+            if is_within_region(lonm, latm, *TRACKS_REG):
                 plt.text(
                     lonm,
                     latm,
