@@ -28,7 +28,9 @@ dse = xr.open_dataset(
 rose = dse.ROSE.sel(ETOPO05_X=slice(*TRACKS_REG[:2])).sel(
     ETOPO05_Y=slice(*TRACKS_REG[2:])
 )
-sats_new = ["TPN+J1N+J2N+J3N"]
+# sats_new = ["TPN+J1N+J2N+J3N"]
+# sats_new = ["S3A"]
+# sats_new = ["TP+J1+J2+J3+S6A"]
 band_0_5n = sg.box(TRACKS_REG[0], 0.0, TRACKS_REG[1], 5.0)
 lat_ref1 = 12
 lat_ref2 = 7
@@ -119,12 +121,13 @@ for sat in sats_new:
         df["lons_inter"],
         df["lats_inter"],
         label=f"Satellite {sat}",
-        s=100,
+        s=60,
         marker="+",
-        linewidths=0.3,
+        color="r",
+        edgecolor="none",
+        linewidths=1.0,
         transform=ccrs.PlateCarree(),
-        color="g",
-        zorder=21,
+        zorder=4,
     )
     plt.legend()
     files = sorted(
@@ -149,10 +152,10 @@ for sat in sats_new:
         ax1.add_geometries(
             [line_track],
             crs=ccrs.PlateCarree(),
-            edgecolor="k",
+            edgecolor="orange",
             facecolor="none",
-            linewidth=0.8,
-            alpha=0.7,
+            linewidth=1.0,
+            alpha=1.0,
             zorder=3,
         )
         if m > 0:
@@ -220,9 +223,10 @@ for sat in sats_new:
                     color="white",
                 )
     plt.savefig(
-        f"pngs_tracks_all_obs/tracks_{sat}.{zone}.with_track_numbers.negative.png",
+        f"tracks_{sat}.{zone}.omni.rama.with_track_numbers.png",
         bbox_inches="tight",
+        dpi=300
     )
-    plt.show()
+    # plt.show()
     plt.close("all")
     # sys.exit()
