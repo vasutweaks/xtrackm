@@ -110,6 +110,25 @@ def print_r2_ekman_gain(csv_path, obs_col, label):
     print(f"  Variance explained increase = {delta_pct:+.2f} percentage points")
 
 
+def print_std_summary(csv_path, obs_col, label):
+    df = filter_by_distance(pd.read_csv(csv_path))
+    gu = df["gu"].to_numpy(dtype=float)
+    obs = df[obs_col].to_numpy(dtype=float)
+    valid = np.isfinite(gu) & np.isfinite(obs)
+    gu = gu[valid]
+    obs = obs[valid]
+
+    if gu.size < 2:
+        print(f"{label} standard deviation: insufficient points")
+        return
+
+    std_gu = np.std(gu, ddof=0)
+    std_obs = np.std(obs, ddof=0)
+    print(f"\n{label} standard deviation (N={gu.size})")
+    print(f"  Std({obs_col}) = {std_obs:.6f} m/s")
+    print(f"  Std(gu)      = {std_gu:.6f} m/s")
+
+
 def rmse(x, y):
     if x.size == 0 or y.size == 0:
         return np.nan
@@ -304,6 +323,8 @@ def main():
     print_bias_change("OMNI", x_omni_no, y_omni_no, x_omni_ek, y_omni_ek)
     print_r2_ekman_gain(RAMA_EK_CSV, "rama_u", "RAMA")
     print_r2_ekman_gain(OMNI_EK_CSV, "omni_u", "OMNI")
+    print_std_summary(RAMA_EK_CSV, "rama_u", "RAMA")
+    print_std_summary(OMNI_EK_CSV, "omni_u", "OMNI")
     print(bias(x_rama_no, y_rama_no))
     # print_variance_decomposition(RAMA_EK_CSV, "RAMA (with Ekman file)", "rama_u")
     # print_variance_decomposition(OMNI_EK_CSV, "OMNI (with Ekman file)", "omni_u")
