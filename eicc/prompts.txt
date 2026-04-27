@@ -1,3 +1,8 @@
+modify the script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.glorys.py
+To extract uo, vo of glorys data at the intersection points and compute speed
+Plot the 500day filtered timeseries and their trends
+Don't plot ekman corrected geostrophic current speed yet.
+
 Write a python script to estimate the leadlag correlation between
 speed (at all A-G) points from p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py
 and equatorial stress from plot_indian_ocean_regions_and_timeseries_pumping.py
