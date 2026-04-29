@@ -1,3 +1,9 @@
+in the script p.radar_rotatedVStrack_gc_c.ek.along.intersections.py
+Write a function to extract ETOPO along satellite tracks (lons_track, lats_track)
+Make the extracted topo a function of distance x like gc and sla
+slice it between x1 and x2
+plot it at the bottom of left cartopy map (of radar and traversing track)
+
 If I select a combination of radar_str, sat and track_number, I should be 
 able to get a single plot for that specific combination.
 refactor the following script to this purpose

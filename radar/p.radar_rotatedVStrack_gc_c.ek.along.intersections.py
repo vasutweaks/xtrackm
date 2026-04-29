@@ -13,6 +13,52 @@ EXTRACTED_DIR = "radar_along_intersections"
 EKMAN_DIR = "ekman_along_intersections"
 OUT_DIR = "radar_rotatedVStrack_gc_along_intersections"
 BOB_REG = (78.0, 95.0, 4.0, 24.0)
+ETOPO = "/home/srinivasu/allData/topo/etopo_60s_io.nc"
+
+
+def _find_coord_name(ds, candidates):
+    for nm in candidates:
+        if nm in ds.coords or nm in ds.variables:
+            return nm
+    return None
+
+
+def _find_topo_var(ds, lon_name, lat_name):
+    pref = ("z", "elevation", "topo", "ROSE", "Band1")
+    for nm in pref:
+        if nm in ds.data_vars and lon_name in ds[nm].dims and lat_name in ds[nm].dims:
+            return nm
+    for nm, vv in ds.data_vars.items():
+        if vv.ndim == 2 and lon_name in vv.dims and lat_name in vv.dims:
+            return nm
+    raise ValueError("No 2D topo variable found in ETOPO file")
+
+
+def open_etopo_field():
+    ds = xr.open_dataset(ETOPO)
+    lon_name = _find_coord_name(ds, ("lon", "longitude", "x", "ETOPO05_X"))
+    lat_name = _find_coord_name(ds, ("lat", "latitude", "y", "ETOPO05_Y"))
+    if lon_name is None or lat_name is None:
+        raise ValueError("Could not detect lon/lat coordinate names in ETOPO file")
+
+    var_name = _find_topo_var(ds, lon_name, lat_name)
+    topo = ds[var_name].load()
+    ds.close()
+    return topo, lon_name, lat_name
+
+
+def extract_etopo_along_track(topo, lon_name, lat_name, lons_track, lats_track, x_vals, x_lo, x_hi):
+    lon_vals = np.asarray(lons_track, dtype=float).copy()
+    lon_grid = np.asarray(topo[lon_name].values, dtype=float)
+    if np.nanmax(lon_grid) > 180.0:
+        lon_vals = np.mod(lon_vals, 360.0)
+
+    lon_da = xr.DataArray(lon_vals, coords={"x": x_vals}, dims=["x"])
+    lat_da = xr.DataArray(np.asarray(lats_track, dtype=float), coords={"x": x_vals}, dims=["x"])
+    topo_track = topo.interp({lon_name: lon_da, lat_name: lat_da}, method="linear")
+    if "x" not in topo_track.dims:
+        topo_track = topo_track.rename({topo_track.dims[0]: "x"})
+    return topo_track.sel(x=slice(x_lo, x_hi))
 
 
 def rotate_to_cross(u_field, v_field, lons_track, lats_track):
@@ -56,6 +102,7 @@ def plot_2x2(
     lon_x2,
     lat_x2,
     x1_m,
+    topo_cut,
     f_plot,
 ):
     levels = (-0.3,0.3)
@@ -83,7 +130,8 @@ def plot_2x2(
 
     # ax_blank_top = fig.add_subplot(gs[0, 0])
     # ax_blank_bot = fig.add_subplot(gs[2, 0])
-    ax0 = fig.add_subplot(gs[:, 0], projection=ccrs.PlateCarree())
+    ax0 = fig.add_subplot(gs[0:2, 0], projection=ccrs.PlateCarree())
+    ax0b = fig.add_subplot(gs[2, 0])
     ax1 = fig.add_subplot(gs[0, 1])
     ax2 = fig.add_subplot(gs[1, 1], sharex=ax1)
     ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
@@ -121,6 +169,14 @@ def plot_2x2(
     ax0.plot([lon_x1, lon_x2], [lat_x1, lat_x2], ".", color="magenta", markersize=5, transform=ccrs.PlateCarree())
     ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
     ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
+
+    topo_plot = topo_cut.assign_coords(x=(topo_cut.x - x1_m) / 1000.0)
+    topo_plot.plot(ax=ax0b, color="tab:brown", linewidth=1.4)
+    ax0b.axhline(0.0, color="gray", linestyle="--", linewidth=0.8)
+    ax0b.set_title("ETOPO along track (x1 to x2)")
+    ax0b.set_xlabel("x from coast (km)")
+    ax0b.set_ylabel("topo (m)")
+    ax0b.grid(alpha=0.3, linestyle="--")
 
     cf1 = gc_plot.plot.contourf(
         ax=ax1,
@@ -201,7 +257,7 @@ def plot_2x2(
     fig.suptitle(f"{radar_str} | {sat} track {tno}")
     fig.tight_layout()
     fig.savefig(f_plot, dpi=300, bbox_inches="tight")
-    # plt.show()
+    plt.show()
     plt.close(fig)
 
 
@@ -210,6 +266,7 @@ def main():
     print(f"Using GC_DIR: {GC_DIR}")
     print(f"Using EXTRACTED_DIR: {EXTRACTED_DIR}")
     print(f"Using EKMAN_DIR: {EKMAN_DIR}")
+    topo, lon_name, lat_name = open_etopo_field()
 
     for radar_str in RADARS:
         polygon = gpd.read_file(f"polygon_shapefile_around_{radar_str}.shp").geometry.iloc[0]
@@ -280,6 +337,16 @@ def main():
                 radar_cut = radar_cross.interp(x=gc_cut.x, method="nearest")
                 ekman_cut = ekman_cross.interp(x=gc_cut.x, method="nearest")
                 gc_ek_cut = gc_cut + ekman_cut
+                topo_cut = extract_etopo_along_track(
+                    topo,
+                    lon_name,
+                    lat_name,
+                    lons_track,
+                    lats_track,
+                    radar_u.x.values,
+                    x_lo,
+                    x_hi,
+                ).interp(x=gc_cut.x, method="nearest")
 
                 dist_to_coast_cut = dist_to_coast_track.interp(x=gc_cut.x, method="nearest")
                 angle_deg_cut = local_angle_series_deg(
@@ -376,6 +443,7 @@ def main():
                         lon_x2,
                         lat_x2,
                         x1_m,
+                        topo_cut,
                         f_plot,
                     )
                 else:

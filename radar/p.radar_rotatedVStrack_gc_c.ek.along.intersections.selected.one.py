@@ -3,15 +3,69 @@ import os
 import xarray as xr
 import xskillscore as xs
 from tools_xtrackm import *
+from pathlib import Path
+import sys
+from pathlib import Path
+import sys
+
+script = Path(sys.argv[0])
+png_file = script.with_suffix(".png")
+
 # codex resume 019d7247-c5e4-7662-bdec-18a975f1646b
 METHOD = "loess"
 FRAC1 = "0.05"
 RADARS = ("TN", "AP", "OR")
 GC_DIR = f"../guv/gc_along_{METHOD}"
-EXTRACTED_DIR = "radar_along_intersections"
-EKMAN_DIR = "ekman_along_intersections"
-OUT_DIR = "radar_rotatedVStrack_gc_along_intersections"
+EXTRACTED_DIR = "../radar/radar_along_intersections"
+EKMAN_DIR = "../radar/ekman_along_intersections"
+OUT_DIR = "../radar/radar_rotatedVStrack_gc_along_intersections"
 BOB_REG = (78.0, 95.0, 4.0, 24.0)
+ETOPO = "/home/srinivasu/allData/topo/etopo_60s_io.nc"
+
+
+def _find_coord_name(ds, candidates):
+    for nm in candidates:
+        if nm in ds.coords or nm in ds.variables:
+            return nm
+    return None
+
+
+def _find_topo_var(ds, lon_name, lat_name):
+    pref = ("z", "elevation", "topo", "ROSE", "Band1")
+    for nm in pref:
+        if nm in ds.data_vars and lon_name in ds[nm].dims and lat_name in ds[nm].dims:
+            return nm
+    for nm, vv in ds.data_vars.items():
+        if vv.ndim == 2 and lon_name in vv.dims and lat_name in vv.dims:
+            return nm
+    raise ValueError("No 2D topo variable found in ETOPO file")
+
+
+def open_etopo_field():
+    ds = xr.open_dataset(ETOPO)
+    lon_name = _find_coord_name(ds, ("lon", "longitude", "x", "ETOPO05_X"))
+    lat_name = _find_coord_name(ds, ("lat", "latitude", "y", "ETOPO05_Y"))
+    if lon_name is None or lat_name is None:
+        raise ValueError("Could not detect lon/lat coordinate names in ETOPO file")
+
+    var_name = _find_topo_var(ds, lon_name, lat_name)
+    topo = ds[var_name].load()
+    ds.close()
+    return topo, lon_name, lat_name
+
+
+def extract_etopo_along_track(topo, lon_name, lat_name, lons_track, lats_track, x_vals, x_lo, x_hi):
+    lon_vals = np.asarray(lons_track, dtype=float).copy()
+    lon_grid = np.asarray(topo[lon_name].values, dtype=float)
+    if np.nanmax(lon_grid) > 180.0:
+        lon_vals = np.mod(lon_vals, 360.0)
+
+    lon_da = xr.DataArray(lon_vals, coords={"x": x_vals}, dims=["x"])
+    lat_da = xr.DataArray(np.asarray(lats_track, dtype=float), coords={"x": x_vals}, dims=["x"])
+    topo_track = topo.interp({lon_name: lon_da, lat_name: lat_da}, method="linear")
+    if "x" not in topo_track.dims:
+        topo_track = topo_track.rename({topo_track.dims[0]: "x"})
+    return topo_track.sel(x=slice(x_lo, x_hi))
 
 
 def rotate_to_cross(u_field, v_field, lons_track, lats_track):
@@ -54,8 +108,11 @@ def plot_2x2(
     lat_x1,
     lon_x2,
     lat_x2,
+    topo_cut,
     f_plot,
 ):
+    levels = (-0.3,0.3)
+    colors = ('b', 'r')
     sat_tsta, sat_tend = get_time_limits_o(sat)
     radar_tsta, radar_tend = radar_times[radar_str]
     overlap_start, overlap_end = overlap_dates(radar_tsta, radar_tend, sat_tsta, sat_tend)
@@ -70,16 +127,17 @@ def plot_2x2(
     fig = plt.figure(figsize=(14, 11))
     gs = fig.add_gridspec(3, 2, width_ratios=[1.0, 1.8], hspace=0.22, wspace=0.2)
 
-    ax_blank_top = fig.add_subplot(gs[0, 0])
-    ax_blank_bot = fig.add_subplot(gs[2, 0])
-    ax0 = fig.add_subplot(gs[1, 0], projection=ccrs.PlateCarree())
+    # ax_blank_top = fig.add_subplot(gs[0, 0])
+    # ax_blank_bot = fig.add_subplot(gs[2, 0])
+    ax0 = fig.add_subplot(gs[0:2, 0], projection=ccrs.PlateCarree())
+    ax0b = fig.add_subplot(gs[2, 0])
     ax1 = fig.add_subplot(gs[0, 1])
     ax2 = fig.add_subplot(gs[1, 1], sharex=ax1)
     ax3 = fig.add_subplot(gs[2, 1], sharex=ax1)
-    ax_blank_top.axis("off")
-    ax_blank_bot.axis("off")
+    # ax_blank_top.axis("off")
+    # ax_blank_bot.axis("off")
 
-    decorate_axis(ax0, f"{radar_str} in Bay of Bengal", *BOB_REG, step=2)
+    decorate_axis(ax0, "", *BOB_REG, step=4)
     ax0.grid(alpha=0.3, linestyle="--")
     ax0.add_geometries(
         [polygon],
@@ -90,6 +148,19 @@ def plot_2x2(
         linewidth=1.5,
     )
     ax0.plot(lons_track, lats_track, color="tab:blue", linewidth=1.2, transform=ccrs.PlateCarree())
+
+    poly_pt = polygon.representative_point()
+    ax0.text(
+        poly_pt.x,
+        poly_pt.y,
+        "OR",
+        fontsize=11,
+        fontweight="bold",
+        color="tab:red",
+        transform=ccrs.PlateCarree(),
+        ha="center",
+        va="center",
+    )
 
     i_mid = len(lons_track) // 2
     ioff = max(1, min(5, len(lons_track) // 10))
@@ -107,11 +178,19 @@ def plot_2x2(
         bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=0.2),
     )
 
-    ax0.plot([lon_x1, lon_x2], [lat_x1, lat_x2], ".", color="magenta", markersize=5, transform=ccrs.PlateCarree())
-    ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
-    ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
+    ax0.plot([lon_x1, lon_x2], [lat_x1, lat_x2], "x", color="k", markersize=5, transform=ccrs.PlateCarree())
+    # ax0.text(lon_x1, lat_x1, "x1", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
+    # ax0.text(lon_x2, lat_x2, "x2", fontsize=9, color="magenta", transform=ccrs.PlateCarree())
 
-    cf1 = gc_plot.plot(
+    topo_plot = topo_cut.assign_coords(x=topo_cut.x / 1000.0)
+    topo_plot.plot(ax=ax0b, color="tab:brown", linewidth=1.4)
+    ax0b.axhline(0.0, color="gray", linestyle="--", linewidth=0.8)
+    ax0b.set_title("ETOPO along track (x1 to x2)")
+    ax0b.set_xlabel("x from coast (km)")
+    ax0b.set_ylabel("topo (m)")
+    ax0b.grid(alpha=0.3, linestyle="--")
+
+    cf1 = gc_plot.plot.contourf(
         ax=ax1,
         x="x",
         y="time",
@@ -121,14 +200,22 @@ def plot_2x2(
         add_labels=False,
         add_colorbar=False,
     )
-    ax1.set_title("GC(time,x)")
+    gc_plot.plot.contour(
+        ax=ax1,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dotted',
+        linewidths=0.5
+    )
     ax1.set_ylabel("time")
     ax1.set_xlabel("")
     ax1.grid(alpha=0.3, linestyle="--")
     if overlap_start is not None and overlap_end is not None:
         ax1.set_ylim(overlap_start, overlap_end)
 
-    radar_plot.plot(
+    radar_plot.plot.contourf(
         ax=ax2,
         x="x",
         y="time",
@@ -138,7 +225,15 @@ def plot_2x2(
         add_labels=False,
         add_colorbar=False,
     )
-    ax2.set_title("Radar cross(time,x)")
+    radar_plot.plot.contour(
+        ax=ax2,
+        x="x",
+        y="time",
+        levels=levels,
+        colors = colors,
+        linestyles='dashed',
+        linewidths=0.5
+    )
     ax2.set_ylabel("time")
     ax2.set_xlabel("")
     ax2.grid(alpha=0.3, linestyle="--")
@@ -151,27 +246,44 @@ def plot_2x2(
     cax.xaxis.set_ticks_position("top")
     cax.xaxis.set_label_position("top")
 
-    corr_plot.plot(ax=ax3, color="k", linewidth=1.5, label="no ekman")
-    corr_ek_plot.plot(ax=ax3, color="b", linewidth=1.5, label="with ekman")
+    corr_plot.plot(ax=ax3, color="c", linewidth=1.5, label="corr no ekman", marker='x')
+    corr_ek_plot.plot(ax=ax3, color="b", linewidth=1.5, label="corr with ekman")
     ax3.axhline(0.0, color="gray", linestyle="--", linewidth=1.0)
     ax3.set_ylim(-1.0, 1.0)
     ax3.set_xlabel("x from coast (km)")
     ax3.set_ylabel("corr(time)")
-    ax3.set_title("corr/rmse vs x")
     ax3.grid(alpha=0.3, linestyle="--")
+    ax3.axhline(0.7, color="tab:blue", linestyle="--", linewidth=0.5)
 
     ax3_r = ax3.twinx()
-    rmse_plot.plot(ax=ax3_r, color="tab:olive", linewidth=1.3, label="rmse no ekman")
-    rmse_ek_plot.plot(ax=ax3_r, color="tab:red", linewidth=1.3, label="rmse with ekman")
+    rmse_plot.plot(ax=ax3_r, color="orange", linewidth=1.3, label="rmse no ekman", marker="x")
+    rmse_ek_plot.plot(ax=ax3_r, color="red", linewidth=1.3, label="rmse with ekman")
     ax3_r.set_ylabel("rmse (m/s)")
+
+    ax3.spines["left"].set_color("tab:blue")
+    ax3.spines["left"].set_linewidth(2.5)
+    ax3.yaxis.label.set_color("tab:blue")
+    ax3.tick_params(axis="y", colors="tab:blue", width=2.0)
+
+    ax3_r.spines["right"].set_color("tab:red")
+    ax3_r.spines["right"].set_linewidth(2.5)
+    ax3_r.yaxis.label.set_color("tab:red")
+    ax3_r.axhline(0.3, color="tab:red", linestyle="--", linewidth=0.5)
+    ax3_r.tick_params(axis="y", colors="tab:red", width=2.0)
 
     lines_l, labels_l = ax3.get_legend_handles_labels()
     lines_r, labels_r = ax3_r.get_legend_handles_labels()
-    ax3.legend(lines_l + lines_r, labels_l + labels_r, loc="best")
+    ax3.legend(lines_l + lines_r, labels_l + labels_r, loc="lower right")
 
-    fig.suptitle(f"{radar_str} | {sat} track {tno}")
+    ax0.text(0.95, 0.98, "a)", transform=ax0.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax0b.text(0.95, 0.98, "b)", transform=ax0b.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax1.text(0.95, 0.98, "c)", transform=ax1.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax2.text(0.95, 0.98, "d)", transform=ax2.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+    ax3.text(0.95, 0.98, "e)", transform=ax3.transAxes, ha="left", va="top", fontsize=12, fontweight="bold")
+
     fig.tight_layout()
-    fig.savefig(f_plot, dpi=170, bbox_inches="tight")
+    # fig.savefig(f_plot, dpi=300, bbox_inches="tight")
+    plt.savefig(f"{png_file}", dpi=300, bbox_inches="tight")
     plt.show()
     plt.close(fig)
 
@@ -179,12 +291,14 @@ def plot_2x2(
 radar_str = "OR"
 sat = "S3A"
 tno = "294"
+tno = "165"
 
 os.makedirs(OUT_DIR, exist_ok=True)
 print(f"Using GC_DIR: {GC_DIR}")
 print(f"Using EXTRACTED_DIR: {EXTRACTED_DIR}")
 print(f"Using EKMAN_DIR: {EKMAN_DIR}")
 print(f"Selection: radar={radar_str}, sat={sat}, track={tno}")
+topo, lon_name, lat_name = open_etopo_field()
 
 polygon = gpd.read_file(f"polygon_shapefile_around_{radar_str}.shp").geometry.iloc[0]
 plot_dir = f"{OUT_DIR}/plots_{radar_str}_ek"
@@ -229,6 +343,16 @@ gc_cut = gc.sel(x=slice(x_lo, x_hi))
 radar_cut = radar_cross.interp(x=gc_cut.x, method="nearest")
 ekman_cut = ekman_cross.interp(x=gc_cut.x, method="nearest")
 gc_ek_cut = gc_cut + ekman_cut
+topo_cut = extract_etopo_along_track(
+    topo,
+    lon_name,
+    lat_name,
+    lons_track,
+    lats_track,
+    radar_u.x.values,
+    x_lo,
+    x_hi,
+).interp(x=gc_cut.x, method="nearest")
 
 dist_to_coast_cut = dist_to_coast_track.interp(x=gc_cut.x, method="nearest")
 angle_deg_cut = local_angle_series_deg(
@@ -267,7 +391,7 @@ sig_ek_mask = pval_ek_x < 0.05
 corr_ek_x_masked = corr_ek_x.where(sig_ek_mask)
 rmse_ek_x_masked = rmse_ek_x.where(sig_ek_mask)
 
-f_plot = f"{plot_dir}/gc_vs_radar_xt_{sat}_{tno}_ek.png"
+f_plot = png_file
 plot_2x2(
     gc_ek_valid,
     radar_ek_valid,
@@ -285,6 +409,7 @@ plot_2x2(
     lat_x1,
     lon_x2,
     lat_x2,
+    topo_cut,
     f_plot,
 )
 print(f"saved {f_plot}")
