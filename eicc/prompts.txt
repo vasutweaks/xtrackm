@@ -1,3 +1,8 @@
+Modify the script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.oscar.py
+To extract speed from oscar data (/home/srinivasu/allData/oscar_0.25/oscar_0.25_*_full_xr_concat.nc) at the intersection points
+Plot the 500day filtered timeseries and their trends
+No need to plot ekman corrected track geostrophic current speed.
+
 modify the script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.glorys.py
 To extract uo, vo of glorys data at the intersection points and compute speed
 Plot the 500day filtered timeseries and their trends
