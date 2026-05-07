@@ -1,4 +1,7 @@
-In the line of p.std.S3A.east_coast.py, create a new script to plot all tracks together in the upper subplot topo plot with different colors and plot std of all tracks in the lower subplot with colors corresponding to each track. Keep the original script untouched and create an newer one.
+In the line of p.std.S3A.east_coast.py, create a new script to plot all tracks
+together in the upper subplot topo plot with different colors and plot std of
+all tracks in the lower subplot with colors corresponding to each track. Keep
+the original script untouched and create an newer one.
 
 u1, v1 are orthogonal vectors and u2, v2 are another set of othogonal vectors
 sharing same origin. u1 and v1 are oriented along x-axis and y-axis
