@@ -113,6 +113,8 @@ def print_r2_ekman_gain(csv_path, obs_col, label):
 def print_std_summary(csv_path, obs_col, label):
     df = filter_by_distance(pd.read_csv(csv_path))
     gu = df["gu"].to_numpy(dtype=float)
+    u_ek = df["u_ek"].to_numpy(dtype=float)
+    gu_ek = gu + u_ek
     obs = df[obs_col].to_numpy(dtype=float)
     valid = np.isfinite(gu) & np.isfinite(obs)
     gu = gu[valid]
@@ -123,10 +125,12 @@ def print_std_summary(csv_path, obs_col, label):
         return
 
     std_gu = np.std(gu, ddof=0)
+    std_gu_ek = np.std(gu_ek, ddof=0)
     std_obs = np.std(obs, ddof=0)
     print(f"\n{label} standard deviation (N={gu.size})")
-    print(f"  Std({obs_col}) = {std_obs:.6f} m/s")
-    print(f"  Std(gu)      = {std_gu:.6f} m/s")
+    print(f"  Std({obs_col}) = {std_obs:.4f} m/s")
+    print(f"  Std(gu)      = {std_gu:.4f} m/s")
+    print(f"  Std(gu + u_ek)      = {std_gu_ek:.4f} m/s")
 
 
 def rmse(x, y):

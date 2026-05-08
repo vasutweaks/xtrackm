@@ -125,6 +125,10 @@ def print_rmse_and_variance_stats(df_no_ek, df_w_ek):
     rmse_w_ek = np.sqrt(np.mean((y_w_ek - x_w_ek) ** 2))
     print(f"RMSE before Ekman correction (drifter_ve vs gu): {rmse_no_ek:.6f} m/s")
     print(f"RMSE after Ekman correction  (drifter_ve vs gu+u_ek): {rmse_w_ek:.6f} m/s")
+    print(f"Std dev obs before Ekman correction (drifter_ve): {np.std(y_no_ek, ddof=0):.6f} m/s")
+    print(f"Std dev gu before Ekman correction  (gu): {np.std(x_no_ek, ddof=0):.6f} m/s")
+    print(f"Std dev obs after Ekman correction  (drifter_ve): {np.std(y_w_ek, ddof=0):.6f} m/s")
+    print(f"Std dev gu after Ekman correction   (gu+u_ek): {np.std(x_w_ek, ddof=0):.6f} m/s")
 
     gu = df_w_ek["gu"].to_numpy(dtype=float)
     u_ek = df_w_ek["u_ek"].to_numpy(dtype=float)
