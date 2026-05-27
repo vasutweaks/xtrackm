@@ -113,8 +113,9 @@ frac1 = "0.05"
 
 sat_val = "ERS1+ERS2+ENV+SRL"
 INCLUDED_MONTHS = [2, 3, 4, 5]  # February-May. Use None to include all months.
-INCLUDED_MONTHS = [10,11,12]  # February-May. Use None to include all months.
-X_SLICE = slice(0, 1000e3)
+# INCLUDED_MONTHS = [10,11,12]  # February-May. Use None to include all months.
+# INCLUDED_MONTHS = None  # February-May. Use None to include all months.
+EFOLDING_X_SLICE = slice(0, 300e3)
 
 
 def select_included_months(gc):
@@ -127,6 +128,59 @@ def included_months_label():
     if INCLUDED_MONTHS is None:
         return "all_months"
     return "months_" + "_".join(f"{month:02d}" for month in INCLUDED_MONTHS)
+
+
+def efolding_width_timeseries(gc):
+    gc_x = select_included_months(gc).sel(x=EFOLDING_X_SLICE).sortby("x")
+    gc_x = gc_x.transpose("time", "x")
+
+    def width_1d(gc_values, x_values):
+        speed = np.abs(np.asarray(gc_values, dtype=float))
+        x = np.asarray(x_values, dtype=float)
+        finite = np.isfinite(speed) & np.isfinite(x)
+        if finite.sum() < 2:
+            return np.nan
+
+        speed = speed[finite]
+        x = x[finite]
+        order = np.argsort(x)
+        speed = speed[order]
+        x = x[order]
+
+        coastal_speed = speed[0]
+        if not np.isfinite(coastal_speed) or coastal_speed <= 0:
+            return np.nan
+
+        threshold = coastal_speed / np.e
+        crossing_indices = np.flatnonzero(speed <= threshold)
+        crossing_indices = crossing_indices[crossing_indices > 0]
+        if crossing_indices.size == 0:
+            return np.nan
+
+        i = crossing_indices[0]
+        x0, x1 = x[i - 1], x[i]
+        y0, y1 = speed[i - 1], speed[i]
+        if y1 == y0:
+            return x1 / 1000.0
+
+        frac = (threshold - y0) / (y1 - y0)
+        return (x0 + frac * (x1 - x0)) / 1000.0
+
+    efolding_width = xr.apply_ufunc(
+        width_1d,
+        gc_x,
+        gc_x.x,
+        input_core_dims=[["x"], ["x"]],
+        vectorize=True,
+        output_dtypes=[float],
+    )
+    efolding_width.name = "efolding_width"
+    efolding_width.attrs["long_name"] = "GC speed e-folding width"
+    efolding_width.attrs["units"] = "km"
+    efolding_width.attrs["description"] = (
+        "First distance in 0-300 km where |gc| falls below coastal |gc|/e"
+    )
+    return efolding_width
 
 
 # open east_coast_tracks_ERS1+ERS2+ENV+SRL.pkl
@@ -151,21 +205,25 @@ for ipt, (track_number, lon_equat) in enumerate(east_coast_tracks.items()):
         f_track, decode_times=False
     ) as ds_track:
         gc = ds_gc.gc.load()
+        efolding_width = efolding_width_timeseries(gc)
 
         fig = plt.figure(figsize=(9, 10))
         gs = fig.add_gridspec(2, 1, height_ratios=[1.35, 1.0], hspace=0.22)
         ax_map = fig.add_subplot(gs[0, 0], projection=ccrs.PlateCarree())
-        ax_gc = fig.add_subplot(gs[1, 0])
+        ax_width = fig.add_subplot(gs[1, 0])
 
         setup_map_axis(ax_map, f"{sat_val} track {track_number}")
         plot_track(ax_map, ds_track, track_number, lon_equat, color)
-        gc_x = select_included_months(gc).mean(dim="time").sel(x=X_SLICE)
-        gc_x.plot(ax=ax_gc, color=color, linewidth=1.8)
-        ax_gc.axhline(0, color="k", linewidth=0.8, linestyle="--")
-        ax_gc.grid(True, linestyle="--", alpha=0.5)
-        ax_gc.set_xlabel("Distance along track (m)")
-        ax_gc.set_ylabel("Mean GC (m/s)")
-        ax_gc.set_title(f"Mean GC along x, {included_months_label()}")
+        efolding_width.plot(
+            ax=ax_width, color=color, linewidth=1.4, marker="o", markersize=2
+        )
+        ax_width.set_ylim(0, 300)
+        ax_width.grid(True, linestyle="--", alpha=0.5)
+        ax_width.set_xlabel("Time")
+        ax_width.set_ylabel("E-folding width (km)")
+        ax_width.set_title(
+            f"GC speed e-folding width, 0-300 km, {included_months_label()}"
+        )
 
         fig.savefig(
             f"efolding_width_gc_track_{sat_val}_{track_number}_{included_months_label()}.png",

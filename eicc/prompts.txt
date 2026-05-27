@@ -1,3 +1,12 @@
+modify the script p.efolding_width.east_coast.points.ERS_map.py to find the
+efolding width of gc speed (distance at which its magnitude reduces by 1/e)
+withing the distance 0-300km. Plot the timeseries of efolding widthe at 
+each timeseries.
+
+modify the script p.annual_singal_strengthVSx.east_coast.points.ERS_map.py to
+compute fft of gc at each point along the track(x), map the amplitude of annual
+signal as function of x and plot.
+
 Modify the script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.oscar.py
 To extract speed from oscar data (/home/srinivasu/allData/oscar_0.25/oscar_0.25_*_full_xr_concat.nc) at the intersection points
 Plot the 500day filtered timeseries and their trends
