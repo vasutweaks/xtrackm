@@ -1,3 +1,7 @@
+edit p.gc_oned_eof.east_coast.points.ERS_map.py to regrid gc to uniform x grid of
+step 6500m. Now perform PCA on two dimensional gc(x, time) to find dominant 
+along track(x) patterns. Make use of xarray as much as possible.
+
 modify the script p.efolding_width.east_coast.points.ERS_map.py to find the
 efolding width of gc speed (distance at which its magnitude reduces by 1/e)
 withing the distance 0-300km. Plot the timeseries of efolding widthe at 
