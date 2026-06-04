@@ -109,9 +109,9 @@ method = "loess"
 frac1 = "0.05"
 
 sat_val = "ERS1+ERS2+ENV+SRL"
-INCLUDED_MONTHS = [2, 3, 4, 5]  # February-May. Use None to include all months.
 INCLUDED_MONTHS = [10,11,12]  # February-May. Use None to include all months.
 INCLUDED_MONTHS = None  # February-May. Use None to include all months.
+INCLUDED_MONTHS = [2, 3, 4, 5]  # February-May. Use None to include all months.
 X_SLICE = slice(0, 2000e3)
 X_GRID_STEP = 6500.0
 N_MODES = 3
