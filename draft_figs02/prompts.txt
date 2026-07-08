@@ -1,3 +1,7 @@
+Write a python script to combine fig03_p.scatter_omniVSrama_uVSgu_ww_ek.py and
+fig04_p.scatter_drifter_ve_vs_gu_ww_ek.py to validations.py so that all 
+observation comparisons come within a figure.
+
 I am thinking of creating a high resolution 1/12 degree gridded SLA (and thus u, v) product close to the east and west coast of India. It takes AVISO monthly gridded 0.25 as the basis, improve it near the coast using statistical/AI/ML methods.
 
 With the context from Notebooklm and draft and figures pdf of version 2.2, identify the major and minor issues with the draft.
