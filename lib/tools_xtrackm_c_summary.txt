@@ -1,0 +1,290 @@
+================================================================================
+tools_xtrackm_c.py -- Step 1 summary
+Simplified rewrite of the along-track reshaping helpers from tools_xtrackm.py
+Date: 2026-08-20
+================================================================================
+
+FILE
+    /home/srinivasu/xtrackm/lib/tools_xtrackm_c.py   (205 lines, 4 functions)
+
+Reference data file used for development/testing:
+    /home/srinivasu/xtrackm/data/GFO/ctoh.sla.ref.GFO.nindian.008.nc
+Reference document (Data and Methods section):
+    /home/srinivasu/slnew/coastal_alt_docs/drafts/draft_v02.2a.pdf
+
+
+--------------------------------------------------------------------------------
+1. MAIN FUNCTION
+--------------------------------------------------------------------------------
+
+    track_dist_time_asn_midx(ds, var_str="sla", units_in="m", dist_from="track")
+
+Returns an (x, time) DataArray in which lat and lon carry their own xarray
+indexes, so all three access patterns work on the same object:
+
+    da = track_dist_time_asn_midx(ds, "sla", units_in="km")
+    da.sel(x=slice(0, 200))             # along distance from coast
+    da.sel(time=slice("2005", "2010"))  # along time
+    da.sel(lat=15.0, method="nearest")  # along latitude
+    da.sel(lon=95.0, method="nearest")  # along longitude
+
+It also handles 1-D variables (mssh, mdt) -- they come back as (x,) -- which
+collapses track_dist_asn_mssh and track_dist_asn_mdt into the same call.
+
+Axes produced:
+    x     along-track distance from the coast, increasing offshore
+    time  one time stamp per cycle
+    lat   latitude of each along-track point   (indexed, so .sel works)
+    lon   longitude of each along-track point  (indexed, so .sel works)
+
+Extra coordinates carried along: points_numbers (on x), cycles_numbers (on time).
+
+
+--------------------------------------------------------------------------------
+2. SUPPORTING FUNCTIONS
+--------------------------------------------------------------------------------
+
+    along_track_dist(ds, units_in="m", dist_from="track")
+        Distance to the coast for every track point, in file (equator->coast)
+        order.
+        dist_from="track"  geodesic distance to the coastal end point
+        dist_from="gshhg"  the dist_to_coast_gshhg variable in the file
+
+    track_time(ds)
+        One datetime64 stamp per cycle, as a pandas DatetimeIndex.
+        Median of the valid point times; empty cycles filled by linear
+        interpolation against cycle number.
+
+    sel_track(da, x=None, lat=None, lon=None, time=None, method="nearest")
+        Select along distance, latitude, longitude and/or time in one call.
+        Each argument takes a scalar (nearest point) or a (lo, hi) pair
+        (inclusive range, given in natural order regardless of how the
+        coordinate runs along the track).
+
+            sel_track(da, x=(0, 200))                    # 0-200 km from coast
+            sel_track(da, lat=12.5)                      # nearest point
+            sel_track(da, lat=(10, 20), time=("2005", "2010"))
+
+
+--------------------------------------------------------------------------------
+3. WHAT CHANGED VERSUS THE OLD VERSION
+--------------------------------------------------------------------------------
+
+DISTANCE
+    Now uses pyproj.Geod.inv instead of a Python loop over geopy.distance.
+    Same Karney (2013) geodesic the draft cites, agreeing to 2e-13 km, but
+    vectorized.
+
+TIME
+    No longer truncated to whole days. The old timedelta(days=int(d)) threw
+    away up to 23.9 h per cycle; the new version keeps sub-second precision and
+    takes the median over valid points rather than trusting the mid-track
+    point. Empty cycles are filled by interpolation against cycle number
+    instead of ffill/bfill, which would have produced duplicate stamps in the
+    index.
+
+DECODE_TIMES
+    Works either way. The old function crashed on a decoded dataset
+    (int() on a cftime.DatetimeJulian); both paths now give identical times to
+    within 6e-7 s.
+
+GSHHG OPTION
+    dist_from="gshhg" folds in what track_dist_time_asn_gshhg did.
+    NOTE: dist_to_coast_gshhg is distance to the *nearest* coastline, so it is
+    not monotonic along the track -- with that option x is not sorted and
+    slicing on it will not behave. The "track" default is the s defined in the
+    draft's methods section.
+
+FUNCTIONS COLLAPSED INTO ONE
+    track_dist_time_asn         -> track_dist_time_asn_midx
+    track_dist_time_asn_gshhg   -> ... dist_from="gshhg"
+    track_dist_time_asn_midx    -> (this function)
+    track_dist_asn_mssh         -> ... var_str="mssh"  (returns (x,))
+    track_dist_asn_mdt          -> ... var_str="mdt"   (returns (x,))
+    dist_asn_gshhg              -> along_track_dist(..., dist_from="gshhg")
+
+
+--------------------------------------------------------------------------------
+4. VERIFICATION PERFORMED
+--------------------------------------------------------------------------------
+
+  - SLA values are bit-identical to the old function's output
+        np.array_equal(new.values, old.values, equal_nan=True) -> True
+  - x agrees with the old geopy-based distance to 2.274e-13 km
+  - decoded vs undecoded input agree to 6.31e-07 s
+  - old-vs-new time difference up to 23.89 h (old truncated to whole days)
+  - all 1421 files under data/*/ reshape cleanly, with
+        monotonic x, unique time, monotonic lat
+  - the one exception is
+        ERS1+ERS2+ENV+SRL/ctoh.sla.ref.ERS1+ERS2+ENV+SRL.nindian.451.nc
+    which has points_numbers = 0 -- an empty track in the data, not a code
+    problem. It now raises
+        ValueError: this track has no along-track points
+    instead of an IndexError.
+  - visual check: (x, time) SLA section, time-mean profile vs distance, and a
+    time series at the point nearest 12N all render correctly, with units and
+    long_name propagating to the axis labels.
+
+tools_xtrackm.py was left untouched, so nothing that imports it changes
+behaviour.
+
+
+--------------------------------------------------------------------------------
+5. BACKGROUND FROM THE DRAFT (Data and Methods)
+--------------------------------------------------------------------------------
+
+X-TRACK L2P v2.2 files store every variable on (points_numbers,
+cycles_numbers), with the first point on the equator and the last point on the
+coast. The draft states the variables are reshaped as a function of distance
+(s) from the coast and time, where s is the along-track distance between the
+coastal point and the track points on an ellipsoidal model of the earth,
+computed with geodesic algorithms (Karney, 2013). That is exactly what x is in
+this module.
+
+Time units in the files: "days since 1950-1-1", calendar "julian".
+Along-track spatial resolution: 6-7 km (1 Hz sampling).
+
+
+--------------------------------------------------------------------------------
+6. USAGE EXAMPLES AND DEMO PLOTS  (added at the end of tools_xtrackm_c.py)
+--------------------------------------------------------------------------------
+
+Run the module directly to print every usage example and write the figures:
+
+    python tools_xtrackm_c.py                       # default file, figs in cwd
+    python tools_xtrackm_c.py <track.nc> <outdir>
+
+Two demo functions are defined (they are not exported in __all__, but can be
+imported and called on any track):
+
+    demo_selections(ds)        prints 8 groups of usage examples, returns the
+                               reshaped SLA DataArray
+    demo_plots(ds, outdir=".") writes the 3 figures, returns their paths
+
+The printed example groups are:
+
+    1. reshape one variable          dims, indexes, x / lat / time ranges
+    2. along distance from coast     .sel(x=slice(...)), .sel(x=50, nearest),
+                                     .mean('time'), .std('time')
+    3. along time                    .sel(time=slice('2005','2010')),
+                                     .sel(time=..., nearest),
+                                     .groupby('time.month'), .resample('1YE')
+    4. along latitude / longitude    .sel(lat=8.0, nearest),
+                                     .sel(lat=slice(12, 5)),
+                                     .sel(lon=95.0, nearest)
+    5. sel_track                     scalars or (lo, hi) pairs, natural order,
+                                     several axes in one call
+    6. other variables               sla, swh, dac, ocean_tide, sigma0_ku
+                                     (2-D) and mssh, mdt, dist_to_coast_gshhg
+                                     (1-D, returned as (x,))
+    7. units_in and dist_from        'm' vs 'km'; 'track' vs 'gshhg'
+    8. helpers used directly         along_track_dist, track_time
+
+Figures written (into demo_figs/ in this repo):
+
+    tools_xtrackm_c_demo1_axes.png
+        (a) SLA on distance-from-coast vs time, first 400 km
+        (b) time mean and std dev vs distance from coast
+        (c) SLA time series at fixed latitudes (12N, 10N, 8N)
+        (d) time-mean SLA plotted against latitude
+        -- one array, four different axes, no extra bookkeeping
+
+    tools_xtrackm_c_demo2_variables.png
+        sla, swh, dac and sigma0_ku, each on (x, time) from the same call
+        with only var_str changed
+
+    tools_xtrackm_c_demo3_diagnostics.png
+        (a) seasonal cycle (groupby month) vs distance from coast
+        (b) band means (0-50, 50-150, 150-400 km) vs time
+        (c) number of valid cycles vs distance from coast
+        (d) SLA std dev vs distance, log x -- the near-coast rise the draft
+            discusses when comparing X-TRACK against standard L2P
+
+Note on the demo track (GFO pass 008): valid cycles drop sharply inside about
+150 km of the coast and there is a data gap near 850-950 km. Both are real
+features of the file, not artefacts of the reshaping.
+
+
+--------------------------------------------------------------------------------
+7. FIXED local_angle / track_angle_at  (in tools_xtrackm_c.py)
+--------------------------------------------------------------------------------
+
+The old lib/tools_xtrackm.py local_angle had two problems.
+
+(a) FLAT-EARTH ANGLE.  It used atan2(dlat, dlon), which ignores the convergence
+    of the meridians (a degree of longitude is cos(lat) times shorter than a
+    degree of latitude). Measured against true geodesic azimuths over all 1421
+    tracks: mean error 0.26 deg, p95 0.91 deg, max 2.03 deg, growing with
+    latitude (0.08 deg at 0-5N, 1.08 deg at 20-26N). It stays small only
+    because these are near-polar orbits -- all headings lie in 13-115 deg, and
+    the error vanishes for a purely meridional track.
+
+(b) INDEX-ORDER MISMATCH AT THE CALL SITES -- the larger error.
+    index_at_lat / index_at_lon / index_at_x return an index into the REVERSED
+    (coast-first) array, but every call site passed it together with the
+    FORWARD (equator-first) ds.lon.values / ds.lat.values, so the heading was
+    computed at the mirror-image point on the track. Across all tracks the
+    latitude actually used was off by mean 9.8 deg (max 25.1 deg), giving an
+    alpha error of mean 0.78 deg, p95 2.26 deg, >5 deg in 0.1% of cases (up to
+    53 deg on the long GFO tracks spanning 0.16N-19.89N).
+    Affected: eicc/p.guv_at_155_116.intersection.S6A.py,
+    eicc/p.speed_at_coastal_points.eicc.trends.py,
+    eicc/p.along_shore_at_coastal_points.eicc.py,
+    eicc/p.guv_at_AtoG.points.S6A_periodogram.py, and the archive/ copies.
+
+THE REPLACEMENTS
+
+    local_angle(lons, lats, ii, ioff=3, degrees=False)
+        True geodesic azimuth (Karney 2013) across a centred 2*ioff stencil,
+        averaged between the two ends so it refers to ii rather than to the
+        start of the stencil. Heading points in the direction of INCREASING
+        INDEX -- reversing the arrays rotates the answer by 180 deg.
+        Returns NaN (not a silent 0.0) for a degenerate stencil: fewer than two
+        points, ii out of range, coincident end points, or a NaN at ii or at
+        either end.
+
+    track_angle_at(ds, lat=None, lon=None, x=None, units_in="m", ioff=3,
+                   degrees=False, order="file")
+        Give exactly one of lat, lon or x (distance from coast). Resolves the
+        index and computes the heading in the SAME array order, so the (b) bug
+        cannot be reproduced. Returns (angle, ii) with ii in file order.
+        order="file"  equator -> coast heading (default; what
+                      geostrophic_components expects)
+        order="coast" coast -> offshore heading, aligned with the x axis of
+                      track_dist_time_asn_midx
+
+VERIFICATION
+
+  Heading vs an independent geodesic reference (34792 points, all tracks):
+        old local_angle : mean 0.2591  p95 0.9149  max 2.0283 deg
+        new local_angle : mean 0.0044  p95 0.0096  max 0.3683 deg
+  (the residual max is the reference's own stencil-midpoint approximation on
+  curved tracks, not a formula error)
+
+  End-to-end: a synthetic SSH field with an exactly uniform geostrophic current
+  (u=0.40, v=0.15 m/s) sampled on tracks 014 and 053 of TP+J1+J2+J3+S6A, which
+  cross at (89.295E, 17.177N), then run through compute_geostrophy_gc and
+  geostrophic_components:
+
+        truth                                  u = +0.4000   v = +0.1500
+        old local_angle + index_at_lat         u = +0.3966   v = +0.1599
+                                               (err 0.9% / 6.6%)
+        fixed track_angle_at                   u = +0.4000   v = +0.1501
+                                               (err 0.0% / 0.1%)
+
+STILL OPEN -- SIGN CONVENTIONS IN tools_xtrackm.py vs THE DRAFT
+  Two deviations that happen to cancel, so the chain gives the right answer but
+  the paper does not describe the code:
+    - compute_geostrophy_gc returns +(g/f) dh/ds, not the draft's -(g/f) dh/ds.
+      Verified: code gc = +0.4272 where the draft's -u sin a + v cos a gives
+      -0.4271 -- equal and opposite.
+    - geostrophic_components divides u by sin(a1-a2); the draft has
+      sin(a2-a1). v matches the draft.
+  Applying the draft's formulas literally to the code's gc gives u with the
+  wrong sign. Neither has been changed.
+  Minor: the assert a1_r < 3 in geostrophic_components never fires on real data
+  (headings are 13-115 deg) but would reject a valid heading above 172 deg, and
+  will not catch degrees that happen to be below 3.
+
+Usage examples for both functions are printed as group 9 by
+    python tools_xtrackm_c.py

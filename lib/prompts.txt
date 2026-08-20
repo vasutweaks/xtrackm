@@ -1,0 +1,9 @@
+I want to simplify and rewrite tools_xtrackm.py.
+Step1: I want to start with track_dist_time_asn_midx(ds, var_str="sla", units_in="m")
+examing xtrack along track data at
+I should able to extract sla(or any other variable data) along distance from
+coast (x), along time, or along latitude.
+/home/srinivasu/xtrackm/data/GFO/ctoh.sla.ref.GFO.nindian.008.nc
+Read Data and methods section in the following document,
+/home/srinivasu/slnew/coastal_alt_docs/drafts/draft_v02.2a.pdf
+Write the new functions in tools_xtrackm_c.py
