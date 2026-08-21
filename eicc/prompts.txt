@@ -1,4 +1,11 @@
+In our current draft
+/home/srinivasu/slnew/coastal_alt_docs/drafts/draft_v02.2a.pdf, our major claim
+is that EICC is weakening over last three decades, How can we verify this?
+I have checked speeds at similar points with OSCAR, GLORYS, but none of them
+have any trend(see p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.*.py).
+
 edit p.gc_oned_eof.east_coast.points.ERS_map.py to regrid gc to uniform x grid of
+
 step 6500m. Now perform PCA on two dimensional gc(x, time) to find dominant 
 along track(x) patterns. Make use of xarray as much as possible.
 
@@ -10,6 +17,8 @@ each timeseries.
 modify the script p.annual_singal_strengthVSx.east_coast.points.ERS_map.py to
 compute fft of gc at each point along the track(x), map the amplitude of annual
 signal as function of x and plot.
+
+modify script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.aviso.py, to plot the speed of EICC at points A-G. Use aviso geostrophic velocity data at /home/srinivasu/allData/aviso/msla_uv. Don't change any major changes to the script. Only adjust it to use aviso msla instead of ecco
 
 Modify the script p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.oscar.py
 To extract speed from oscar data (/home/srinivasu/allData/oscar_0.25/oscar_0.25_*_full_xr_concat.nc) at the intersection points

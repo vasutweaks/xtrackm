@@ -1,0 +1,126 @@
+================================================================================
+VERIFICATION OF THE MULTIDECADAL EICC WEAKENING CLAIM
+draft_v02.2a, Figure 6 / p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py
+Diagnostics: eicc/l.verify_eicc_weakening_trend.py
+Date: 2026-08-22
+================================================================================
+
+CLAIM UNDER TEST
+    Track-derived speed at coastal intersection points A-G, sat =
+    ERS1+ERS2+ENV+SRL, gives a negative trend at all 7 points, all flagged
+    significant, mean -32% over 30 years. The draft states 55% weakening at
+    point B and ~30% averaged over all points.
+
+BOTTOM LINE
+    The -30% weakening does not survive verification. It is almost certainly
+    an instrument artifact: a step change in noise level at the ERS-2/ENVISAT
+    transition, rectified into the positive-definite speed |V| through an
+    ill-conditioned two-track inversion. The disagreement with OSCAR, GLORYS,
+    ECCO and AVISO is the symptom, not a puzzle to be explained away.
+
+--------------------------------------------------------------------------------
+1. THE TREND LIVES ENTIRELY AT THE ERS-2 -> ENVISAT BOUNDARY
+--------------------------------------------------------------------------------
+    mean over A-G:
+        full-record trend of |V|                     -0.0098 m/s/yr
+        pooled WITHIN-era trend                      -0.0001 m/s/yr
+          (ERS-1+2 alone, and ENV+SRL alone)
+        step in mean |V| across mid-2002             -0.155  m/s
+
+    Inside each instrument era there is no trend at all, and the within-era
+    signs are mixed - A, C, D, E are all POSITIVE in the ENV+SRL half. The
+    whole -30% is one step at the mission change.
+
+     pt  full record   ERS-1+2   ENV+SRL  mean early  mean late    step
+      A      -0.0176   -0.0055   +0.0187       1.108      0.778  -0.330
+      B      -0.0231   -0.0307   -0.0138       0.971      0.704  -0.267
+      C      -0.0045   +0.0419   +0.0092       0.798      0.637  -0.161
+      D      -0.0131   -0.0267   +0.0055       0.947      0.765  -0.182
+      E      -0.0028   -0.0077   +0.0061       0.750      0.698  -0.052
+      F      -0.0007   +0.0117   -0.0016       0.582      0.559  -0.023
+      G      -0.0072   +0.0038   -0.0148       0.511      0.442  -0.068
+
+--------------------------------------------------------------------------------
+2. THE STEP IS EXACTLY THE DROP IN NOISE LEVEL (RICE RECTIFICATION)
+--------------------------------------------------------------------------------
+    |V| is positive-definite, so it rectifies noise:
+        E[|V|] ~ sqrt( |V_true|^2 + sigma^2 )
+
+    Across the same mission boundary:
+        mean cycle-to-cycle noise ratio (late/early)      0.843
+        mean speed ratio            (late/early)          0.827
+        correlation of the two ratios across the 7 points 0.62
+
+    ENVISAT and SARAL/AltiKa are quieter instruments and retrack much better
+    near the coast - valid-cycle return goes 52% (ERS-1 era) -> 95% (SARAL).
+    The speed drop tracks the noise drop almost exactly.
+
+--------------------------------------------------------------------------------
+3. THE TWO-TRACK INVERSION IS BADLY CONDITIONED, SO NOISE DOMINATES
+--------------------------------------------------------------------------------
+    Every ERS crossing at these points is at ~25 degrees. That amplifies
+    error into gv: std(gv)/std(gu) reaches 5.4 at point A, with
+    std(gv) = 1.16 m/s - larger than any real EICC variability.
+
+    Signal-to-noise of |V|:
+        pt    A     B     C     D     E     F     G
+        SNR  0.64  0.80  0.53  0.38  0.61  0.46  0.67
+
+    Noise exceeds signal at EVERY point. Consistently, the mean speeds in
+    Figure 6 (0.47-0.92 m/s) are 2-3x AVISO's at the same locations
+    (0.17-0.39 m/s) - inflated, not measured.
+
+--------------------------------------------------------------------------------
+4. SIGNED COMPONENTS SHOW NO TREND; AVISO OVER THE SAME PERIOD SHOWS NO TREND
+--------------------------------------------------------------------------------
+    The signed gu/gv trends are insignificant almost everywhere, and where
+    significant they disagree in sign (A +0.006, B -0.006 m/s/yr).
+
+    Period note: the guv files end 2016-04, not 2023. The record is 23.4
+    years, so "three decades" and the %/30y figures are extrapolations.
+    1994, 2011 and 2012 are entirely absent from the record.
+
+    Matching AVISO to the actual record period, same points, same 2002
+    boundary:
+        AVISO   1993-2016:  +0.0008 m/s/yr,  step +0.007 m/s
+        X-TRACK 1993-2016:  -0.0098 m/s/yr,  step -0.155 m/s
+
+    Same quantity, same points, same period. Only the along-track record
+    steps.
+
+    Side note: the Ekman term that Figure 6 scalar-adds contributes
+    -0.0002 m/s/yr, about 1% of the claimed trend. Adding speeds rather than
+    vectors is wrong, but it is not what drives this.
+
+--------------------------------------------------------------------------------
+HOW TO VERIFY - RECOMMENDED PATH
+--------------------------------------------------------------------------------
+1. Use the signed single-track cross-track current gc, not |V|.
+   At these near-perpendicular coastal crossings gc is essentially the
+   alongshore EICC, needs no ill-conditioned inversion, and being signed it
+   does not rectify noise. Its trends are insignificant at 6 of 7 points.
+
+2. Use a noise-immune strength metric: the annual-harmonic amplitude of the
+   signed gc. Noise does not project onto the annual harmonic.
+   Computed (1993-2002 vs 2003-2016):
+
+        A -37%   B +50%   C -87%   D +9%   E -34%   F +9%   G -12%
+
+   Mixed signs, no coherent basin-wide weakening. This is the honest result
+   from the robust metric.
+
+3. If a trend is still wanted: fit trend + mission-step jointly and report
+   both; estimate inter-mission offsets in the ERS-2/ENVISAT overlap.
+
+4. Cross-check against a single-mission record. TP+J1+J2+J3+S6A spans
+   1992-2023 continuously on one orbit family and would not carry this step.
+
+FALSIFICATION TEST
+    If the ERS-2/ENVISAT step also appears in TP+J1+J2+J3+S6A at the same
+    points and the same dates, it is oceanic rather than instrumental and
+    this diagnosis is wrong. That test is cheap and should be run before
+    revising the draft text.
+
+STATUS
+    Draft and Figure 6 have NOT been modified.
+================================================================================
