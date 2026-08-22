@@ -18,9 +18,11 @@ from pathlib import Path
 
 # copilot --resume=d419a1e5-878f-477e-813b-3b06f3d9a50b
 
-AVISO_UV_DIR = "/home/srinivasu/allData/aviso/msla_uv"
-AVISO_U = f"{AVISO_UV_DIR}/allyear_dt_global_allsat_msla_u.nc"
-AVISO_V = f"{AVISO_UV_DIR}/allyear_dt_global_allsat_msla_v.nc"
+# MADT = absolute dynamic topography, so ugos/vgos are the TOTAL geostrophic
+# currents (msla_uv carries ugosa/vgosa, which are anomalies only).
+AVISO_UV_DIR = "/home/srinivasu/allData/aviso"
+AVISO_U = f"{AVISO_UV_DIR}/allyear_dt_global_allsat_madt_u.nc"
+AVISO_V = f"{AVISO_UV_DIR}/allyear_dt_global_allsat_madt_v.nc"
 script = Path(sys.argv[0])
 png_file = script.with_suffix(".png")
 
@@ -44,7 +46,7 @@ sat_val = "ERS1+ERS2+ENV+SRL"
 
 df = pd.read_csv(f"intersections_near_east_coast_{sat_val}.csv")
 ds_aviso = xr.merge(
-    [xr.open_dataset(AVISO_U)["u"], xr.open_dataset(AVISO_V)["v"]]
+    [xr.open_dataset(AVISO_U)["ugos"], xr.open_dataset(AVISO_V)["vgos"]]
 ).sel(
     longitude=slice(NIO[0], NIO[1]),
     latitude=slice(NIO[2], NIO[3]),
@@ -68,22 +70,22 @@ MAP_EXTENT = (78.5, 88.0, 10.0, 22.0)
 
 
 def extract_aviso_speed(ds, lon, lat, max_radius_deg=2.0):
-    """Return AVISO msla speed at the nearest wet grid cell to lon/lat."""
-    u = ds["u"].sel(longitude=lon, latitude=lat, method="nearest")
-    v = ds["v"].sel(longitude=lon, latitude=lat, method="nearest")
+    """Return AVISO madt speed at the nearest wet grid cell to lon/lat."""
+    u = ds["ugos"].sel(longitude=lon, latitude=lat, method="nearest")
+    v = ds["vgos"].sel(longitude=lon, latitude=lat, method="nearest")
     speed = np.hypot(u, v).rename("speed")
     if np.isfinite(speed.values).sum() >= 2:
         return speed, float(speed.longitude), float(speed.latitude)
 
-    ds_box = ds[["u", "v"]].sel(
+    ds_box = ds[["ugos", "vgos"]].sel(
         longitude=slice(lon - max_radius_deg, lon + max_radius_deg),
         latitude=slice(lat - max_radius_deg, lat + max_radius_deg),
     )
-    speed_box = np.hypot(ds_box["u"], ds_box["v"]).rename("speed")
+    speed_box = np.hypot(ds_box["ugos"], ds_box["vgos"]).rename("speed")
     valid = np.isfinite(speed_box).any("time")
     if not bool(valid.any()):
         raise ValueError(
-            f"No finite AVISO msla velocity found within {max_radius_deg} deg of "
+            f"No finite AVISO madt velocity found within {max_radius_deg} deg of "
             f"{lon:.2f}E, {lat:.2f}N"
         )
 
