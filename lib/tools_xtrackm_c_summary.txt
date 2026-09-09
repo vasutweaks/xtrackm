@@ -288,3 +288,362 @@ STILL OPEN -- SIGN CONVENTIONS IN tools_xtrackm.py vs THE DRAFT
 
 Usage examples for both functions are printed as group 9 by
     python tools_xtrackm_c.py
+
+
+================================================================================
+8. ISSUES IN THE GEOSTROPHIC CURRENT COMPUTATION
+   (investigated 2026-09-09; replacements written in tools_xtrackm_c.py)
+================================================================================
+
+HEADLINE: the pipeline is CORRECT, but by accident -- compute_geostrophy_gc and
+geostrophic_components each carry a sign error and the two cancel exactly.
+Fixing either one alone flips the answer. Separately, the draft's own v formula
+IS wrong, which is almost certainly the "[x] meridional component sign issue"
+in Issues.txt and the reason gv correlates poorly with AVISO.
+
+--------------------------------------------------------------------------------
+8.1  THE TWO CANCELLING SIGN ERRORS
+--------------------------------------------------------------------------------
+Let alpha be the heading in the direction of increasing x (offshore). Then
+    gc = -u sin(alpha) + v cos(alpha) = +(g/f) dh/dx
+and the exact inverse at a crossing is
+    u = (gc1 cos a2 - gc2 cos a1) / sin(a2 - a1)
+    v = (gc1 sin a2 - gc2 sin a1) / sin(a2 - a1)
+
+  - compute_geostrophy_gc returns +(g/f) dh/dx but is used with alpha taken in
+    the OPPOSITE (equator -> coast) direction, so its gc is the negative of the
+    gc that alpha convention implies.
+  - geostrophic_components writes the determinant as sin(a1 - a2) instead of
+    sin(a2 - a1), negating BOTH u and v.
+  Product of the two: +1. Verified end to end (below).
+
+--------------------------------------------------------------------------------
+8.2  THE DRAFT'S v FORMULA IS WRONG
+--------------------------------------------------------------------------------
+draft_v02.2a.pdf writes
+    v = (gc2 sin a1 - gc1 sin a2) / sin(a2 - a1)
+The exact inverse of the draft's OWN gc1/gc2 equations is
+    v = (gc1 sin a2 - gc2 sin a1) / sin(a2 - a1)      <- numerator negated
+Numerical check, inverting the draft's own projection equations over 18039
+random (u, v, a1, a2):
+    draft u    recovers the truth in 100.00% of cases
+    draft v    recovers the truth in   0.00% of cases
+    correct u  100.00%      correct v  100.00%
+The draft's gc = -(g/f) dh/ds IS self-consistent with its projection equation,
+provided alpha there means the equator -> coast heading (opposite to s). Only
+the v inversion is in error. THE PAPER NEEDS THIS FIXED.
+
+--------------------------------------------------------------------------------
+8.3  OTHER DEFECTS FOUND
+--------------------------------------------------------------------------------
+(a) EQUATOR MASK IS ONE-SIDED AND TOO NARROW.
+    compute_geostrophy_gc uses np.where(lats > 2, f, nan) -- a one-sided test,
+    not |lat| < 2, and its own comment says "2s-2n" while the draft says 5S-5N.
+    Harmless only because no NINDIAN track reaches the southern hemisphere
+    (checked: 0 of 1418). Between 2N and 5N the median |gc| on GFO 008 is still
+    ~1 m/s against ~0.3 m/s further north, so the old mask leaves a
+    contaminated band in. New default: symmetric equator_band=5.0.
+
+(b) f AND g ALIGNED BY ARRAY POSITION, NOT BY COORDINATE.
+    ratio1 = (g/f)[:, newaxis] built from ds.lat.values[::-1] is multiplied into
+    sla_smooth, so the result is silently wrong if sla_smooth was subset,
+    sorted, or transposed. The new function reads lat off the DataArray's own
+    coordinate.
+
+(c) NO UNIT CHECK ON THE x AXIS.
+    gc = (g/f) dh/dx assumes x in metres. Handing it a track built with
+    units_in="km" gives currents 1000x too large, silently: measured gc
+    +427.2 m/s vs +0.42725 m/s. The new function converts from
+    da.x.attrs["units"].
+
+(d) differentiate("x") STRADDLES DATA GAPS.
+    Adjacent 1 Hz points are 6-7 km apart, but 0.2% of intervals are gaps up to
+    ~1384 km, across which a long-baseline average slope is reported as a local
+    gradient. New optional max_gap masks those.
+
+(e) NEAR-PARALLEL THRESHOLD FAR TOO LOOSE.
+    geostrophic_components rejects only |sin(a2-a1)| < 1e-6, i.e. crossings
+    down to 6e-5 deg, where the inversion is pure noise. New default
+    min_sin=0.1 (about 5.7 deg). Its ValueError message is also a broken
+    f-string that prints "{math.degrees(theta):.2f}" literally.
+
+(f) assert a1_r < 3 CHECKS ONLY AN UPPER BOUND.
+    Will not catch degrees below 3, would reject a valid heading above 172 deg,
+    and vanishes under python -O. Replaced by an explicit finite/range check.
+
+(g) OPERATOR PRECEDENCE BUG in geostrophic_current_components_1:
+        u = (gd + ga.interp(...)) / 2*cos_theta
+    is (x/2)*cos(theta), not x/(2 cos theta) -- 1.333x off at theta=30 deg.
+    Same on the v line with sin_theta. This function appears unused; not
+    ported.
+
+(h) compute_geostrophy_from_slope uses a single endpoint-to-endpoint slope
+    instead of the local heading, and abs(angle), which destroys the sign for
+    descending tracks. It also carries a -1 that compute_geostrophy_gc does
+    not. Not ported.
+
+(i) NOT A GEOSTROPHY BUG, BUT BLOCKING: track_smooth_loess_x -- the project's
+    primary smoother -- crashes with
+        numpy.linalg.LinAlgError: SVD did not converge in Linear Least Squares
+    on data/GFO/ctoh.sla.ref.GFO.nindian.008.nc. 31 of 186 cycles are entirely
+    empty; interpolate_na cannot fill an all-NaN column, so loess_1d is handed
+    all-NaN. Needs a guard that skips or NaN-fills empty cycles.
+
+(j) SEPARATE FROM GEOSTROPHY: compute_dist measures from lons_track[-1],
+    assuming the LAST point is the coastal one. For 32 unique tracks (64 files
+    counting the _lon_ordered links) the FIRST point is nearer the coast, e.g.
+    ERS1+ERS2+ENV+SRL/666: first point 7.4 km from a coast, last 105.6 km. The
+    x axis is still a valid monotone along-track coordinate, so gc is
+    unaffected, but "distance from coast" is measured from the wrong end for
+    those tracks -- which corrupts the coastal binning, the EICC transects, and
+    the std-vs-distance comparison in the draft.
+
+--------------------------------------------------------------------------------
+8.4  NEW FUNCTIONS
+--------------------------------------------------------------------------------
+    OMEGA                                  Earth rotation rate (Groten 2004)
+    coriolis(lat)                          f in 1/s, plain ndarray in and out
+    gravity(lat)                           international gravity formula
+    cross_track_geostrophy(da, equator_band=5.0, max_gap=None)
+                                           gc = +(g/f) dh/dx from a reshaped,
+                                           smoothed track; lat taken from the
+                                           DataArray's own coordinate; x
+                                           converted to metres from its units
+                                           attribute
+    resolve_uv(gc1, gc2, a1, a2, min_sin=0.1)
+                                           the exact inverse; a1/a2 are the
+                                           OFFSHORE headings in radians, i.e.
+                                           track_angle_at(..., order="coast")
+
+Sign convention is stated once in a comment block above these functions and
+used consistently. cor_p / grav are not reused: they wrap their output in a
+DataArray with a "lat" dim, which raises CoordinateValidationError when handed
+a plain array.
+
+--------------------------------------------------------------------------------
+8.5  VERIFICATION
+--------------------------------------------------------------------------------
+Synthetic SSH giving an exactly uniform geostrophic current (u=0.40, v=0.15
+m/s), sampled on TP+J1+J2+J3+S6A tracks 014 and 053, which cross at
+(89.295E, 17.177N):
+
+    truth                                        u = +0.4000   v = +0.1500
+    new: cross_track_geostrophy + resolve_uv     u = +0.4000   v = +0.1501
+    old: compute_geostrophy_gc + geostr_comps    u = +0.4022   v = +0.1451
+    draft v02.2a formulas as written             u = +0.4000   v = -0.1501
+
+  - the old chain's residual is the old local_angle flat-earth error (see
+    section 7); with that fixed the old chain is exact too
+  - the draft's v comes out with the WRONG SIGN
+  - gc itself is unchanged: max |gc_new - gc_old| = 7.7e-12 m/s over all 1412
+    processable tracks at every point where both are finite
+
+Usage examples print as group 10 of "python tools_xtrackm_c.py"; figure
+tools_xtrackm_c_demo4_geostrophy.png shows gc on (x, time), the raw-vs-smoothed
+|gc| distribution, the time-mean cross-shore profile, and the g/f blow-up
+inside the equatorial band with both mask widths marked.
+
+--------------------------------------------------------------------------------
+8.6  THE 15 LOCAL COPIES ARE **NOT** EQUIVALENT TO THE LIBRARY FUNCTION
+--------------------------------------------------------------------------------
+CLAUDE.md says the scripts that define their own geostrophic_components_from_a
+"are equivalent; prefer the library one". They are not equivalent. All 15
+copies implement the DRAFT's formulas (theta = a2 - a1, v numerator negated),
+not the library's, and 8 of them then patch u by hand with "u = -1*u" or
+"u = u*-1". Verified on the synthetic uniform-current test:
+
+    truth                                            u = +0.4000  v = +0.1500
+    lib geostrophic_components                       u = +0.4022  v = +0.1451  OK
+    local copy WITH  u = -1*u                        u = +0.4022  v = +0.1451  OK
+    local copy WITHOUT the patch                     u = -0.4022  v = +0.1451  BAD
+
+(the +0.0022 / -0.0049 residual is the old local_angle flat-earth error, section 7)
+
+The hand patch is empirical evidence that someone hit this sign and fixed it in
+some scripts but not others.
+
+PATCHED, u correct (8):
+    drifter/c.metrics.track_guvVSnearby_drifters_at_intersection_points.py
+    drifter/c.metrics.track_guvVSnearby_drifters_at_intersection_points_v2.py
+    drifter/c.metrics.track_guvVSnearby_drifters_at_intersection_points_w_ekman.py
+    drifter/debug1.py
+    drifter/p.drifters_passing_intersection_point_box.one.py
+    guv/p.oscar_ekmn_uvVStrack_guv.at.intersections.py
+    lib/dump.py
+    selected/p.radar_uvVStrack_guv.at.intersections.py
+
+NOT PATCHED -> ZONAL COMPONENT u HAS THE WRONG SIGN (7):
+    guv/archive/p.rama_uvVStrack_guv.nearest.all.py
+    guv/p.aviso_only_uvVStrack_guv.at.intersections_single.py     <-- see below
+    guv/p.cb_buoys_uvVStrack_guv.nearest.all.py
+    guv/p.coastal_buoys_uvVStrack_guv.nearest.all.py
+    guv/p.oscar_only_uvVStrack_guv.one.py
+    guv/p.oscar_only_uvVStrack_guv.one_simple.py
+    radar/archive/p.radar_uvVStrack_guv.at.intersections.py
+
+guv/p.aviso_only_uvVStrack_guv.at.intersections_single.py contains the line
+"u = u" where the other scripts have "u = -1*u" -- the patch was deleted and a
+no-op left behind. That is the AVISO comparison script, and guv/Notes.txt
+records: "I expected correlations of above 0.9 with aviso guv, because they are
+purely geostrophic, but it was not the case" and "Is it possible that the
+actual correct sign of gu depends on satellite or whether the track is
+ascending or descending?" The answer is no -- it does not depend on the track;
+that script simply computes u with the sign flipped. Anticorrelated u is
+exactly what a poor correlation against a correct AVISO u looks like.
+
+ACTIONS (not taken -- these are analysis scripts, not touched by this rewrite):
+  1. Fix the "u = u" no-op in the AVISO script and re-run the comparison.
+  2. Delete all 15 local copies and import resolve_uv (or the library's
+     geostrophic_components) instead.
+  3. Correct the v formula in draft_v02.2a.
+  4. Correct the CLAUDE.md claim that the local copies are equivalent.
+
+
+================================================================================
+9. SMOOTHING AND OUTLIER REJECTION -- YES, THESE NEEDED REWRITING
+   (investigated 2026-09-09; replacements in tools_xtrackm_c.py)
+================================================================================
+
+Every smoother in tools_xtrackm.py either invents data or destroys it, and the
+two most-used filters (mad_filter_1d_xr, 31 call sites; butter_lowpass_1d, 20)
+are quantitatively wrong. Measured on GFO pass 008 (28695 finite of 39060).
+
+--------------------------------------------------------------------------------
+9.1  mad_filter_1d_xr / mad_filter_2d_xr -- 0.6745x TOO LENIENT
+--------------------------------------------------------------------------------
+        mad = median_abs_deviation(valid_data, scale='normal')
+        modified_z_scores = 0.6745 * (da_vals - median) / mad
+scale='normal' ALREADY divides by 0.6745, so it returns a robust sigma. The
+extra 0.6745 makes every z-score 0.6745x too small:
+    std of z as coded            0.6769   (should be 1.0)
+    nominal thresh 3.5 cuts at   5.19 sigma
+    on Gaussian noise, thresh=3.0 flags 0.000% where it should flag 0.315%
+On real data (GFO 008, dim="time"):
+    thresh=3.0 : new flags 110 outliers, old flags   2
+    thresh=3.5 : new flags  31 outliers, old flags   0
+So the project's outlier rejection has been very nearly a no-op. 31 call sites.
+mad_filter_1d_xr additionally rebuilds the output with only `dim` as a
+coordinate, dropping lat/lon and attrs, and only handles 1-D input.
+
+--------------------------------------------------------------------------------
+9.2  butter_lowpass_1d / butter_lowpass_2d -- WRONG SAMPLING RATE
+--------------------------------------------------------------------------------
+Both hardcode "fs = 1  # Sampling frequency: 1 sample per day". An along-track
+series is one sample per satellite REPEAT CYCLE, so a nominal 3-day cutoff is
+really 3 cycles, and the physical cutoff changes with the mission:
+    TP+J1+J2+J3+S6A / TPN+...   10 d repeat ->  30 days
+    HY2A / HY2B                 14 d        ->  42 days
+    GFO                         17 d        ->  51 days
+    S3A / S3B                   27 d        ->  81 days
+    ERS1+ERS2+ENV+SRL           35 d        -> 105 days
+Cross-mission comparisons were therefore low-passed at 30-105 days while all
+being labelled "3 days". 20 call sites. butter_lowpass_1d silently returns
+UNFILTERED data when len <= 15; butter_lowpass_2d lacks that guard and raises
+instead.
+
+--------------------------------------------------------------------------------
+9.3  THE LOESS SMOOTHERS FABRICATE DATA
+--------------------------------------------------------------------------------
+Both call
+    interpolate_na(dim="x", method="linear", fill_value="extrapolate")
+and then keep the result everywhere, so the output has MORE finite values than
+the input. track_smooth_loess_statsmodels_x (the primary smoother, used by
+computed/c.loess_0.05_smooth.all.py) on GFO 008:
+    input  28695 finite  ->  output 32550 finite   = 3855 values invented
+    at x = 0 km (the coastal point) 37 valid cycles became 155
+Worse, the fabricated points also CORRUPT THE FIT AT GENUINE OBSERVATIONS:
+    |new - old| at the 28695 real points: median 0.20 cm, p95 1.3 cm, max 86 cm
+    by band: 0-50 km 0.06 cm | 50-150 km 0.61 cm | 150-1600 km 0.19 cm
+The 50-150 km transition band -- where the gaps are worst and the paper's
+coastal argument lives -- is the most affected.
+
+track_smooth_loess_x additionally RAISES on that same file:
+    numpy.linalg.LinAlgError: SVD did not converge in Linear Least Squares
+because 31 of 186 cycles are entirely empty, interpolate_na cannot fill an
+all-NaN column, and loess_1d is handed all-NaN.
+
+--------------------------------------------------------------------------------
+9.4  THE OTHER SMOOTHERS
+--------------------------------------------------------------------------------
+(a) track_smooth_gaussian_x DESTROYS 59% OF THE DATA. gaussian_filter1d blanks
+    the whole kernel footprint around every NaN: 28695 valid points in, 11865
+    out. Fixed by normalised convolution (filter the data and a validity mask
+    separately, then divide).
+(b) track_smooth_box_x DEFAULTS TO smooth=1, a no-op -- calling it without an
+    explicit window returns the data unsmoothed. Its min_periods=1 also emits a
+    "mean" computed from a single sample.
+(c) slope_smooth_optimal_filter_x uses np.convolve, which REVERSES the kernel.
+    genweights(-5, 6) is asymmetric, so the applied window is the mirror image
+    of the intended one (on a ramp of slope 3: convolve 298.7 vs correlate
+    301.3). np.convolve also propagates NaN across the full window (-31% of
+    points). Not ported -- it is used only by computed/c.optim_smooth.all.py.
+    NOTE: genweights itself is fine; its weights sum to +1 and it is correctly
+    applied to an already-differentiated slope field, so the earlier concern
+    that it was a derivative kernel misapplied as a smoother does not hold.
+(d) None of the smoothers use the physical x spacing -- sigma and window are in
+    samples, and LOESS frac is a fraction of points, so the effective physical
+    scale varies across the gaps documented in section 8.3(d).
+
+--------------------------------------------------------------------------------
+9.5  NEW FUNCTIONS
+--------------------------------------------------------------------------------
+Two rules, applied uniformly:
+  1. never invent data -- a NaN on input stays NaN on output unless the caller
+     explicitly asks, via a named argument, for gaps up to a stated width;
+  2. never silently destroy it -- one NaN in a kernel must not blank the window.
+
+    mad_filter(da, thresh=3.5, dim=None)
+        correct modified z-score; any number of dimensions; dim may be a tuple
+        to filter along each in turn (what mad_filter_2d_xr did); keeps every
+        coordinate and attribute
+    smooth_box(da, window=6, min_count=None, dim="x", keep_coverage=True)
+        min_count defaults to half the window
+    smooth_gaussian(da, sigma=3, dim="x", min_weight=0.5, keep_coverage=True)
+        normalised convolution; min_weight drops points with too little real
+        kernel support
+    smooth_loess(da, frac=0.05, dim="x", min_points=10, fill_gaps=None)
+        fits on finite samples only; series shorter than min_points return NaN
+        instead of raising; fill_gaps (in x units) is the explicit opt-in for
+        bounded gap filling
+    lowpass_time(da, cutoff_days, order=4, dim="time")
+        sampling interval taken from the time coordinate itself, so the mission
+        no longer has to be known; a cutoff at or below the Nyquist period is
+        refused rather than silently meaningless; records sampling_days and
+        lowpass_cutoff_days in the output attrs
+
+--------------------------------------------------------------------------------
+9.6  VERIFICATION
+--------------------------------------------------------------------------------
+GFO 008, 28695 finite points in:
+    smooth_box(window=6)             28420   (-275)
+    smooth_gaussian(sigma=3)         28357   (-338)   old gaussian: 11865 (-16830)
+    smooth_loess(frac=0.05)          28695   (  +0)   old loess:    32550 (+3855)
+    smooth_loess(fill_gaps=20 km)    31589  (+2894)   opt-in, bounded
+  (box and gaussian come out slightly BELOW the input because min_count /
+   min_weight drop points with no real support -- coverage never grows)
+
+    mad_filter(3.0) flags 110 outliers      old: 2
+    mad_filter(3.5) flags  31 outliers      old: 0
+    lowpass_time reads 17.1 d sampling from the axis and refuses cutoff_days=3
+      ("at or below the Nyquist period (34.1 d)")
+
+Random 120-track sample across all 8 missions: 118 processed (2 too small),
+0 failures, and 0 cases where any output grew beyond the input's coverage.
+
+Usage examples print as group 11 of "python tools_xtrackm_c.py"; figure
+tools_xtrackm_c_demo5_smoothing.png compares the smoothers on one cycle, the
+coverage of each against the input, the old-vs-new LOESS difference at genuine
+observations, and the MAD double-scaling.
+
+--------------------------------------------------------------------------------
+9.7  NOT DONE
+--------------------------------------------------------------------------------
+  - No analysis script has been repointed at these; tools_xtrackm.py is
+    untouched. Re-running computed/c.loess_0.05_smooth.all.py with smooth_loess
+    would change every downstream geostrophy product, so that is a deliberate
+    decision, not a mechanical swap.
+  - slope_smooth_optimal_filter_x and the two loess variants
+    (track_smooth_loess_x, ..._parallel) are not ported.
+  - The draft quotes RMSE 0.133 m/s and correlation 0.66 for loess frac=0.05
+    against AVISO. Those numbers came from the fabricating implementation and
+    should be recomputed before the filter-comparison paragraph is final.
