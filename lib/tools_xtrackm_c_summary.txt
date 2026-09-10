@@ -789,8 +789,8 @@ using the extra lat/lon indexes that track_dist_time_asn_midx sets.
   - L2P's std near the coast is computed over a biased subset -- only the 25%
     of cycles it retains inside 10 km. That is inherent to the comparison and
     is exactly why panel (b) exists, but it is worth a sentence in the caption.
-  - fig02 and fig03 have since been reviewed too (sections 11 and 13).
-    fig04-fig07 in draft_figs02 have not.
+  - fig02-fig05 have since been reviewed too (sections 11, 13, 14, 15 and 16).
+    fig06-fig07 in draft_figs02 have not.
 
 ================================================================================
 11. REVIEW AND REWRITE OF
@@ -1192,4 +1192,418 @@ Minor:
   - The CSVs themselves still carry the 0 m u_ek column. Regenerating them with
     EKMAN_DEPTH = "15" in the two producers would make the re-attachment step
     unnecessary and fix every other figure that reads them.
-  - fig04-fig07 in draft_figs02 have not been reviewed.
+  - fig04 and fig05 have since been reviewed and rewritten (sections 14, 15
+    and 16). fig06-fig07 in draft_figs02 have not.
+
+================================================================================
+14. REVIEW AND REWRITE OF
+    draft_figs02/fig04_p.scatter_drifter_ve_vs_gu_ww_ek.py
+    AND ITS CSV PRODUCER
+    drifter_track_reg/c.extract.drifter_veANDgu_ek_at_intersections.py
+    (reviewed and fixed 2026-09-10; "_c" suffix)
+================================================================================
+
+Two hexbin scatters: GDP drifter ve against altimetry gu, with and without the
+Ekman contribution, for TP+J1+J2+J3+S6A. The real problems were in the CSV
+producer, so both files were rewritten.
+
+--------------------------------------------------------------------------------
+14.1  MAJOR: NO DROGUE FILTERING
+--------------------------------------------------------------------------------
+The producer's loader took only
+    ds_d[["longitude", "latitude", "time", "ve", "vn"]]
+and never read drogue_lost_date, which sits in the same file
+("_FillValue = drogue still attached; 0 = drogue lost before deployment").
+An undrogued GDP drifter is a surface follower, biased downwind by roughly 1% of
+wind speed -- about 0.1 m/s at 10 m/s, comparable to the signal being validated.
+
+    ALL 1622 rows      : undrogued at the comparison time = 634 (39.1%)
+    the 328 rows fig04 actually plots : undrogued = 159 (48.5%)
+
+Split of the published subset (gu + ek 0 m, coast <= 100 km):
+    all (as published)  n=328  r 0.728  OLS 0.833  RMA 1.145  rmse 0.342
+    drogued only        n=169  r 0.782  OLS 0.856  RMA 1.095  rmse 0.316
+    undrogued only      n=159  r 0.661  OLS 0.786  RMA 1.189  rmse 0.367
+
+--------------------------------------------------------------------------------
+14.2  MAJOR: THE "72 HOUR" FILTER WAS AN 18 HOUR FILTER ON THE DRIFTERS
+--------------------------------------------------------------------------------
+filter_rama_uv_72h calls butter_lowpass_1d(cutoff_days=3), which hardcodes
+fs = 1 sample/day (section 9.2). Drifter files are 6-hourly. From the actual
+filter frequency response:
+    daily (Ekman)       true Nyquist 0.50 cyc/day -> -3dB cutoff 3.00 d  CORRECT
+    6-hourly (drifter)  true Nyquist 2.00 cyc/day -> -3dB cutoff 0.75 d  WRONG
+Same function, two sampling rates, correct for only one. ve is already a "12 hr
+centered difference", so an 18 h filter was close to a no-op and left the
+inertial and tidal energy in. Refiltering with lowpass_time():
+    drifter_ve  corr(old,new) 0.9864, median |diff| 0.0356 m/s,
+                rms 0.4638 -> 0.4471 (variance down 3.7%)
+    gu          corr 1.0000  (unchanged, as expected)
+    u_ek        corr 0.9999  (the Ekman path was already correct at 3 days)
+
+--------------------------------------------------------------------------------
+14.3  THE TIME MATCH WAS MEASURED AND THEN IGNORED
+--------------------------------------------------------------------------------
+fig04 set MAX_ABS_TIME_DIFF_DAYS = None, computed the offset statistics, printed
+them, and filtered on nothing:
+    |drifter_time - gu_time| : median 2.50 d, p90 4.50 d, max 126 d
+    only 20.8% within 1 day; 41.7% within 2 days
+Worse, gu is INTERPOLATED across the ~10 d repeat cycle onto the drifter
+instant, but gu_time recorded the NEAREST native cycle -- so the column did not
+describe the offset that was actually used. 42 rows are nearest-sample
+fallbacks where the interpolation returned NaN.
+
+--------------------------------------------------------------------------------
+14.4  EKMAN DEPTH -- THE ONE CASE THAT SHOULD **NOT** CHANGE
+--------------------------------------------------------------------------------
+EKMAN_DEPTH = "0" against drifters drogued at 15 m, the same mismatch as
+sections 11.1 and 13.1. But drifters are the exception -- 0 m verifies
+marginally BETTER on every metric:
+    gu + ek  0 m : r 0.726  RMA 1.143  rmse 0.343
+    gu + ek 15 m : r 0.705  RMA 1.256  rmse 0.348
+So the section 11.7 recommendation to check the depth across all buoy
+comparisons is now checked for drifters, and the answer is: leave it at 0 m.
+The rewritten CSV carries u_ek_15m alongside u_ek so the choice stays testable.
+
+--------------------------------------------------------------------------------
+14.5  SMALLER FINDINGS
+--------------------------------------------------------------------------------
+  - THE TWO CSVs fig04 LOADS ARE BYTE-IDENTICAL. drifter_ve_vs_gu_{SAT}.csv and
+    drifter_ve_vs_gu_ek_{SAT}.csv are the same 314589 bytes (cmp confirms).
+    Harmless -- it makes the panels a fair paired comparison -- but the code
+    implies two independent sources.
+  - THE FIGURE SILENTLY SHOWS A COASTAL SUBSET: 328 of 1622 rows, 18 of 68
+    intersections. The suptitle stating the 100 km cut is commented out.
+  - NO CLOSEST-APPROACH DISTANCE WAS RECORDED. The candidate pickles pre-select
+    drifters in a +-0.30 deg box, so proximity was bounded (measured: median
+    17.6 km, p90 35.0, max 46.0), but nothing downstream could refine it.
+  - Same OLS / "Std error" problems as fig03 (section 13.1 items 2 and 3). Here
+    OLS reads 0.833 and RMA 1.145 -- they STRADDLE 1, so the sign of the
+    conclusion depended on which estimator was used.
+  - raise("No glob files") raises a str (TypeError); globals().update(locals())
+    at the end of main(); u_ek.sel(time=..., method="nearest") with no
+    tolerance; fig04's asymmetric set_xlim(vmin, 1.5).
+  - np.abs(coast_km) <= 100 on a SIGNED coast-distance field would admit inland
+    points, but all 1622 intersections are 10-1128 km offshore, none negative.
+    Harmless here.
+
+--------------------------------------------------------------------------------
+14.6  WHAT WAS WRITTEN
+--------------------------------------------------------------------------------
+    drifter_track_reg/c.extract.drifter_veANDgu_ek_at_intersections_c.py
+    drifter_track_reg/drifter_ve_vs_gu_ek_TP+J1+J2+J3+S6A_c.csv   (1622 rows)
+    draft_figs03/fig04_p.scatter_drifter_ve_vs_gu_ww_ek_c.py
+    draft_figs03/fig04_p.scatter_drifter_ve_vs_gu_ww_ek_c.nc
+    draft_figs03/fig04_p.scatter_drifter_ve_vs_gu_ww_ek_c.png
+
+Producer: reads drogue_lost_date in the same pass that builds the drifter index
+and writes `drogued` per row; low-passes ve/vn AND the Ekman with lowpass_time()
+so both get a real 3 day cutoff; records closest_km (geodesic), gu_dt_days and
+gu_from_interp; writes u_ek at both 0 m and 15 m; real exceptions; Ekman .sel()
+given a 2 day tolerance; keeps the |lat| < 5 skip that matches the Ekman mask
+(section 12.3).
+
+Figure: reads the one corrected CSV; prints the whole filter cascade so every
+cut is visible; DROGUED_ONLY and MAX_ABS_TIME_DIFF_DAYS as module constants;
+reduced major axis drawn with OLS reported alongside; rmse about the 1:1 line
+plus bias; N annotated with intersections and drifters; the cuts stated in the
+suptitle; data-driven symmetric limits; dark 1:1 line; scatter instead of hexbin
+below 300 points, since the corrected filters leave a modest sample where a
+hexbin is nearly all single-count cells.
+
+--------------------------------------------------------------------------------
+14.7  RESULTS -- THE FILTER CASCADE (gu + ek 0 m, corrected ve)
+--------------------------------------------------------------------------------
+    filter                       n       r     RMA   rmse(1:1)
+    all rows                  1622   0.767   1.211     0.285
+    coast <= 100 km            328   0.756   1.092     0.313
+    + drogued only             169   0.791   1.039     0.299
+    + |dt| <= 2 d               69   0.829   1.002     0.272
+
+Final panels (n = 69, 17 intersections, 66 drifters):
+    without Ekman : r 0.791  RMA 1.078  (OLS 0.853)  rmse 0.291  bias -0.002
+    with Ekman    : r 0.829  RMA 1.002  (OLS 0.831)  rmse 0.272  bias -0.016
+
+RMA slope 1.002 with r 0.829 -- essentially perfect amplitude agreement between
+the drifter and altimetry+Ekman zonal current. The published figure showed
+r 0.728 and RMA 1.145 on 328 points diluted by undrogued drifters and loose time
+matching. The drifter validation is substantially stronger than it looked.
+
+--------------------------------------------------------------------------------
+14.8  OPEN POINTS
+--------------------------------------------------------------------------------
+  - n falls from 328 to 69 under the two quality cuts. That is honest but small;
+    quote it with the intersection and drifter counts attached, and consider
+    reporting the drogued-only n=169 row (r 0.791, RMA 1.039) as the headline if
+    a larger sample matters more than the tightest time match.
+  - DONE (section 15): all eight missions have since been co-located, and the
+    producer now loops sats_new rather than taking one SAT at a time.
+  - The undrogued rows are not worthless -- they are a separate population, and
+    the difference between the drogued and undrogued fits (r 0.782 vs 0.661) is
+    itself a measurement of the wind-slip contamination.
+
+================================================================================
+15. DRIFTER CO-LOCATION FOR ALL EIGHT MISSIONS, AND THE POOLED FIGURE
+    (2026-09-10; "_c" suffix throughout)
+================================================================================
+
+Section 14 fixed the drifter comparison but regenerated only TP+J1+J2+J3+S6A.
+The comparison existed for three missions at most. It now covers all eight:
+15042 rows against 1622, a 9x larger validation sample.
+
+--------------------------------------------------------------------------------
+15.1  WHY ONLY THREE MISSIONS EXISTED
+--------------------------------------------------------------------------------
+The blocker was the candidate pickles, not the extraction. Present before:
+    S3A 438 | TP+J1+J2+J3+S6A 87 | TPN+J1N+J2N+J3N 88
+    ERS1+ERS2+ENV+SRL, GFO, HY2A, HY2B, S3B: NONE
+guv, Ekman and tracks_intersections_*.csv were already there for all eight, so
+nothing upstream had to be recomputed.
+
+c.candidate_buoys.for.intersection_points.py hardcoded a single `sat`, and its
+inner loop RE-OPENED every bbox-surviving drifter file once per nearby
+intersection. It also had a print(dmeta) inside that loop, dumping the whole
+metadata dict for every drifter of every intersection.
+
+--------------------------------------------------------------------------------
+15.2  c.candidate_buoys.for.intersection_points_c.py
+--------------------------------------------------------------------------------
+Same selection rule (any fix inside a +-0.30 deg box, drifter lifetime
+overlapping the mission), but every drifter file is read ONCE into a 0.30 deg
+spatial hash, so each intersection only tests the drifters that visited its own
+cells. Runs in about a minute for all eight. Writes candidate_pickles_c/;
+the original candidate_pickles/ is left untouched.
+
+    satellite              intersections  drifters overlapping  pickles written
+    GFO                        349              417                 232
+    TP+J1+J2+J3+S6A             89             1433                  69
+    S3A                        460              439                 333
+    S3B                        457              230                 316
+    TPN+J1N+J2N+J3N             88             1163                  70
+    ERS1+ERS2+ENV+SRL          788             1015                 560
+    HY2A                       133              223                  97
+    HY2B                       133               94                  83
+                                                            total  1760
+
+  1474 drifters, 37602 occupied 0.30 deg cells.
+  The new counts are lower than the old ones only because intersections inside
+  |lat| < 5 are now skipped up front (they have no Ekman -- section 12.3), which
+  the extraction discarded anyway: TP 89 - 19 = 70, minus 1 with no candidates
+  = 69 against the old 87; TPN 88 - 18 = 70 against the old 88. No loss.
+
+--------------------------------------------------------------------------------
+15.3  c.extract.drifter_veANDgu_ek_at_intersections_c.py -- ALL MISSIONS
+--------------------------------------------------------------------------------
+Now loops sats_new and shares the drifter cache across missions, so a drifter
+read once serves all eight. One CSV per mission:
+
+    satellite               rows  drogued  |dt| med  closest med  drifters
+    GFO                     1108    48.6%    4.50 d    18.5 km       201
+    TP+J1+J2+J3+S6A         1622    60.9%    2.50 d    17.6 km       727
+    S3A                     2555    72.4%    6.75 d    18.5 km       274
+    S3B                     1569    70.9%    7.00 d    16.9 km       154
+    TPN+J1N+J2N+J3N          264    58.3%    2.75 d    20.6 km       132
+    ERS1+ERS2+ENV+SRL       7515    60.1%    8.75 d    18.1 km       592
+    HY2A                     318    76.4%    4.00 d    17.6 km       145
+    HY2B                      91    56.0%    4.00 d    16.8 km        46
+
+--------------------------------------------------------------------------------
+15.4  THE TIME-MATCH QUALITY IS MISSION-DEPENDENT -- A FIXED CUT IS NOT FAIR
+--------------------------------------------------------------------------------
+|drifter_time - gu_time| is the offset to the NEAREST altimeter cycle, so it is
+bounded by half the repeat period, and its median tracks the mission exactly:
+    TP / TPN   10 d repeat -> 2.50 / 2.75 d
+    HY2A/HY2B  14 d        -> 4.00 / 4.00 d
+    GFO        17 d        -> 4.50 d
+    S3A / S3B  27 d        -> 6.75 / 7.00 d
+    ERS        35 d        -> 8.75 d
+The fixed |dt| <= 2 d of section 14 therefore keeps 69 of 169 TP points but only
+34 of 239 S3A and 78 of 657 ERS -- it silently selects for the short-repeat
+missions. fig04b cuts at TIME_CUT_REPEAT_FRACTION x the mission's OWN repeat
+(default 0.25), which removes a comparable share everywhere.
+MAX_ABS_TIME_DIFF_DAYS remains available for an absolute cut.
+
+--------------------------------------------------------------------------------
+15.5  SKILL PER MISSION (gu + Ekman)
+--------------------------------------------------------------------------------
+                             all rows      | drogued, coast<=100km  | + |dt|<=2d
+    satellite            n     r    RMA    |    n    r    RMA  rmse  |   n    r
+    GFO               1108  0.758  1.164   |   87  0.699 0.975 0.321 |  27  0.805
+    TP+J1+J2+J3+S6A   1622  0.767  1.211   |  169  0.791 1.039 0.299 |  69  0.829
+    S3A               2555  0.701  1.292   |  239  0.710 1.097 0.317 |  34  0.788
+    S3B               1569  0.693  1.300   |  139  0.689 1.241 0.268 |  29  0.714
+    TPN+J1N+J2N+J3N    264  0.691  1.132   |   21  0.781 1.098 0.400 |   7  0.924
+    ERS1+ERS2+ENV+SRL 7507  0.646  1.304   |  657  0.612 1.151 0.342 |  78  0.607
+    HY2A               318  0.642  1.242   |   37  0.720 1.491 0.318 |   8  0.832
+    HY2B                91  0.281  0.915   |    5 -0.640 -1.121 1.163|   -    -
+    POOLED           15034  0.685  1.271   | 1354  0.667 1.126 0.332 | 253  0.744
+
+  - HY2B IS NOT USABLE ALONE: 91 rows, 5 surviving the quality cuts, r = -0.64.
+    Its 2020-2022 window overlaps only 94 drifters. Exclude it from any
+    per-mission statement; it is 0.4% of the pooled sample.
+  - ERS HAS THE LARGEST SAMPLE AND THE LOWEST SKILL (7507 rows, r 0.646). That
+    is consistent with its 35 d repeat -- gu interpolated across 35 days onto a
+    drifter instant is a far weaker constraint than across 10 days. It is a
+    temporal-resolution effect, not a product-quality one, and worth saying so.
+
+--------------------------------------------------------------------------------
+15.6  fig04b -- THE POOLED FIGURE
+--------------------------------------------------------------------------------
+    draft_figs03/fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.py
+    draft_figs03/fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc
+    draft_figs03/fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.png
+
+Four panels: (a) pooled without Ekman, (b) pooled with Ekman -- both scatters
+coloured by mission -- (c) the pooled r decomposed by mission, (d) the RMA slope
+by mission. Panels (c)/(d) use paired dots rather than bars: the spread in r is
+narrow (0.62-0.79) and truncating a bar axis to show it would misread.
+
+Defaults: MAX_COAST_KM = None (the point of pooling is the sample; set 100.0 to
+reproduce fig04's coastal cut), DROGUED_ONLY = True,
+TIME_CUT_REPEAT_FRACTION = 0.25, MIN_N_PER_SAT = 50 (flags HY2B in red).
+Both panels are forced onto identical rows -- 3 rows had a NaN u_ek and gave the
+two panels different N.
+
+    filter                          n       r     RMA  rmse(1:1)
+    all rows, all missions      15034   0.685   1.271     0.303
+    drogued only                 9445   0.682   1.246     0.299
+    |dt| <= 0.25 x repeat        4771   0.727   1.218     0.280
+
+Final panels, N = 4771 over 8 missions and 704 drifters:
+    without Ekman : r 0.685  RMA 1.442  (OLS 0.988)  rmse 0.302  bias +0.065
+    with Ekman    : r 0.727  RMA 1.218  (OLS 0.886)  rmse 0.280  bias +0.002
+
+Adding Ekman moves the bias from +0.065 to +0.002 m/s and the amplitude from
+1.442 to 1.218, on 70x the sample of the single-mission figure.
+
+--------------------------------------------------------------------------------
+15.7  TWO THINGS THE DECOMPOSITION SHOWS
+--------------------------------------------------------------------------------
+(a) EKMAN IMPROVES r FOR EVERY SINGLE MISSION, by +0.02 (S3A) to +0.05 (ERS,
+    S3B, HY2A). No mission is an exception.
+(b) EVERY MISSION SITS ABOVE RMA = 1 (except HY2B, n=20). Drifters consistently
+    carry more variance than altimetry + Ekman -- the ageostrophic and
+    submesoscale energy the altimeter cannot resolve. A physical result, not a
+    defect, and the reason the RMA slope should be read together with r and
+    rmse rather than alone (see the RMA note: the slope is a ratio of standard
+    deviations, so signal present in y but absent from x reads as slope > 1).
+
+CAPTION NOTE: the pooled r (0.727) sits BELOW six of the eight missions,
+because ERS contributes 2292 of the 4771 points at the lowest skill. Say so, or
+a reader will read the pooled value as inconsistent with the panel.
+
+--------------------------------------------------------------------------------
+15.8  OPEN POINTS
+--------------------------------------------------------------------------------
+  - fig04 (single mission) still uses the fixed MAX_ABS_TIME_DIFF_DAYS = 2.
+    That is fine for one mission but should not be copied to a cross-mission
+    figure -- see 15.4.
+  - candidate_pickles/ (the old directory) is now stale relative to
+    candidate_pickles_c/. Nothing reads both, but they should not be mixed.
+  - The undrogued rows are retained in the CSVs and simply flagged. The
+    difference between the drogued and undrogued fits is itself a measurement of
+    wind-slip contamination and could be a supplementary panel.
+  - fig05 has since been reviewed and rewritten (section 16). fig06-fig07 in
+    draft_figs02 have not.
+
+================================================================================
+16. REVIEW AND REWRITE OF draft_figs02/
+    fig05_p.radar_rotatedVStrack_gc_c.ek.along.intersections.selected.one.py
+    (reviewed and fixed 2026-09-10; "_c" suffix)
+================================================================================
+
+HF radar cross-track current against altimetry gc (+ Ekman) along one track
+crossing an ICORN radar footprint. Five panels: (a) map, (b) ETOPO along track,
+(c) altimetry, (d) radar, (e) corr and rmse against distance from the coast.
+Case shown: radar OR, S3A track 165.
+
+--------------------------------------------------------------------------------
+16.1  WHAT WAS ALREADY CORRECT -- THE ROTATION
+--------------------------------------------------------------------------------
+This is the first of these figures with NO sign error and NO index mismatch.
+rotate_to_cross builds
+    theta_cross = local_angle(lon_track, lat_track, ii) + pi/2
+    cross       = cos(theta)*u + sin(theta)*v  =  -u sin(a) + v cos(a)
+and radar/c.extract_radar.along.intersections.py stores lon_track COAST-FIRST
+(ds_track.lon.values[::-1], named lons_coast_to_off), so `a` is the OFFSHORE
+heading -- exactly the convention compute_geostrophy_gc produces (section 8.1).
+
+Verified, not assumed. Synthetic uniform current (u=0.40, v=0.15 m/s) on S3A
+track 165, mid-track point:
+    compute_geostrophy_gc   +0.4231 m/s
+    fig05 rotate_to_cross   +0.4232 m/s      ratio 1.0002, same sign
+`ii` also runs over the same array it indexes, so the section 7(b) bug does not
+apply. fig05 compares like with like.
+
+--------------------------------------------------------------------------------
+16.2  MAJOR: THE gc + EKMAN SUM WAS ALIGNED BY LUCK
+--------------------------------------------------------------------------------
+    gc_ek_cut = gc_cut + ekman_cut
+left ekman_cut on its own DAILY time axis, so xarray aligned on the time
+INTERSECTION. It works today only because the old track_dist_time_asn truncates
+cycle times to whole days (section 3), which happens to place all 115 gc stamps
+exactly on daily Ekman stamps:
+    gc times present in the ekman axis                       115 of 115
+    same gc times from the corrected track_dist_time_asn_midx  0 of 115
+With corrected sub-second times the sum collapses to an EMPTY time axis and the
+following .reindex(time=gc_cut.time) returns an all-NaN field -- silently. Any
+downstream regeneration with tools_xtrackm_c breaks here.
+FIXED: the Ekman is reindexed onto the gc times explicitly with a 2 d tolerance
+BEFORE the addition, and the script prints a guard line on the finite count.
+
+--------------------------------------------------------------------------------
+16.3  MAJOR: n WAS NEVER REPORTED, AND THE SIGNIFICANCE LINE WAS ARBITRARY
+--------------------------------------------------------------------------------
+The OR radar record (2009-12 to 2019-01) barely overlaps this gc record
+(2016-06 to 2024-11). After the 24 h match:
+    paired cycles per x: min 0, median 25, max 27 -- out of 115
+The figure showed no n anywhere and drew a hard-coded ax3.axhline(0.7) as a
+guide. At n = 25 the two-tailed p = 0.05 threshold is |r| >= 0.396.
+FIXED: panel (e) carries n(x) in its title and a computed p = 0.05 threshold
+curve. A MIN_N = 10 cut was added alongside the p-test -- p < 0.05 alone was
+admitting near-edge columns with a handful of pairs, which appeared as isolated
+corr/rmse spikes around 190 km. 12 of 33 x columns survive both tests.
+
+--------------------------------------------------------------------------------
+16.4  SMALLER FINDINGS
+--------------------------------------------------------------------------------
+  - PANEL (c) IS MISLABELLED. plot_2x2 is handed gc_ek_valid, so the panel shows
+    gc PLUS Ekman; neither the axis nor the caption said so.
+  - ioff = max(1, min(5, ln // 10)) here, against ioff = 3 everywhere else in
+    the project -- for a 350-point track that is 5, a different heading baseline
+    from the guv chain.
+  - the OLD flat-earth local_angle (section 7a). Small here, since the rotation
+    angle enters near the track normal, but no reason not to use the geodesic one.
+  - bias_ek_x computed and never used.
+  - fig.tight_layout() overrides the gridspec hspace/wspace; `from pathlib import
+    Path` and `import sys` each appear twice; f_plot is threaded through
+    plot_2x2 but savefig uses png_file.
+  - CHECKED AND FINE: the two correlation curves in panel (e) ARE computed on
+    identical samples (np.array_equal(valid, valid_ek) -> True), so the
+    different-sample problem of fig03/fig04 does not arise.
+
+--------------------------------------------------------------------------------
+16.5  WHAT WAS WRITTEN
+--------------------------------------------------------------------------------
+    draft_figs03/fig05_p.radar_rotatedVStrack_gc_c.ek.along.intersections.selected.one_c.py
+    ..._c.nc    corr/rmse/bias/pval/n profiles, plus topo, dist_to_coast_gshhg
+                and heading_offshore_deg against x
+    ..._c.png
+
+Explicit Ekman time reindex before the sum; n and a real p = 0.05 threshold on
+panel (e) plus MIN_N; honest panel labels; geodesic local_angle at IOFF = 3;
+bias used; layout, imports and the dead f_plot cleaned up; the shapefile read
+from ../draft_figs02/ so that directory is untouched.
+
+--------------------------------------------------------------------------------
+16.6  RESULT
+--------------------------------------------------------------------------------
+Correlation 0.75-0.88 out to about 40 km from the coast, decaying to ~0.45 by
+75 km, with the Ekman version above the no-Ekman version essentially everywhere
+-- the same sign of improvement as the buoy (section 11), scatter (section 13)
+and drifter (sections 14-15) comparisons. Beyond about 80 km the radar footprint
+ends and the sample falls below MIN_N.
+
+CAPTION NOTE: this rests on a MEDIAN OF 25 PAIRED CYCLES, not the 115-cycle
+record. The correlations are genuinely significant at that n, but the figure
+must say what n is.
