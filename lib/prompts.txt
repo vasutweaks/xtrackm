@@ -5,6 +5,11 @@ If you find any major issues, first brief me.
 rewrite new script in ../draft_figs03.
 Any newly generated script or .nc file should have _c suffix.
 
+review fig02, under new understanding and 
+new tools_xtrackm_c.py.
+If you find any major issues, first brief me.
+rewrite new script in ../draft_figs03.
+Any newly generated script or .nc file should have _c suffix.
 
 I want to simplify and rewrite tools_xtrackm.py.
 What is the issue with computation of geosptrophic currents?

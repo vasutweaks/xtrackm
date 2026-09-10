@@ -647,3 +647,549 @@ observations, and the MAD double-scaling.
   - The draft quotes RMSE 0.133 m/s and correlation 0.66 for loess frac=0.05
     against AVISO. Those numbers came from the fabricating implementation and
     should be recomputed before the filter-comparison paragraph is final.
+
+
+================================================================================
+10. REVIEW AND REWRITE OF draft_figs02/fig01_f.combined_map_std_valid.S3A.py
+    (reviewed 2026-09-09; rewrite in draft_figs03/, "_c" suffix)
+================================================================================
+
+The figure behind the draft's claim that "the standard deviation of SLA from
+the conventional L2P product was compared with that of the X-TRACK product as a
+function of distance from the coast". Three panels: (a) S3A east-coast track
+map, (b) valid points vs GSHHG distance, (c) SLA std vs distance, X-TRACK
+against AVISO L2P, over the 12 common passes in
+common_passes_l2pVSxtrack_selected.pkl.
+
+--------------------------------------------------------------------------------
+10.1  MAJOR ISSUES FOUND
+--------------------------------------------------------------------------------
+(1) PANEL (b) PLOTS THE SCATTER AND THE MEAN LINE ON DIFFERENT X-AXES.
+    The scatter uses GSHHG distance
+        ax_vp.scatter(gshhg_interp.values, cnt.values, ...)
+    but the bold mean line uses
+        ax_vp.plot(cnt_mean_xt.x.values, ...)
+    which is x_common, the GEODESIC along-track distance. Same for L2P. So in
+    a panel labelled "GSHHG Distance from coast", both conclusion-bearing lines
+    are drawn against a different coordinate from the cloud behind them.
+    Measured over the 12 passes, GSHHG minus geodesic:
+        0-50 km    median  +1.1 km
+        50-100 km  median -10.1 km
+        100-200 km median -17.6 km
+        overall    p95 |diff| 1422 km, max 1744 km
+    (the far-offshore blow-up is expected -- GSHHG is distance to the nearest
+    coast in ANY direction, so it stops tracking along-track distance)
+
+(2) PANEL (b) COMPARES RAW COUNTS UNDER A "PERCENTAGE" LABEL.
+    cnt = sla_track.count(dim="time") is a cycle count, but the y label reads
+    "Percentage Valid Points". X-TRACK has 115 cycles, L2P 110-112, so X-TRACK
+    got a 3-5% head start unrelated to data recovery.
+
+(3) PANEL (c) Y-LIMITS HARD-SET TO (0.05, 0.25) clip one of the 24 individual
+    track curves (max individual-track std 0.294 m).
+
+Minor: datasets opened without a context manager in the std loop and never
+closed; plt.tight_layout() overrides the gridspec wspace/hspace.
+
+--------------------------------------------------------------------------------
+10.2  CHECKED AND FOUND FINE -- NOT CHANGED
+--------------------------------------------------------------------------------
+  - .interp(x=x_common) on the X-TRACK side. Expected to fabricate valid points
+    and deflate the std; it does not. S3A's native spacing is essentially the
+    6675 m of the grid, so valid points go 0.99x (384164 -> 382214) and the
+    mean std -0.8% (0.0982 -> 0.0974 m). The L2P files were built the same way
+    (/home/srinivasu/allData/aviso_l2p/s3a/c.dist_time_asn_east_coast_passes.py
+    also calls sla_da.interp(x=x_common)), so the treatment is symmetric. The
+    interpolation is what puts both products on one axis; kept.
+  - The section 8.3(j) wrong-end compute_dist problem: 0 of these 12 S3A passes
+    are affected.
+  - Outlier rejection. Applying the corrected mad_filter(3.5) before the std
+    moves every band by <= 0.003 m:
+        band        XT raw  XT mad  L2P raw  L2P mad
+        0-25 km     0.1587  0.1562   0.1165   0.1149
+        25-50 km    0.1318  0.1294   0.1245   0.1210
+        50-100 km   0.1212  0.1204   0.1212   0.1210
+        100-200 km  0.1366  0.1364   0.1303   0.1302
+        200-1000 km 0.1090  0.1086   0.1075   0.1072
+    The result does not depend on it, so MAD_THRESH is left None with a flag to
+    switch it on.
+  - The map panel's local_angle call is index-consistent (forward-ordered
+    arrays, forward index mid_i = ln//2 + ln//4), so the section 7(b) bug does
+    NOT apply here -- only the flat-earth angle, now geodesic.
+
+--------------------------------------------------------------------------------
+10.3  WHAT THE CORRECTED PANELS SHOW
+--------------------------------------------------------------------------------
+Panel (b), valid points as % of each product's own cycles, mean over 12 passes:
+    GSHHG   0- 10 km : XTRACK  69.3%   L2P  25.0%   gain +44.3 points
+    GSHHG  10- 25 km : XTRACK  90.5%   L2P  55.2%   gain +35.3 points
+    GSHHG  25- 50 km : XTRACK  93.1%   L2P  86.6%   gain  +6.5 points
+    GSHHG  50-100 km : XTRACK  95.7%   L2P  96.6%   gain  -0.9 points
+    GSHHG 100-300 km : XTRACK  95.6%   L2P  94.2%   gain  +1.3 points
+
+Panel (c), SLA std vs along-track distance:
+    x    0- 25 km : XTRACK 0.1587   L2P 0.1195   diff +0.0392
+    x   25- 50 km : XTRACK 0.1318   L2P 0.1244   diff +0.0074
+    x   50-100 km : XTRACK 0.1212   L2P 0.1212   diff -0.0000
+    x  100-200 km : XTRACK 0.1366   L2P 0.1303   diff +0.0063
+    x  200-1000km : XTRACK 0.1090   L2P 0.1075   diff +0.0015
+
+X-TRACK keeps 69% of cycles inside 10 km of the coast where L2P keeps 25%, and
+carries a correspondingly higher std there (0.159 vs 0.120 m), the two
+converging to identical by 50-100 km. This is a much cleaner statement of the
+draft's argument than the original panel could make.
+
+--------------------------------------------------------------------------------
+10.4  WHAT WAS WRITTEN
+--------------------------------------------------------------------------------
+    draft_figs03/fig01_f.combined_map_std_valid.S3A_c.py
+    draft_figs03/fig01_f.combined_map_std_valid.S3A_c.nc
+    draft_figs03/fig01_f.combined_map_std_valid.S3A_c.png (+ .png.jpeg)
+
+Changes in the script:
+  - panel (b) binned in GSHHG (10 km bins, bin_in_gshhg helper) for BOTH the
+    scatter and the mean, so one axis means one thing
+  - panel (b) as a percentage of each product's own cycle count
+  - panel (c) y limits follow the data
+  - all datasets read through context managers
+  - the curves saved to the .nc (std_xtrack, std_l2p on track x x;
+    pct_valid_xtrack, pct_valid_l2p on track x gshhg; 12 tracks, 300 x, 100
+    gshhg bins) so the panels can be redrawn without re-reading the tracks
+  - imports tools_xtrackm first (decorate_axis, is_within_region, NIO, plt,
+    ccrs) then tools_xtrackm_c explicitly, so the corrected
+    track_dist_time_asn_midx / local_angle / mad_filter win
+  - reads the pass list from ../draft_figs02/, so draft_figs02 is untouched
+  - MAD_THRESH module constant, default None
+
+--------------------------------------------------------------------------------
+10.5  BUG THIS REVIEW EXPOSED IN tools_xtrackm_c.mad_filter -- FIXED
+--------------------------------------------------------------------------------
+mad_filter built its outlier mask with xr.apply_ufunc and applied it with
+out.where(~mask). .where() aligns coordinates, and a DataArray that has been
+through .interp(x=x_common) carries a STALE lat/lon index (the lat coord is
+correctly interpolated to length 300, but the index object still reports the
+original 266), so alignment raised
+
+    ValueError: conflicting sizes for dimension 'x': length 300 on 'x' and
+    length 266 on {'time': 'time', 'x': 'lat'}
+
+The mask is now built with np.apply_along_axis on the raw values and applied
+through da.copy(data=...), which touches no coordinate and so cannot align.
+The stale index after .interp() is an xarray quirk worth knowing about when
+using the extra lat/lon indexes that track_dist_time_asn_midx sets.
+
+--------------------------------------------------------------------------------
+10.6  OPEN POINTS ON THE NEW FIGURE
+--------------------------------------------------------------------------------
+  - The X-TRACK curve in panel (b) dips to about 85% beyond 750 km and there is
+    one stray point near 700 km / 20%. Both are GSHHG binning artefacts far
+    offshore, where distance-to-nearest-coast stops tracking along-track
+    distance. Harmless for the 0-100 km argument, but capping panel (b) at
+    about 300 km would be more honest than the present 1000 km.
+  - L2P's std near the coast is computed over a biased subset -- only the 25%
+    of cycles it retains inside 10 km. That is inherent to the comparison and
+    is exactly why panel (b) exists, but it is worth a sentence in the caption.
+  - fig02 and fig03 have since been reviewed too (sections 11 and 13).
+    fig04-fig07 in draft_figs02 have not.
+
+================================================================================
+11. REVIEW AND REWRITE OF
+    draft_figs02/fig02_p.omni_uvVStrack_guv_c.ek.nearest.selected.py
+    (reviewed 2026-09-09; rewrite in draft_figs03/, "_c" suffix)
+================================================================================
+
+Validation figure: OMNI buoy zonal current against track geostrophic + Ekman
+current at the S3A intersection nearest the buoy. Two panels, (a) basin map with
+the two tracks and the buoy, (b) the time series. Case shown:
+S3A BD10, tracks 522 x 279, intersection (87.595E, 16.522N), 42.60 km from BD10.
+
+This is a PLOTTING script -- it consumes the precomputed
+guv/guv_at_intersections_loess/guv_at_intersection_S3A_522_279_loess_0.05.nc --
+so the sign conventions of sections 7 and 8 live in the producer, not here.
+
+--------------------------------------------------------------------------------
+11.1  MAJOR ISSUES FOUND
+--------------------------------------------------------------------------------
+(1) THE EKMAN DEPTH DOES NOT MATCH THE BUOY DEPTH.
+        dpth = 15                 # OMNI current interpolated to 15 m
+        EKMAN_DEPTH = "0"         # Ekman added at the SURFACE
+    15 m Ekman files sit beside the 0 m ones in the same directory
+    (ekman/ekman_at_intersections_cd/*_ekman_15m_*.nc). The geostrophic part is
+    near depth-independent in the upper layer; the Ekman spiral is not, so the
+    depths must agree. On the stored guv product:
+        corr(gu, omni)                    = 0.665
+        corr(gu + ek  0 m, omni)          = 0.725   <- as published
+        corr(gu + ek 10 m, omni)          = 0.741
+        corr(gu + ek 15 m, omni)          = 0.735   <- matched depth
+
+(2) THE AVISO msla REFERENCE IS MONTHLY, NOT DAILY.
+    allyear_dt_global_allsat_msla_u.nc has a 31 d step with mid-month stamps.
+    The original plotted it raw and never scored it, so it looked like a dense
+    reference line. Reindexed onto the S3A cycles at the script's own 24 h
+    tolerance it keeps only 8 of 62 points. It is now time-interpolated and
+    labelled monthly, and its skill is explicitly not like-for-like (monthly
+    mean against instantaneous track samples).
+
+(3) raise("...") RAISES A str -> TypeError: exceptions must derive from
+    BaseException. All three guard paths (missing OMNI file, |lat| < 2, missing
+    guv file) die with the wrong error instead of the intended message.
+
+(4) THE CORRELATIONS WERE COMPUTED, PRINTED TO STDOUT, AND NEVER DRAWN.
+    This is a validation figure; the skill numbers belong on the panel.
+
+Minor: dse opened twice and ds_aviso_u/v, ds_omni (also opened twice) and ds_ek
+never closed; script / png_file / cmap1 / d each assigned twice; N =
+omni_v.count().item() unused; SELECT_* assigned three times, only the last
+taking effect.
+
+--------------------------------------------------------------------------------
+11.2  DO NOT USE guv/guv_at_intersections_loess/gc_at_*.nc  -- A TRAP
+--------------------------------------------------------------------------------
+Found while trying to rebuild guv from the stored per-track gc files. The name
+    gc_at_{sat}_{track}_{method}_{frac}.nc
+carries NO intersection identifier, but a track is "self" in many pairs --
+track 522 appears in 10, at x = 126.6, 347.3, 571.5, 799.0, 1029.2, 1262.0,
+1496.9, 1733.6, 1971.6, 2210.4 km. Every pair writes the same filename, so the
+file on disk is whichever pair ran last.
+
+Proof: recomputing gc along track 522 and correlating each x-column against the
+stored gc_at_S3A_522_loess_0.05.nc gives
+    x = 1263.7 km   corr +0.9968   <- the 1262.0 km intersection
+    x = 1257.0 km   corr +0.9825
+    x = 1270.4 km   corr +0.9753
+while at x = 571.5 km, the actual 522 x 279 intersection, corr is +0.0833.
+The two stored gc files for this pair also share ZERO timestamps (self starts
+2016-06-20, other 2016-06-28), so they cannot even be combined.
+
+668 gc_at_*.nc files exist against 2291 guv_at_*.nc. NO SCRIPT READS THEM
+(checked across the repo), so this is a latent trap rather than an active bug --
+but it silently defeats any attempt to rebuild guv from them. The guv_at_*.nc
+files are fine: they carry both track numbers in the name.
+
+--------------------------------------------------------------------------------
+11.3  UPSTREAM CAVEATS CARRIED BY THE STORED guv PRODUCT
+--------------------------------------------------------------------------------
+guv/c.guv_at_intersection_points_loess_0.05.py:
+  - uses index_at_lat() + local_angle() -- the section 7(b) index-order
+    mismatch. For this pair it took the heading at 5.03N (track 522) and 3.73N
+    (track 279) instead of the intersection latitude 16.52N. Because S3A tracks
+    are nearly straight the resulting angle error is only 0.221 deg and
+    0.250 deg, and the effect on the product is
+        gu  median |producer - corrected| 0.0002 m/s =  0.1% of rms(0.142)
+        gv  median |producer - corrected| 0.0075 m/s =  1.3% of rms(0.591)
+    Negligible here BY LUCK, not by design.
+  - uses mad_filter_1d_xr three times (0.6745x too lenient, section 9.1)
+  - uses track_smooth_loess_statsmodels_x (fabricates data, section 9.3)
+  - it DOES use the library geostrophic_components, so the section 8.6 sign
+    problem of the 15 local copies does not apply to this product.
+
+--------------------------------------------------------------------------------
+11.4  INDEPENDENT VALIDATION OF THE NEW CHAIN
+--------------------------------------------------------------------------------
+Recomputing gc for S3A 522 and 279 from the raw tracks:
+    new chain (track_dist_time_asn_midx -> smooth_loess -> cross_track_geostrophy)
+    vs old chain (track_dist_time_asn -> track_smooth_loess_statsmodels_x ->
+                  compute_geostrophy_gc)
+        track 522: corr +0.9870, median |diff| 0.0003 m/s
+        track 279: corr +0.9986, median |diff| 0.0004 m/s
+and the new chain matches the real stored series at its true x (1263.7 km) to
+corr +0.9968. The new tools reproduce the old product where the old product is
+what it claims to be.
+
+Note for anyone recomputing: old times are truncated to whole days (section 3),
+so old and new series must be matched on calendar date, not on the timestamp.
+
+--------------------------------------------------------------------------------
+11.5  WHAT WAS WRITTEN
+--------------------------------------------------------------------------------
+    draft_figs03/fig02_p.omni_uvVStrack_guv_c.ek.nearest.selected_c.py
+    draft_figs03/fig02_p.omni_uvVStrack_guv_c.ek.nearest.selected_c.nc
+    draft_figs03/fig02_p.omni_uvVStrack_guv_c.ek.nearest.selected_c.png
+
+Changes in the script:
+  - EKMAN_DEPTH = OMNI_DEPTH, so the two can never drift apart again
+  - r, rmse and n for track / track+ekman / AVISO printed AND drawn on panel (b)
+  - AVISO monthly msla interpolated onto the cycle times and labelled monthly
+  - real exceptions (ValueError / FileNotFoundError) instead of raise("str")
+  - every dataset through a context manager; duplicate assignments removed
+  - track_angle_at() for the map label rotation, so the heading is the geodesic
+    one at the intersection latitude rather than an endpoint-to-endpoint
+    flat-earth slope; labels placed at 0.45 / 0.80 along each track with a
+    translucent box, since at the old mid+quarter position they collided with
+    each other and with the buoy marker
+  - the matched series and all metrics saved to the .nc (gu, gv, omni_u,
+    u_ekman, gu_plus_ekman, aviso_msla_u, plus every metric and the geometry in
+    the attrs)
+  - RECOMPUTE_GUV flag (default False) rebuilds gu/gv here from the raw tracks
+    with smooth_loess + cross_track_geostrophy + resolve_uv and corrected
+    headings, so the corrected result is one edit away
+  - reads tracks_intersections_*.csv from ../draft_figs02/, so draft_figs02 is
+    untouched
+
+--------------------------------------------------------------------------------
+11.6  RESULTS
+--------------------------------------------------------------------------------
+                        stored product        recomputed (RECOMPUTE_GUV=True)
+    track               r=0.665 n=62          r=0.687 n=52
+    track+ekman 15 m    r=0.735               r=0.753
+    AVISO msla monthly  r=0.678               r=0.689
+
+  - the corrected chain gives slightly BETTER skill on FEWER, more honest points
+    (n 62 -> 52, because smooth_loess does not fabricate and the corrected MAD
+    filter actually rejects)
+  - TRACK+EKMAN BEATS THE AVISO MONTHLY PRODUCT against the buoy (0.735 vs
+    0.678, and 0.753 vs 0.689 recomputed). Worth stating in the paper, with the
+    caveat that AVISO is a monthly mean against instantaneous track samples so
+    the comparison is not like for like.
+
+--------------------------------------------------------------------------------
+11.7  OPEN POINTS
+--------------------------------------------------------------------------------
+  - The 0 m vs 15 m Ekman choice should be checked across ALL the buoy
+    comparisons, not just this one figure; every script pairing an OMNI/RAMA
+    depth bin with EKMAN_DEPTH="0" has the same mismatch.
+  - Whether to regenerate the whole guv product with the corrected chain is a
+    scientific decision, not a mechanical one -- see section 9.7.
+  - Consider deleting the gc_at_*.nc files outright, or adding the intersection
+    x (or the partner track) to their names.
+
+================================================================================
+12. SHOULD THE EKMAN VELOCITIES BE RECOMPUTED?
+    Review of /home/srinivasu/allData/ccmp31 (reviewed 2026-09-10)
+    ANSWER: NO -- no recompute is needed. Reasons below.
+================================================================================
+
+Scripts reviewed:
+    c.ekman_uv_ccmp31_all_years_cd.py     dynamic Cd and A  (the "_cd" product)
+    c.ekman_uv_ccmp31_all_years.py        constant Cd=1.5e-3, A=0.1
+    xtrackm/ekman/c.extract.ekman.at.intersections_cd.py
+
+--------------------------------------------------------------------------------
+12.1  THE PHYSICS IS CORRECT -- VERIFIED AGAINST THE PRODUCT ITSELF
+--------------------------------------------------------------------------------
+The code matches the draft's equations term for term. Measured on the product,
+the SURFACE Ekman current lies at exactly -45.0 deg to the wind in the northern
+hemisphere -- the textbook result. Magnitudes are sane:
+    |speed| median 0.05-0.15 m/s, p99.9 0.42 m/s, max 0.83 m/s
+    by band: |lat| 5-7 median 0.153 | 7-10 0.127 | 10-15 0.111 | 15-25 0.083 m/s
+    0 points above 2 m/s
+The piecewise Cd is continuous at both breakpoints (1.14e-3 at W=3 and at W=10)
+and A is continuous at W=1. The 5S-5N mask is applied as the draft states.
+
+--------------------------------------------------------------------------------
+12.2  SOUTHERN HEMISPHERE IS 180 deg WRONG -- BUT IRRELEVANT HERE
+--------------------------------------------------------------------------------
+    f   = 2*omega*sin(deg2rad(lat))          # signed
+    u_E = (sqrt(2) / (f * d)) * ...          # signed f in the prefactor
+The phase terms cos(z/d - pi/4), sin(z/d - pi/4) are hemisphere-independent, so
+a negative f flips the whole vector instead of mirroring the spiral. Measured:
+    Northern Hemisphere : -45.0 deg from the wind   correct = -45  OK
+    Southern Hemisphere : +135.0 deg                correct = +45  WRONG
+The product file spans 30S-30N, so the 5S-30S band is wrong.
+
+DECIDED (user, 2026-09-10): irrelevant. The whole NINDIAN X-TRACK product is
+northern hemisphere -- confirmed independently: 0 of 1418 tracks reach south of
+the equator, and the 2497 intersection latitudes run 0.0-24.9N. The SH values
+are never read. NOT FIXED. If the file is ever shared or reused outside
+NINDIAN this is a trap; restricting a future recompute to 0-30N would sidestep
+it at no cost.
+
+--------------------------------------------------------------------------------
+12.3  THE MASK MISMATCH -- RESOLVED WITHOUT RECOMPUTING
+--------------------------------------------------------------------------------
+Ekman masks at |lat| > 5 (baked into the file as NaN); the OLD
+compute_geostrophy_gc masks at lat > 2 (section 8.3a). Consequences:
+    630 of 2497 intersections (25.2%) lie inside 5S-5N -> their Ekman files are
+      entirely NaN. Confirmed: 111 of 400 sampled *_ekman_15m_*.nc are all-NaN.
+    206 are inside |lat| < 2.
+    424 sit in the 2-5N band, where the old gc EXISTS but the Ekman does not,
+      so gu + u_ek is NaN at points where gu is finite.
+
+NO RECOMPUTE IS NEEDED, because the NEW chain already agrees:
+    cross_track_geostrophy(..., equator_band=5.0)   <- the default
+Verified on GFO 008: 0 finite gc points with |lat| < 5. That matches the Ekman
+product's own 5 deg mask out of the box.
+
+For OLD stored products the alignment is one line:
+    along-track :  gc.where(abs(gc.lat) >= 5)      (lat rides along as a coord)
+    stored guv  :  the guv_at_*.nc files carry only a 'time' coord, so filter
+                   the rows by lats_inter from the intersections CSV instead
+LIMIT: downstream masking can only ever remove more data. The Ekman file has
+the 5 deg mask baked in as NaN, so a 2 deg or 3 deg band would require a
+recompute. Since 5 deg is what the draft states, that direction never arises.
+
+--------------------------------------------------------------------------------
+12.4  THE SCRIPT NO LONGER REPRODUCES THE PRODUCT IN USE
+--------------------------------------------------------------------------------
+    for z in [0, -10, -15]:
+        ...
+        ekman_velocities.to_netcdf(f"ekman_velocities_{z_out}m_..._cd_bob.nc")
+        ln_cmd = ...
+        break                     # <-- exits after z = 0
+Two compounding regressions, both dated 2026-04-13:
+  - the break limits the loop to z = 0; only ..._0m_..._cd_bob.nc exists
+  - a BoB subset (LON 78-100, LAT 5-23) and a "_bob" suffix were added
+xtrackm reads ekman_velocities_{z}m_all_years_daily_cd.nc -- the FULL-IOD files
+(30.12-119.88E, -29.88 to 29.88N, 1993-01-01 to 2025-12-31) dated 2026-04-01,
+written by an earlier version. Re-running the script today would give one depth
+over a smaller box under a different name.
+NOT BLOCKING: all three depths (0, 10, 15 m) already exist over the full domain.
+This is reproducibility debt, not a data problem.
+
+--------------------------------------------------------------------------------
+12.5  ws IS NOT WHAT THE DRAFT SAYS -- BUT IT DOES NOT MATTER
+--------------------------------------------------------------------------------
+Both scripts use CCMP's own scalar wind speed, with the vector magnitude
+explicitly commented out:
+    # wind_speed = np.sqrt(u10**2 + v10**2)
+    wind_speed = ds["ws"]
+CCMP 'ws' exceeds hypot(uwnd, vwnd) at 100% of points (median ratio 1.033,
+p95 2.357, max difference 4.4 m/s). The draft states W = sqrt(u10^2 + v10^2).
+Recomputing u_E both ways:
+    z =   0 m : mean speed 0.0818 (ws) vs 0.0838 (hypot), ratio 0.976
+                median |du_E| 0.0004  p95 0.0072  corr 0.99926
+    z = -15 m : mean speed 0.0257 vs 0.0248, ratio 1.033
+                median |du_E| 0.0003  p95 0.0036  corr 0.99870
+A DOCUMENTATION MISMATCH, NOT A NUMERICAL ONE. Fix the sentence in the draft,
+or uncomment the line -- either way nothing needs regenerating.
+
+--------------------------------------------------------------------------------
+12.6  SMALLER POINTS
+--------------------------------------------------------------------------------
+  - c.extract.ekman.at.intersections_cd.py uses .sel(method="nearest") with no
+    tolerance. Every intersection is inside the grid today, but a point outside
+    would silently bind to an edge cell hundreds of km away instead of erroring.
+  - The extraction WRITES an all-NaN file for the 630 masked intersections
+    rather than skipping, so downstream comparisons quietly correlate zero
+    points. Cheap improvement: skip, so a consumer fails loudly.
+  - omega = 7.2921e-5 here vs 7.292115e-5 in tools_xtrackm.cor_p (2e-6
+    relative -- irrelevant numerically, but they should agree).
+  - WRITE_LOC and the ln_cmd symlink are dead code; the land mask is commented
+    out.
+
+--------------------------------------------------------------------------------
+12.7  CALIBRATION -- WHAT A RECOMPUTE WOULD CHANGE
+--------------------------------------------------------------------------------
+Dynamic Cd + A (the "_cd" product, what the draft finally describes) against the
+draft's first formulation (constant Cd = 1.5e-3, A = 0.1):
+    z = 0 : rms 0.0880 vs 0.0269 m/s  ->  the dynamic version is 3.27x larger
+That choice is already documented in the draft; the number is quoted here only
+to show the sensitivity scale against which the issues above should be judged.
+
+
+================================================================================
+13. REVIEW AND REWRITE OF
+    draft_figs02/fig03_p.scatter_omniVSrama_uVSgu_ww_ek.py
+    (reviewed 2026-09-10; rewrite in draft_figs03/, "_c" suffix)
+================================================================================
+
+Four hexbin scatters: RAMA and OMNI buoy zonal current against altimetry gu,
+with and without the Ekman contribution. A pure CSV consumer, reading
+guv/{rama,omni}_guv_c_nearest_global_matches.ek.csv (205 and 1148 rows).
+
+--------------------------------------------------------------------------------
+13.1  MAJOR ISSUES FOUND
+--------------------------------------------------------------------------------
+(1) THE SECTION 11.1 EKMAN DEPTH MISMATCH PROPAGATES HERE, AND IT FLIPS THE
+    CONCLUSION. Both CSV producers (guv/p.{omni,rama}_uvVStrack_guv_c.ek.
+    nearest.all.py) take the buoy at dpth = 15.0 m but set EKMAN_DEPTH = "0".
+    Re-attaching the 15 m Ekman to the same rows (re-attaching 0 m reproduces
+    the published u_ek column to corr 0.998, median |diff| 0.005 m/s, so the
+    swap is trustworthy):
+
+        RAMA  gu alone       n= 205  r 0.483  RMA 1.128  rmse(1:1) 0.177
+              gu + ek  0 m   n= 205  r 0.662  RMA 0.797  rmse(1:1) 0.175
+              gu + ek 15 m   n= 205  r 0.622  RMA 1.030  rmse(1:1) 0.157
+        OMNI  gu alone       n=1148  r 0.516  RMA 0.795  rmse(1:1) 0.198
+              gu + ek  0 m   n=1148  r 0.584  RMA 0.686  rmse(1:1) 0.209  WORSE
+              gu + ek 15 m   n=1148  r 0.573  RMA 0.765  rmse(1:1) 0.192
+
+    At 0 m the Ekman is too strong for a 15 m measurement: it fixes the phase
+    (r rises) but overshoots the amplitude, and for OMNI it makes the rmse about
+    the 1:1 line WORSE than gu alone. The figure's claim that Ekman improves
+    agreement is therefore self-undermining on that metric as published. At the
+    matching depth the rmse improves instead, and RAMA reaches RMA slope 1.030
+    with bias -0.006 m/s.
+
+(2) THE SLOPE IS ORDINARY LEAST SQUARES AND SEVERELY ATTENUATED.
+    np.polyfit(x, y, 1) regresses the buoy on the altimetry; both are noisy
+    measurements, so OLS is biased low (regression dilution):
+        OMNI  OLS 0.400   reduced-major-axis 0.687
+        RAMA  OLS 0.528   reduced-major-axis 0.797
+    The panel prints "y = 0.400x + ...", which reads as altimetry overestimating
+    by 2.5x. Most of that is the estimator, not the data.
+
+(3) THE ERROR IS MEASURED ABOUT THE WRONG LINE.
+        stderr = sqrt(sum((y - yhat)**2) / (n - 2))
+    is the residual about the FITTED line (0.137 RAMA / 0.142 OMNI), while the
+    figure draws a 1:1 line. The disagreement about 1:1 is 0.175 / 0.209 --
+    22-47% larger. Together with (2) the figure looks better than the data.
+
+(4) N OVERSTATES THE INDEPENDENT SAMPLE. The panels report N = 205 and 1148.
+    Those come from 10 intersections / 5 RAMA buoys and 26 intersections /
+    12 OMNI buoys. The points are clustered and serially correlated; effective
+    degrees of freedom are nearer 10 and 26.
+
+Minor:
+  - MAX_DISTANCE_KM = 250.0 is INERT. RAMA's maximum buoy distance is 79.5 km
+    and OMNI's 68.7 km, yet every panel title advertises
+    "distance_km in [-inf, 250.0]" for a filter that removes nothing.
+  - set_xlim/ylim(-1, 1) after hexbin with a global extent: 2 of 1148 OMNI gu
+    values (max 1.28) are binned off-screen and still drive the colour vmax.
+  - the printed "Rows after distance filter" is len(df) before the isfinite
+    mask, not the panel N.
+  - ln_sf imported but used only in commented-out code.
+
+--------------------------------------------------------------------------------
+13.2  CHECKED AND FOUND FINE
+--------------------------------------------------------------------------------
+  - I expected the no-Ekman and with-Ekman panels to have different N, given the
+    section 12.3 finding that 25% of intersections have an all-NaN Ekman file.
+    They do not: u_ek has ZERO NaN in both CSVs -- these 36 intersections all
+    sit outside the masked band. Same rows in every panel.
+  - Both CSV producers read the stored guv_at_intersection_*.nc, so the section
+    8.6 local-copy sign problem does not touch this figure.
+  - Both apply the 72 h buoy filter (filter_rama_uv_72h) that guv/Notes.txt
+    asks for.
+
+--------------------------------------------------------------------------------
+13.3  WHAT WAS WRITTEN
+--------------------------------------------------------------------------------
+    draft_figs03/fig03_p.scatter_omniVSrama_uVSgu_ww_ek_c.py
+    draft_figs03/fig03_p.scatter_omniVSrama_uVSgu_ww_ek_c.nc
+    draft_figs03/fig03_p.scatter_omniVSrama_uVSgu_ww_ek_c.png
+
+  - u_ek re-attached from ekman/ekman_at_intersections_cd/*_ekman_{DEPTH}m_*.nc
+    at EKMAN_DEPTH = 15, matched on calendar date; the script prints the 0 m
+    re-attachment against the CSV column as a self-check. EKMAN_DEPTH = 0
+    reproduces the published panels.
+  - the drawn fit is reduced major axis; the OLS slope stays in the box in
+    parentheses so the difference remains visible
+  - rmse about the 1:1 line is the headline error, with the residual about the
+    fit kept beneath it and labelled; bias added
+  - N reported as "N = 1148 (26 intersections, 12 buoys)"
+  - axis limits follow the data; titles report the distance range actually
+    present rather than the inert 250 km cut
+  - the 1:1 line drawn in dark grey, not white, since the axes now extend past
+    the hexbins onto white ground
+  - every metric written to the .nc as scalars
+
+--------------------------------------------------------------------------------
+13.4  RESULTS AS REWRITTEN (EKMAN_DEPTH = 15)
+--------------------------------------------------------------------------------
+    panel            n     r      RMA    OLS    rmse(1:1)  bias
+    RAMA no Ekman   205  0.483  1.128  0.545    0.177     +0.017
+    RAMA + Ekman    205  0.622  1.030  0.641    0.157     -0.006
+    OMNI no Ekman  1148  0.516  0.795  0.410    0.198     +0.012
+    OMNI + Ekman   1148  0.573  0.765  0.438    0.192     -0.003
+
+--------------------------------------------------------------------------------
+13.5  OPEN POINTS
+--------------------------------------------------------------------------------
+  - RAMA's RMA slope of 1.030 is a striking amplitude match but rests on 10
+    intersections and 5 buoys, and RMA is more volatile than OLS at moderate r
+    (0.622 here). Quote it with the intersection count attached.
+  - The CSVs themselves still carry the 0 m u_ek column. Regenerating them with
+    EKMAN_DEPTH = "15" in the two producers would make the re-attachment step
+    unnecessary and fix every other figure that reads them.
+  - fig04-fig07 in draft_figs02 have not been reviewed.
