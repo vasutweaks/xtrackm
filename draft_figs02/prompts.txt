@@ -1,3 +1,9 @@
+Make critical assessement of the claim made in
+draft_figs02/fig06_p.speed_at_coastal_points.eicc.trends.all_in_one.ERS.py and the draft
+draft_v02.2a.docx about the multidecadal weakening of the EICC.
+codex resume 01a0966c-677c-7592-a35c-818164e45094
+12/9/2026
+
 Write a python script to combine fig03_p.scatter_omniVSrama_uVSgu_ww_ek.py and
 fig04_p.scatter_drifter_ve_vs_gu_ww_ek.py to validations.py so that all 
 observation comparisons come within a figure.
