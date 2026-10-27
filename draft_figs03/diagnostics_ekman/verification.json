@@ -1,0 +1,28 @@
+{
+  "checks": [
+    "RAMA: fresh n, r and RMSE match fig03_p.scatter_omniVSrama_uVSgu_ww_ek_c.nc",
+    "OMNI: fresh n, r and RMSE match fig03_p.scatter_omniVSrama_uVSgu_ww_ek_c.nc",
+    "Drifters: coastal TP series: fresh n, r and RMSE match fig04_p.scatter_drifter_ve_vs_gu_ww_ek_c.nc",
+    "Drifters: all 8 missions: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "GFO: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "TP+J1+J2+J3+S6A: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "S3A: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "S3B: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "TPN+J1N+J2N+J3N: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "ERS1+ERS2+ENV+SRL: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "HY2A: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "HY2B: fresh n, r and RMSE match fig04b_p.scatter_drifter_ve_vs_gu_ww_ek_allsat_c.nc",
+    "Radar: fresh common-mask n, temporal r and RMSE match Fig. 5 profiles (n>=3)",
+    "Selected OMNI BD10: common-mask r and RMSE match Fig. 2 attributes"
+  ],
+  "radar": {
+    "n_locations": 27,
+    "n_cycles_min": 13,
+    "n_cycles_median": 25.0,
+    "n_cycles_max": 27,
+    "locations_r_improves": 16,
+    "locations_rmse_improves": 10,
+    "locations_both_improve": 9,
+    "source_ekman": "/home/srinivasu/allData/ccmp31/ekman_velocities_0m_all_years_daily_cd_bob.nc"
+  }
+}
